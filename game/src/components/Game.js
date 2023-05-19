@@ -32,7 +32,7 @@ const Game = () => {
       <ambientLight intensity={0.7} />
       <spotLight position={[0, 50, 0]} angle={1} />
       <Physics>
-        <Board dimensions={[20, 20]}
+        <Board dimensions={[21, 21]}
         />
         {/* Here you can add your agents, targets, and obstacles. */}
         {agents.map(agent => <Agent key={agent.id} position={agent.position} team={agent.team} life={agent.life} />)}
