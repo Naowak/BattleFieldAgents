@@ -26,16 +26,13 @@ const Game = () => {
   ]);
 
   return (
-    <Canvas>
+    <Canvas style={{ background: "#111111"}}>
       <OrbitControls />
       <Stars />
       <ambientLight intensity={0.7} />
-      <spotLight position={[0, 45, 0]} angle={1} />
+      <spotLight position={[0, 50, 0]} angle={1} />
       <Physics>
-        <Board 
-          agents={agents} 
-          targets={targets} 
-          obstacles={obstacles} 
+        <Board dimensions={[20, 20]}
         />
         {/* Here you can add your agents, targets, and obstacles. */}
         {agents.map(agent => <Agent key={agent.id} position={agent.position} team={agent.team} life={agent.life} />)}
