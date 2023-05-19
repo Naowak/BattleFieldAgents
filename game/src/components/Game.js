@@ -14,8 +14,8 @@ const Game = () => {
   const [gameState, setGameState] = useState({
     turn: 0,  
     agents: [
-      { id: 1, team: 'red', life: 100, position: [2, 0, 0] },
-      { id: 2, team: 'blue', life: 100, position: [-2, 0, 0] },
+      { id: 1, team: 'red', life: 100, initialPosition: [2, 0, 0], position: [2, 0, 0] },
+      { id: 2, team: 'blue', life: 100, initialPosition: [-2, 0, 0], position: [-2, 0, 0]},
     ],
     targets: [
       { id: 1, team: 'blue', position: [-1, 0, 0] },
@@ -129,9 +129,17 @@ const Game = () => {
         <Board dimensions={[2*SIZE+1, 2*SIZE+1]}
         />
         {/* Here you can add your agents, targets, and obstacles. */}
-        {gameState.agents.map(agent => <Agent key={agent.id} position={agent.position} team={agent.team} life={agent.life} newPosition={agent.newPosition} />)}
-        {gameState.targets.map(target => <Target key={target.id} position={target.position} team={target.team} />)}
-        {gameState.obstacles.map(obstacle => <Obstacle key={obstacle.id} position={obstacle.position} />)}
+        {gameState.agents.map(agent => (
+          <Agent 
+            key={agent.id} 
+            initialPosition={agent.initialPosition} 
+            position={agent.position} 
+            team={agent.team} 
+            life={agent.life} 
+          />
+        ))}
+        {/* {gameState.targets.map(target => <Target key={target.id} position={target.position} team={target.team} />)}
+        {gameState.obstacles.map(obstacle => <Obstacle key={obstacle.id} position={obstacle.position} />)} */}
       </Physics>
     </Canvas>
   );

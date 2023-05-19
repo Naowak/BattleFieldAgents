@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Game from './components/Game';
 
+console.warn = () => {};
+
 function App() {
   return (
     <div className="App" style={{display: 'flex', flex: 1}}>
