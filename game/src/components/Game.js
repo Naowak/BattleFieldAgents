@@ -138,8 +138,8 @@ const Game = () => {
             life={agent.life} 
           />
         ))}
-        {/* {gameState.targets.map(target => <Target key={target.id} position={target.position} team={target.team} />)}
-        {gameState.obstacles.map(obstacle => <Obstacle key={obstacle.id} position={obstacle.position} />)} */}
+        {gameState.targets.map(target => <Target key={target.id} position={target.position} team={target.team} />)}
+        {gameState.obstacles.map(obstacle => <Obstacle key={obstacle.id} position={obstacle.position} />)}
       </Physics>
     </Canvas>
   );
