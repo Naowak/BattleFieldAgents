@@ -47,6 +47,10 @@ const Game = () => {
 
       // Check if new position is valid (not colliding with other agents)
       const agentCollision = gameState.agents.some((agent) => {
+        // Check if agent is dead
+        if (!gameState.turn.order.includes(agent.id)) {
+          return false;
+        }
         return JSON.stringify(agent.position) === JSON.stringify(newPosition);
       });
 
@@ -64,17 +68,7 @@ const Game = () => {
         // Update gameState
         let newGameState = { ...gameState };
         newGameState.agents[agentIndex].position = newPosition;
-    
-        // increment turnActions
-        newGameState.turn.actions += 1;
-    
-        if (newGameState.turn.actions % 4 === 0) { // if 4 actions completed, move to next agent
-          do {
-            newGameState.turn.current = (newGameState.turn.current + 1) % newGameState.agents.length;
-          } while (newGameState.agents[newGameState.turn.current].life <= 0); // skip dead agents
-        }
-    
-        setGameState(newGameState);
+        updateTurn();
       }
     }
   };
@@ -101,19 +95,31 @@ const Game = () => {
       }
     ]));
 
-    // Update turn 
+    updateTurn();
+
+  };
+
+  // Update the gameState after each action
+  const updateTurn = () => {
     let newGameState = { ...gameState };
     newGameState.turn.actions += 1;
 
-    if (newGameState.turn.actions % 4 === 0) { // if 4 actions completed, move to next agent
-      do {
-        newGameState.turn.current = (newGameState.turn.current + 1) % newGameState.agents.length;
-      } while (newGameState.agents[newGameState.turn.current].life <= 0); // skip dead agents
+    if (newGameState.turn.actions % 4 === 0) { // if 4 actions completed, next turn (agent)
+      newGameState.turn.current = newGameState.turn.current + 1;
+      newGameState.turn.agentId = gameState.turn.order[gameState.turn.current % gameState.turn.order.length]
     }
 
     setGameState(newGameState);
-
   };
+
+  // Remove agent from the gameState.turn.order
+  const killAgent = (agentId) => {
+    let newGameState = { ...gameState };
+    newGameState.turn.order = newGameState.turn.order.filter((id) => id !== agentId);
+    setGameState(newGameState);
+  };
+
+
 
 
 
@@ -123,13 +129,11 @@ const Game = () => {
     
     const handleKeyPress = (event) => {
       // Get the id of the current agent
-      const agentId = gameState.agents[gameState.turn.current]?.id;
-    
-      if (event.key === "ArrowUp") { handleMove(agentId, 'up') }
-      if (event.key === "ArrowDown") { handleMove(agentId, 'down') }
-      if (event.key === "ArrowLeft") { handleMove(agentId, 'left') }
-      if (event.key === "ArrowRight") { handleMove(agentId, 'right') }
-      if (event.key === " ") { handleAttack(agentId) }
+      if (event.key === "ArrowUp") { handleMove(gameState.turn.agentId, 'up') }
+      if (event.key === "ArrowDown") { handleMove(gameState.turn.agentId, 'down') }
+      if (event.key === "ArrowLeft") { handleMove(gameState.turn.agentId, 'left') }
+      if (event.key === "ArrowRight") { handleMove(gameState.turn.agentId, 'right') }
+      if (event.key === " ") { handleAttack(gameState.turn.agentId) }
     };
     
 
@@ -179,23 +183,27 @@ const Game = () => {
       <Board />
       {/* Here you can add your agents, targets, and obstacles. */}
       {gameState.agents.map(agent => (
-        <Agent 
-          key={agent.id} 
-          initialPosition={agent.initialPosition} 
-          position={agent.position} 
-          team={agent.team} 
-          life={agent.life} 
-          shake={agent.shake}
-        />
+        agent.life > 0 && (
+          <Agent 
+            key={agent.id} 
+            initialPosition={agent.initialPosition} 
+            position={agent.position} 
+            team={agent.team} 
+            life={agent.life} 
+            shake={agent.shake}
+          />
+        )
       ))}
       {gameState.targets.map(target => (
-        <Target 
-          key={target.id} 
-          position={target.position} 
-          team={target.team} 
-          life={target.life}
-          shake={target.shake}
-        />
+        target.life > 0 && (
+          <Target 
+            key={target.id} 
+            position={target.position} 
+            team={target.team} 
+            life={target.life}
+            shake={target.shake}
+          />
+        )
       ))}
       {gameState.obstacles.map(obstacle => <Obstacle key={obstacle.id} position={obstacle.position} />)}
       {bullets.map((bullet) => (
@@ -205,6 +213,7 @@ const Game = () => {
           removeBullet={removeBullet}
           gameState={gameState}
           handleShakeItem={(itemId, kind) => handleShakeItem(itemId, kind, gameState, setGameState)}
+          killAgent={killAgent}
         />
       ))}
     </Canvas>

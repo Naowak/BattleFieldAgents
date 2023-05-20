@@ -81,10 +81,18 @@ const initGameState = () => {
     });
   }
 
+  const order = []
+  for (let i = 0; i < NB_AGENTS_PER_TEAM; i++) {
+    order.push(`red_${i}`);
+    order.push(`blue_${i}`);
+  }
+
   return {
     turn: {
       current: 0,
       actions: 0,
+      order: order,
+      agentId: order[0],
     },
     targets,
     agents,
