@@ -91,15 +91,14 @@ const Game = () => {
       let targetX = Math.floor(Math.random() * (2*SIZE + 1)) - SIZE; // Random cell in the range [-SIZE, SIZE]
       let targetY = Math.floor(Math.random() * (2*SIZE + 1)) - SIZE; 
   
-      console.log(bullets)
-      setBullets([
-        ...bullets, 
+      setBullets(prevBullets => ([
+        ...prevBullets, 
         { 
           id: Date.now(),  // Unique id for the bullet
-          position: gameState.agents[agentIndex].position, 
+          initialPosition: gameState.agents[agentIndex].position, 
           target: [targetX, targetY] 
         }
-      ]);
+      ]));
     }
   };
   

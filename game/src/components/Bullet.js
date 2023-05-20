@@ -2,7 +2,9 @@ import React, { useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Vector3 } from 'three';
 
-export default function Bullet ({ id, position, target, removeBullet, gameState }) {
+const TRANSLATE_Y = 0.25;
+
+export default function Bullet ({ id, initialPosition, target, removeBullet, gameState }) {
   const speed = 0.1;
   const ref = useRef();
   const { scene } = useThree();
@@ -51,7 +53,7 @@ export default function Bullet ({ id, position, target, removeBullet, gameState 
   });
 
   return (
-    <mesh ref={ref} position={position}>
+    <mesh ref={ref} position={[initialPosition[0], TRANSLATE_Y, initialPosition[1]]}>
       <sphereBufferGeometry attach='geometry' args={[1, 16, 16]} />
       <meshStandardMaterial attach='material' color='yellow' />
     </mesh>
