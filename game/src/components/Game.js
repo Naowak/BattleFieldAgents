@@ -7,6 +7,7 @@ import Bullet from './Bullet';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
 import { AGENT_LIFE, TARGET_LIFE, BOARD_SIZE } from '../libs/constants';
+import { handleShakeItem } from '../libs/animations';
 
 
 const Game = () => {
@@ -102,48 +103,10 @@ const Game = () => {
     }
   };
 
-  // Activate and deactivate shake state for an agent
-  const handleShakeAgent = (agentId) => {
-    // Find the agent in the gameState
-    const agentIndex = gameState.agents.findIndex((agent) => agent.id === agentId);
-  
-    // If the agent is found
-    if (agentIndex !== -1) {
-      // Update the shake state for the agent
-      let newGameState = { ...gameState };
-      newGameState.agents[agentIndex].shake = true;
-      setGameState(newGameState);
-  
-      // Reset shake state after 500ms
-      setTimeout(() => {
-        newGameState = { ...gameState };
-        newGameState.agents[agentIndex].shake = false;
-        setGameState(newGameState);
-      }, 500);
-    }
-  };
 
-  // Activate and deactivate shake state for a target
-  const handleShakeTarget = (targetId) => {
-    // Find the target in the gameState
-    const targetIndex = gameState.targets.findIndex((target) => target.id === targetId);
 
-    // If the target is found
-    if (targetIndex !== -1) {
-      // Update the shake state for the target
-      let newGameState = { ...gameState };
-      newGameState.targets[targetIndex].shake = true;
-      setGameState(newGameState);
-
-      // Reset shake state after 500ms
-      setTimeout(() => {
-        newGameState = { ...gameState };
-        newGameState.targets[targetIndex].shake = false;
-        setGameState(newGameState);
-      }, 500);
-    }
-  };
   
+  // CONTROLS WITH KEYBOARD
   useEffect(() => {
     
     const handleKeyPress = (event) => {
@@ -202,8 +165,7 @@ const Game = () => {
           {...bullet} 
           removeBullet={removeBullet}
           gameState={gameState}
-          handleShakeAgent={handleShakeAgent}
-          handleShakeTarget={handleShakeTarget}
+          handleShakeItem={(itemId, kind) => handleShakeItem(itemId, kind, gameState, setGameState)}
         />
       ))}
     </Canvas>
