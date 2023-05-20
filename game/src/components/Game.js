@@ -6,28 +6,15 @@ import Obstacle from './Obstacle';
 import Bullet from './Bullet';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
-import { AGENT_LIFE, TARGET_LIFE, BOARD_SIZE } from '../libs/constants';
+import { BOARD_SIZE } from '../libs/constants';
 import { handleShakeItem } from '../libs/animations';
-
+import { initGameState } from '../libs/initialization';
 
 const Game = () => {
 
   // States
   const [bullets, setBullets] = useState([]);
-  const [gameState, setGameState] = useState({
-    turn: 0,  
-    agents: [
-      { id: 1, team: 'red', life: AGENT_LIFE, initialPosition: [2, 0], position: [2, 0], shake: false },
-      { id: 2, team: 'blue', life: AGENT_LIFE, initialPosition: [-2, 0], position: [-2, 0], shake: false },
-    ],
-    targets: [
-      { id: 1, team: 'blue', position: [-1, 0], life: TARGET_LIFE, shake: false },
-      { id: 2, team: 'red', position: [1, 0], life: TARGET_LIFE, shake: false },
-    ],
-    obstacles: [
-      { id: 1, position: [0, 0] },
-    ],
-  });
+  const [gameState, setGameState] = useState(initGameState());
 
   const removeBullet = (bulletId) => {
     setBullets(bullets.filter((bullet) => bullet.id !== bulletId));

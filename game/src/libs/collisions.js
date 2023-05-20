@@ -37,6 +37,14 @@ const bulletCollision = (ref, id, initialPosition, gameState, removeBullet, hand
       removeBullet(id);
     }
   }
+
+  // Check for collision with obstacles
+  for (let obstacle of gameState.obstacles) {
+    const obstaclePosition = new THREE.Vector3(obstacle.position[0], 0, obstacle.position[1]);
+    if (obstaclePosition.distanceTo(bulletPosition) < BULLET_SPEED) {
+      removeBullet(id);
+    }
+  }
 };
 
 export { 
