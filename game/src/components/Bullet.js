@@ -1,8 +1,8 @@
-import { useSphere } from '@react-three/cannon';
+import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 
 const Bullet = ({ position, direction }) => {
-  const [ref] = useSphere(() => ({ position, mass: 0 }));
+  const ref = useRef();  
 
   // This hook will animate the bullet each frame
   useFrame((state, delta) => {
@@ -12,7 +12,7 @@ const Bullet = ({ position, direction }) => {
   });
 
   return (
-    <mesh ref={ref}>
+    <mesh ref={ref} position={[position[0], 0, position[1]]}>
       <sphereBufferGeometry attach='geometry' args={[0.1, 16, 16]} />
       <meshStandardMaterial attach='material' color='yellow' />
     </mesh>

@@ -14,15 +14,15 @@ const Game = () => {
   const [gameState, setGameState] = useState({
     turn: 0,  
     agents: [
-      { id: 1, team: 'red', life: 100, initialPosition: [2, 0, 0], position: [2, 0, 0] },
-      { id: 2, team: 'blue', life: 100, initialPosition: [-2, 0, 0], position: [-2, 0, 0]},
+      { id: 1, team: 'red', life: 100, initialPosition: [2, 0], position: [2, 0] },
+      { id: 2, team: 'blue', life: 100, initialPosition: [-2, 0], position: [-2, 0]},
     ],
     targets: [
-      { id: 1, team: 'blue', position: [-1, 0, 0] },
-      { id: 2, team: 'red', position: [1, 0, 0] },
+      { id: 1, team: 'blue', position: [-1, 0] },
+      { id: 2, team: 'red', position: [1, 0] },
     ],
     obstacles: [
-      { id: 1, position: [0, 0, 0] },
+      { id: 1, position: [0, 0] },
     ],
   });
 
@@ -44,7 +44,7 @@ const Game = () => {
       // Calculate new position based on direction
       let newPosition = [...gameState.agents[agentIndex].position];
       newPosition[0] += directionVector[0];
-      newPosition[2] += directionVector[1];
+      newPosition[1] += directionVector[1];
 
       // Check if new position is valid (not colliding with obstacles)
       const obstacleCollision = gameState.obstacles.some((obstacle) => {
@@ -120,11 +120,14 @@ const Game = () => {
   
 
   return (
-    <Canvas style={{ background: "#111111"}}>
-      <OrbitControls />
+    <Canvas 
+      camera={{ position: [0, 14, 14] }} 
+      style={{ background: "#111111"}}
+    >
+      <OrbitControls target={[0, 0, 0]} />
       <Stars />
       <ambientLight intensity={0.7} />
-      <spotLight position={[0, 50, 0]} angle={1} />
+      <spotLight position={[0, 10, 0]} angle={1} />
       <Physics>
         <Board dimensions={[2*SIZE+1, 2*SIZE+1]}
         />

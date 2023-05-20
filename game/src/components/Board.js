@@ -1,12 +1,12 @@
-import { useBox } from '@react-three/cannon';
+import React, { useRef } from 'react';
 import * as Three from 'three';
 
 const BoardTile = ({ position }) => {
-  const [ref] = useBox(() => ({ position, mass: 0 }));
+  const ref = useRef();
 
   return (
     <>
-      <mesh ref={ref}>
+      <mesh ref={ref} position={[position[0], -1, position[1]]}>
         <boxBufferGeometry attach='geometry' args={[1, 1, 1]} />
         <meshLambertMaterial attach="material" color="lightgrey" />
         <lineSegments>
@@ -22,7 +22,7 @@ export default function Board({ dimensions }) {
   const tiles = [];
   for (let i = 0; i < dimensions[0]; i++) {
     for (let j = 0; j < dimensions[1]; j++) {
-      const position = [i * 1 - 10, -1, j * 1 - 10];
+      const position = [i * 1 - 10, j * 1 - 10];
       tiles.push(<BoardTile key={`${i}-${j}`} position={position} />);
     }
   }
