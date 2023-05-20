@@ -114,7 +114,7 @@ const Game = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyPress);
     }
-  }, []); // Pass an empty dependency array so this effect only runs once
+  }, []);
   
   
   

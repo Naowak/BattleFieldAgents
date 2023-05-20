@@ -1,5 +1,4 @@
 import React, { useRef } from 'react';
-import { useSphere } from '@react-three/cannon';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
