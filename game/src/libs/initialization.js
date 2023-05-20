@@ -82,7 +82,10 @@ const initGameState = () => {
   }
 
   return {
-    turn: 0,
+    turn: {
+      current: 0,
+      actions: 0,
+    },
     targets,
     agents,
     obstacles,

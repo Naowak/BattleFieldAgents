@@ -64,6 +64,16 @@ const Game = () => {
         // Update gameState
         let newGameState = { ...gameState };
         newGameState.agents[agentIndex].position = newPosition;
+    
+        // increment turnActions
+        newGameState.turn.actions += 1;
+    
+        if (newGameState.turn.actions % 4 === 0) { // if 4 actions completed, move to next agent
+          do {
+            newGameState.turn.current = (newGameState.turn.current + 1) % newGameState.agents.length;
+          } while (newGameState.agents[newGameState.turn.current].life <= 0); // skip dead agents
+        }
+    
         setGameState(newGameState);
       }
     }
@@ -72,22 +82,37 @@ const Game = () => {
   const handleAttack = (agentId) => {
     // Find the agent in the gameState
     const agentIndex = gameState.agents.findIndex((agent) => agent.id === agentId);
-  
-    // If the agent is found
-    if (agentIndex !== -1) {
-      // Create a bullet with a random target
-      let targetX = Math.floor(Math.random() * (2*BOARD_SIZE + 1)) - BOARD_SIZE; // Random cell in the range [-BOARD_SIZE, BOARD_SIZE]
-      let targetY = Math.floor(Math.random() * (2*BOARD_SIZE + 1)) - BOARD_SIZE; 
-  
-      setBullets(prevBullets => ([
-        ...prevBullets, 
-        { 
-          id: Date.now(),  // Unique id for the bullet
-          initialPosition: gameState.agents[agentIndex].position, 
-          target: [targetX, targetY] 
-        }
-      ]));
+
+    // If the agent is not found, return
+    if (agentIndex == -1) {
+      return
     }
+  
+    // Create a bullet with a random target
+    let targetX = Math.floor(Math.random() * (2*BOARD_SIZE + 1)) - BOARD_SIZE; // Random cell in the range [-BOARD_SIZE, BOARD_SIZE]
+    let targetY = Math.floor(Math.random() * (2*BOARD_SIZE + 1)) - BOARD_SIZE; 
+
+    setBullets(prevBullets => ([
+      ...prevBullets, 
+      { 
+        id: Date.now(),  // Unique id for the bullet
+        initialPosition: gameState.agents[agentIndex].position, 
+        target: [targetX, targetY] 
+      }
+    ]));
+
+    // Update turn 
+    let newGameState = { ...gameState };
+    newGameState.turn.actions += 1;
+
+    if (newGameState.turn.actions % 4 === 0) { // if 4 actions completed, move to next agent
+      do {
+        newGameState.turn.current = (newGameState.turn.current + 1) % newGameState.agents.length;
+      } while (newGameState.agents[newGameState.turn.current].life <= 0); // skip dead agents
+    }
+
+    setGameState(newGameState);
+
   };
 
 
@@ -97,12 +122,16 @@ const Game = () => {
   useEffect(() => {
     
     const handleKeyPress = (event) => {
-      if (event.key === "ArrowUp") { handleMove(1, 'up') }
-      if (event.key === "ArrowDown") { handleMove(1, 'down') }
-      if (event.key === "ArrowLeft") { handleMove(1, 'left') }
-      if (event.key === "ArrowRight") { handleMove(1, 'right') }
-      if (event.key === " ") { handleAttack(1) }
+      // Get the id of the current agent
+      const agentId = gameState.agents[gameState.turn.current]?.id;
+    
+      if (event.key === "ArrowUp") { handleMove(agentId, 'up') }
+      if (event.key === "ArrowDown") { handleMove(agentId, 'down') }
+      if (event.key === "ArrowLeft") { handleMove(agentId, 'left') }
+      if (event.key === "ArrowRight") { handleMove(agentId, 'right') }
+      if (event.key === " ") { handleAttack(agentId) }
     };
+    
 
     window.addEventListener('keydown', handleKeyPress);
   
@@ -111,6 +140,29 @@ const Game = () => {
       window.removeEventListener('keydown', handleKeyPress);
     }
   }, []);
+  
+
+  // GAME LOOP
+  useEffect(() => {
+    const redTeamAgents = gameState.agents.filter(agent => agent.team === 'red');
+    const blueTeamAgents = gameState.agents.filter(agent => agent.team === 'blue');
+    
+    // check if all agents of one team are dead
+    if (redTeamAgents.every(agent => agent.life <= 0)) {
+      alert('Blue team wins!');
+      // add code to end game
+    }
+    if (blueTeamAgents.every(agent => agent.life <= 0)) {
+      alert('Red team wins!');
+      // add code to end game
+    }
+    
+    // check if a target is destroyed
+    if (gameState.targets.some(target => target.life <= 0)) {
+      alert(`${gameState.targets[0].life > 0 ? 'Red' : 'Blue'} team wins!`);
+      // add code to end game
+    }
+  }, [gameState]);
   
   
   
