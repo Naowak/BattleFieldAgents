@@ -2,8 +2,9 @@ import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { AGENT_RADIUS, AGENT_TRANSLATE_Y, AGENT_TOP_HEIGHT } from '../libs/constants';
 import { agentMovement } from '../libs/movements';
+import { shake as ShakeAgent } from '../libs/animations';
 
-const Agent = ({ initialPosition, team, life, position }) => {
+const Agent = ({ initialPosition, team, life, position, shake }) => {
   
   const ref = useRef();  
   const precision = 3;  // Number of decimal places for position coordinates
@@ -19,6 +20,11 @@ const Agent = ({ initialPosition, team, life, position }) => {
 
       // Move the agent
       agentMovement(ref, position, upDown);
+
+      // Shake the agent when it gets hit
+      if (shake) {
+        ShakeAgent(ref);
+      }
       
     }
   });

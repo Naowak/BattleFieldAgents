@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { BULLET_SPEED, BULLET_DAMAGE } from "./constants";
 
 // Check for collision with agents and targets
-const bulletCollision = (ref, id, initialPosition, gameState, removeBullet) => {
+const bulletCollision = (ref, id, initialPosition, gameState, removeBullet, handleShake) => {
   
   // Get bullet position
   const bulletPosition = new THREE.Vector3(
@@ -23,8 +23,7 @@ const bulletCollision = (ref, id, initialPosition, gameState, removeBullet) => {
     // Check if the agent is close enough to the bullet
     if (agentPosition.distanceTo(bulletPosition) < BULLET_SPEED) {
       agent.life -= BULLET_DAMAGE;  // Decrease life by 25
-      agent.shake = true;
-      setTimeout(() => agent.shake = false, 500);  // Stop shaking after 0.5 seconds
+      handleShake(agent.id);  // Shake the agent
       console.log("agent touched", agent, ref.current.position)
       console.log("bullet touched", ref.current.position)
       removeBullet(id);
@@ -36,8 +35,7 @@ const bulletCollision = (ref, id, initialPosition, gameState, removeBullet) => {
     const targetPosition = new THREE.Vector3(target.position[0], 0, target.position[1]);
     if (targetPosition.distanceTo(bulletPosition) < BULLET_SPEED) {
       target.life -= BULLET_DAMAGE;  // Decrease life by 25
-      target.shake = true;
-      setTimeout(() => target.shake = false, 500);  // Stop shaking after 0.5 seconds
+      //handleShake(target.id);  // Shake the agent
       removeBullet(id);
       console.log("target touched", target)
     }

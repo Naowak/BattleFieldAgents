@@ -16,8 +16,8 @@ const Game = () => {
   const [gameState, setGameState] = useState({
     turn: 0,  
     agents: [
-      { id: 1, team: 'red', life: AGENT_LIFE, initialPosition: [2, 0], position: [2, 0] },
-      { id: 2, team: 'blue', life: AGENT_LIFE, initialPosition: [-2, 0], position: [-2, 0]},
+      { id: 1, team: 'red', life: AGENT_LIFE, initialPosition: [2, 0], position: [2, 0], shake: false },
+      { id: 2, team: 'blue', life: AGENT_LIFE, initialPosition: [-2, 0], position: [-2, 0], shake: false },
     ],
     targets: [
       { id: 1, team: 'blue', position: [-1, 0], life: TARGET_LIFE, },
@@ -101,8 +101,26 @@ const Game = () => {
       ]));
     }
   };
-  
 
+  const handleShake = (agentId) => {
+    // Find the agent in the gameState
+    const agentIndex = gameState.agents.findIndex((agent) => agent.id === agentId);
+  
+    // If the agent is found
+    if (agentIndex !== -1) {
+      // Update the shake state for the agent
+      let newGameState = { ...gameState };
+      newGameState.agents[agentIndex].shake = true;
+      setGameState(newGameState);
+  
+      // Reset shake state after 500ms
+      setTimeout(() => {
+        newGameState = { ...gameState };
+        newGameState.agents[agentIndex].shake = false;
+        setGameState(newGameState);
+      }, 500);
+    }
+  };
   
   useEffect(() => {
     
@@ -143,6 +161,7 @@ const Game = () => {
           position={agent.position} 
           team={agent.team} 
           life={agent.life} 
+          shake={agent.shake}
         />
       ))}
       {gameState.targets.map(target => <Target key={target.id} position={target.position} team={target.team} />)}
@@ -153,6 +172,7 @@ const Game = () => {
           {...bullet} 
           removeBullet={removeBullet}
           gameState={gameState}
+          handleShake={handleShake}
         />
       ))}
     </Canvas>
