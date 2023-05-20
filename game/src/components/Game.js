@@ -134,8 +134,7 @@ const Game = () => {
       <Stars />
       <ambientLight intensity={0.7} />
       <spotLight position={[0, 10, 0]} angle={1} />
-      <Board dimensions={[2*SIZE+1, 2*SIZE+1]}
-      />
+      <Board />
       {/* Here you can add your agents, targets, and obstacles. */}
       {gameState.agents.map(agent => (
         <Agent 

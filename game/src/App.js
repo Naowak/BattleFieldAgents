@@ -6,7 +6,7 @@ console.warn = () => {};
 function App() {
   return (
     <div className="App" style={{display: 'flex', flex: 1}}>
-      <Game/>
+      <Game />
     </div>
   );
 }
