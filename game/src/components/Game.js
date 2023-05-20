@@ -20,8 +20,8 @@ const Game = () => {
       { id: 2, team: 'blue', life: AGENT_LIFE, initialPosition: [-2, 0], position: [-2, 0], shake: false },
     ],
     targets: [
-      { id: 1, team: 'blue', position: [-1, 0], life: TARGET_LIFE, },
-      { id: 2, team: 'red', position: [1, 0], life: TARGET_LIFE },
+      { id: 1, team: 'blue', position: [-1, 0], life: TARGET_LIFE, shake: false },
+      { id: 2, team: 'red', position: [1, 0], life: TARGET_LIFE, shake: false },
     ],
     obstacles: [
       { id: 1, position: [0, 0] },
@@ -102,7 +102,8 @@ const Game = () => {
     }
   };
 
-  const handleShake = (agentId) => {
+  // Activate and deactivate shake state for an agent
+  const handleShakeAgent = (agentId) => {
     // Find the agent in the gameState
     const agentIndex = gameState.agents.findIndex((agent) => agent.id === agentId);
   
@@ -117,6 +118,27 @@ const Game = () => {
       setTimeout(() => {
         newGameState = { ...gameState };
         newGameState.agents[agentIndex].shake = false;
+        setGameState(newGameState);
+      }, 500);
+    }
+  };
+
+  // Activate and deactivate shake state for a target
+  const handleShakeTarget = (targetId) => {
+    // Find the target in the gameState
+    const targetIndex = gameState.targets.findIndex((target) => target.id === targetId);
+
+    // If the target is found
+    if (targetIndex !== -1) {
+      // Update the shake state for the target
+      let newGameState = { ...gameState };
+      newGameState.targets[targetIndex].shake = true;
+      setGameState(newGameState);
+
+      // Reset shake state after 500ms
+      setTimeout(() => {
+        newGameState = { ...gameState };
+        newGameState.targets[targetIndex].shake = false;
         setGameState(newGameState);
       }, 500);
     }
@@ -164,7 +186,15 @@ const Game = () => {
           shake={agent.shake}
         />
       ))}
-      {gameState.targets.map(target => <Target key={target.id} position={target.position} team={target.team} />)}
+      {gameState.targets.map(target => (
+        <Target 
+          key={target.id} 
+          position={target.position} 
+          team={target.team} 
+          life={target.life}
+          shake={target.shake}
+        />
+      ))}
       {gameState.obstacles.map(obstacle => <Obstacle key={obstacle.id} position={obstacle.position} />)}
       {bullets.map((bullet) => (
         <Bullet 
@@ -172,7 +202,8 @@ const Game = () => {
           {...bullet} 
           removeBullet={removeBullet}
           gameState={gameState}
-          handleShake={handleShake}
+          handleShakeAgent={handleShakeAgent}
+          handleShakeTarget={handleShakeTarget}
         />
       ))}
     </Canvas>

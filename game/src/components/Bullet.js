@@ -1,10 +1,10 @@
 import React, { useRef } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
 import { BULLET_TRANSLATE_Y, BULLET_RADIUS } from '../libs/constants';
 import { bulletMovement } from '../libs/movements';
 import { bulletCollision } from '../libs/collisions';
 
-export default function Bullet ({ id, initialPosition, target, removeBullet, gameState, handleShake }) {
+export default function Bullet ({ id, initialPosition, target, removeBullet, gameState, handleShakeAgent, handleShakeTarget }) {
   
   const ref = useRef();
 
@@ -12,7 +12,7 @@ export default function Bullet ({ id, initialPosition, target, removeBullet, gam
   useFrame(() => {
     if (ref.current) {
       bulletMovement(ref, target);
-      bulletCollision(ref, id, initialPosition, gameState, removeBullet, handleShake) 
+      bulletCollision(ref, id, initialPosition, gameState, removeBullet, handleShakeAgent, handleShakeTarget) 
     }
   });
 
