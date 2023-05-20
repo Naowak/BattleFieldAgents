@@ -29,7 +29,7 @@ export default function Panel ({ gameState }) {
     flexDirection: 'column',
     justifyContent: 'flex-start',
     alignItems: 'center',
-    backgroundColor: '#333333',
+    backgroundColor: '#3a3a3a',
     borderRadius: '5px',
     marginBottom: '20px',
   };
