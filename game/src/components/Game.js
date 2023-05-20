@@ -3,14 +3,16 @@ import Board from './Board';
 import Agent from './Agent';
 import Target from './Target';
 import Obstacle from './Obstacle';
+import Bullet from './Bullet';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
-import { Physics } from '@react-three/cannon';
 
 const SIZE = 10;
 
 const Game = () => {
 
+  // States
+  const [bullets, setBullets] = useState([]);
   const [gameState, setGameState] = useState({
     turn: 0,  
     agents: [
@@ -25,6 +27,10 @@ const Game = () => {
       { id: 1, position: [0, 0] },
     ],
   });
+
+  const removeBullet = (bulletId) => {
+    setBullets(bullets.filter((bullet) => bullet.id !== bulletId));
+  };
 
   const handleMove = (agentId, direction) => {
 
@@ -75,28 +81,28 @@ const Game = () => {
     }
   };
 
-  const handleAttack = (agentId, direction) => {
+  const handleAttack = (agentId) => {
     // Find the agent in the gameState
     const agentIndex = gameState.agents.findIndex((agent) => agent.id === agentId);
-    if (agentIndex !== -1) {
-      // Add a bullet to the gameState
-      let newGameState = { ...gameState };
-      newGameState.bullets = newGameState.bullets || [];
-      newGameState.bullets.push({
-        id: Date.now(),  // Just using the current timestamp as a unique id
-        position: [...newGameState.agents[agentIndex].position],
-        direction,
-      });
-      setGameState(newGameState);
   
-      // Remove the bullet after some time (simulate range)
-      setTimeout(() => {
-        let newGameState = { ...gameState };
-        newGameState.bullets = newGameState.bullets.filter((bullet) => bullet.id !== Date.now());
-        setGameState(newGameState);
-      }, 2000);  // Adjust this based on how long you want the bullet to exist
+    // If the agent is found
+    if (agentIndex !== -1) {
+      // Create a bullet with a random target
+      let targetX = Math.floor(Math.random() * (2*SIZE + 1)) - SIZE; // Random cell in the range [-SIZE, SIZE]
+      let targetY = Math.floor(Math.random() * (2*SIZE + 1)) - SIZE; 
+  
+      console.log(bullets)
+      setBullets([
+        ...bullets, 
+        { 
+          id: Date.now(),  // Unique id for the bullet
+          position: gameState.agents[agentIndex].position, 
+          target: [targetX, targetY] 
+        }
+      ]);
     }
   };
+  
 
   
   useEffect(() => {
@@ -106,6 +112,7 @@ const Game = () => {
       if (event.key === "ArrowDown") { handleMove(1, 'down') }
       if (event.key === "ArrowLeft") { handleMove(1, 'left') }
       if (event.key === "ArrowRight") { handleMove(1, 'right') }
+      if (event.key === " ") { handleAttack(1) }
     };
 
     window.addEventListener('keydown', handleKeyPress);
@@ -128,22 +135,28 @@ const Game = () => {
       <Stars />
       <ambientLight intensity={0.7} />
       <spotLight position={[0, 10, 0]} angle={1} />
-      <Physics>
-        <Board dimensions={[2*SIZE+1, 2*SIZE+1]}
+      <Board dimensions={[2*SIZE+1, 2*SIZE+1]}
+      />
+      {/* Here you can add your agents, targets, and obstacles. */}
+      {gameState.agents.map(agent => (
+        <Agent 
+          key={agent.id} 
+          initialPosition={agent.initialPosition} 
+          position={agent.position} 
+          team={agent.team} 
+          life={agent.life} 
         />
-        {/* Here you can add your agents, targets, and obstacles. */}
-        {gameState.agents.map(agent => (
-          <Agent 
-            key={agent.id} 
-            initialPosition={agent.initialPosition} 
-            position={agent.position} 
-            team={agent.team} 
-            life={agent.life} 
-          />
-        ))}
-        {gameState.targets.map(target => <Target key={target.id} position={target.position} team={target.team} />)}
-        {gameState.obstacles.map(obstacle => <Obstacle key={obstacle.id} position={obstacle.position} />)}
-      </Physics>
+      ))}
+      {gameState.targets.map(target => <Target key={target.id} position={target.position} team={target.team} />)}
+      {gameState.obstacles.map(obstacle => <Obstacle key={obstacle.id} position={obstacle.position} />)}
+      {bullets.map((bullet) => (
+        <Bullet 
+          key={bullet.id} 
+          {...bullet} 
+          removeBullet={removeBullet}
+          gameState={gameState}
+        />
+      ))}
     </Canvas>
   );
 };
