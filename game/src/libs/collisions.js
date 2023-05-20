@@ -24,8 +24,6 @@ const bulletCollision = (ref, id, initialPosition, gameState, removeBullet, hand
     if (agentPosition.distanceTo(bulletPosition) < BULLET_SPEED) {
       agent.life -= BULLET_DAMAGE;  // Decrease life by 25
       handleShakeAgent(agent.id);  // Shake the agent
-      console.log("agent touched", agent, ref.current.position)
-      console.log("bullet touched", ref.current.position)
       removeBullet(id);
     }
   }
@@ -37,7 +35,6 @@ const bulletCollision = (ref, id, initialPosition, gameState, removeBullet, hand
       target.life -= BULLET_DAMAGE;  // Decrease life by 25
       handleShakeTarget(target.id);  // Shake the target
       removeBullet(id);
-      console.log("target touched", target)
     }
   }
 };

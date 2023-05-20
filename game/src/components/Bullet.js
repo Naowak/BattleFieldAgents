@@ -8,11 +8,18 @@ export default function Bullet ({ id, initialPosition, target, removeBullet, gam
   
   const ref = useRef();
 
-  // Move the bullet towards the target
   useFrame(() => {
+    // Move the bullet towards the target, and check for collisions
     if (ref.current) {
       bulletMovement(ref, target);
       bulletCollision(ref, id, initialPosition, gameState, removeBullet, handleShakeAgent, handleShakeTarget) 
+    }
+    // Check that the bullet is in target position, if so remove it
+    if (ref.current) {
+      const bulletPosition = [ref.current.position.x, ref.current.position.z];
+      if (bulletPosition[0] === target[0] && bulletPosition[1] === target[1]) {
+        removeBullet(id);
+      }
     }
   });
 

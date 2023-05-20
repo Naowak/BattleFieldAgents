@@ -70,6 +70,7 @@ const bulletMovement = (ref, position) => {
   }
 }
 
+// Target
 
 export {
   agentMovement,
