@@ -10,14 +10,13 @@ import { BOARD_SIZE } from '../libs/constants';
 import { handleShakeItem } from '../libs/animations';
 import { initGameState } from '../libs/initialization';
 
-const Game = () => {
+const Game = ({ gameState, setGameState }) => {
 
   // Ref 
   const over = useRef(false);
 
   // States
   const [bullets, setBullets] = useState([]);
-  const [gameState, setGameState] = useState(initGameState());
 
   const removeBullet = (bulletId) => {
     setBullets(bullets.filter((bullet) => bullet.id !== bulletId));
@@ -188,7 +187,7 @@ const Game = () => {
   return (
     <Canvas 
       camera={{ position: [0, 14, 14] }} 
-      style={{ background: "#111111"}}
+      style={{ background: "#111111", flex: 3}}
     >
       <OrbitControls target={[0, 0, 0]} />
       <Stars />
