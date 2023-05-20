@@ -6,8 +6,8 @@ import Obstacle from './Obstacle';
 import Bullet from './Bullet';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
+import { AGENT_LIFE, TARGET_LIFE, BOARD_SIZE } from '../libs/constants';
 
-const SIZE = 10;
 
 const Game = () => {
 
@@ -16,12 +16,12 @@ const Game = () => {
   const [gameState, setGameState] = useState({
     turn: 0,  
     agents: [
-      { id: 1, team: 'red', life: 100, initialPosition: [2, 0], position: [2, 0] },
-      { id: 2, team: 'blue', life: 100, initialPosition: [-2, 0], position: [-2, 0]},
+      { id: 1, team: 'red', life: AGENT_LIFE, initialPosition: [2, 0], position: [2, 0] },
+      { id: 2, team: 'blue', life: AGENT_LIFE, initialPosition: [-2, 0], position: [-2, 0]},
     ],
     targets: [
-      { id: 1, team: 'blue', position: [-1, 0], life: 100, },
-      { id: 2, team: 'red', position: [1, 0], life: 100 },
+      { id: 1, team: 'blue', position: [-1, 0], life: TARGET_LIFE, },
+      { id: 2, team: 'red', position: [1, 0], life: TARGET_LIFE },
     ],
     obstacles: [
       { id: 1, position: [0, 0] },
@@ -69,7 +69,7 @@ const Game = () => {
 
       // Check if new position is valid (not out of bounds)
       const outOfBounds = newPosition.some((coord) => {
-        return Math.abs(coord) > SIZE;
+        return Math.abs(coord) > BOARD_SIZE;
       });
 
       if (!obstacleCollision && !agentCollision && !targetCollision && !outOfBounds) {
@@ -88,8 +88,8 @@ const Game = () => {
     // If the agent is found
     if (agentIndex !== -1) {
       // Create a bullet with a random target
-      let targetX = Math.floor(Math.random() * (2*SIZE + 1)) - SIZE; // Random cell in the range [-SIZE, SIZE]
-      let targetY = Math.floor(Math.random() * (2*SIZE + 1)) - SIZE; 
+      let targetX = Math.floor(Math.random() * (2*BOARD_SIZE + 1)) - BOARD_SIZE; // Random cell in the range [-BOARD_SIZE, BOARD_SIZE]
+      let targetY = Math.floor(Math.random() * (2*BOARD_SIZE + 1)) - BOARD_SIZE; 
   
       setBullets(prevBullets => ([
         ...prevBullets, 
