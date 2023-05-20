@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { TARGET_TRANSLATE_Y } from '../libs/constants';
 import { shake as ShakeTarget } from '../libs/animations';
+import { COLOR_BLUE, COLOR_RED } from '../libs/constants';
 
 const Target = ({ position, team, life, shake }) => {
   const ref = useRef();  
@@ -24,7 +25,7 @@ const Target = ({ position, team, life, shake }) => {
   return (
     <mesh ref={ref} position={[position[0], TARGET_TRANSLATE_Y, position[1]]}>
       <boxBufferGeometry attach='geometry' args={[1, 1, 1]} />
-      <meshStandardMaterial attach='material' color={team === 'red' ? 'red' : 'blue'} />
+      <meshStandardMaterial attach='material' color={team === 'red' ? COLOR_RED : COLOR_BLUE} />
     </mesh>
   );
 };

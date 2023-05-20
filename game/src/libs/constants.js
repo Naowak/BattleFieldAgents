@@ -27,6 +27,8 @@ const NB_OBSTACLES = 50;
 // Others
 const PRECISION = 3;  // Number of decimal places for position coordinates
 const SPAWN_RANGE = 3;  // Range of cells around the target where the agents can spawn
+const COLOR_RED = '#aa4444';
+const COLOR_BLUE = '#444499';
 
 export {
   BULLET_TRANSLATE_Y,
@@ -52,4 +54,6 @@ export {
 
   PRECISION,
   SPAWN_RANGE,
+  COLOR_RED,
+  COLOR_BLUE
 }

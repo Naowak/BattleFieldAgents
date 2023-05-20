@@ -3,6 +3,8 @@ import { useFrame } from '@react-three/fiber';
 import { AGENT_RADIUS, AGENT_TRANSLATE_Y, AGENT_TOP_HEIGHT } from '../libs/constants';
 import { agentMovement } from '../libs/movements';
 import { shake as ShakeAgent } from '../libs/animations';
+import { COLOR_BLUE, COLOR_RED } from '../libs/constants';
+
 
 const Agent = ({ initialPosition, team, life, position, shake }) => {
   
@@ -32,7 +34,7 @@ const Agent = ({ initialPosition, team, life, position, shake }) => {
   return (
     <mesh ref={ref} position={[initialPosition[0], AGENT_TRANSLATE_Y, initialPosition[1]]}>
       <sphereBufferGeometry attach='geometry' args={[AGENT_RADIUS, 32, 32]} />
-      <meshStandardMaterial attach='material' color={team === 'red' ? 'red' : 'blue'} />
+      <meshStandardMaterial attach='material' color={team === 'red' ? COLOR_RED : COLOR_BLUE} />
     </mesh>
   );
 };

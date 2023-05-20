@@ -1,5 +1,5 @@
 import React from 'react';
-
+import { COLOR_BLUE, COLOR_RED } from '../libs/constants';
 
 export default function Panel ({ gameState }) {
   const { turn, agents } = gameState;
@@ -37,7 +37,8 @@ export default function Panel ({ gameState }) {
   const itemTitleStyles = {
     width: '100%',
     padding: '10px',
-    backgroundColor: '#af7788',
+    //backgroundColor: '#af7788',
+    backgroundColor: currentAgent.team === 'red' ? COLOR_RED : COLOR_BLUE,
     borderRadius: '5px',
     textAlign: 'center',
   };
