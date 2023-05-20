@@ -10,6 +10,7 @@ const AGENT_RADIUS = 0.3;
 const AGENT_SPEED = 0.1;
 const AGENT_TOP_HEIGHT = 0.05; // BE CAREFUL TO ADJUST THIS VALUE IN FUNCTION OF THE SPEED
 const AGENT_LIFE = 100;
+const NB_AGENTS_PER_TEAM = 5;
 
 // Targets
 const TARGET_TRANSLATE_Y = 0;
@@ -21,9 +22,11 @@ const BOARD_TRANSLATE_Y = -1;
 
 // Obstacles
 const OBSTACLE_TRANSLATE_Y = 0;
+const NB_OBSTACLES = 50;
 
 // Others
 const PRECISION = 3;  // Number of decimal places for position coordinates
+const SPAWN_RANGE = 3;  // Range of cells around the target where the agents can spawn
 
 export {
   BULLET_TRANSLATE_Y,
@@ -36,6 +39,7 @@ export {
   AGENT_SPEED,
   AGENT_TOP_HEIGHT,
   AGENT_LIFE,
+  NB_AGENTS_PER_TEAM,
 
   TARGET_TRANSLATE_Y,
   TARGET_LIFE,
@@ -44,6 +48,8 @@ export {
   BOARD_TRANSLATE_Y,
 
   OBSTACLE_TRANSLATE_Y,
+  NB_OBSTACLES,
 
   PRECISION,
+  SPAWN_RANGE,
 }
