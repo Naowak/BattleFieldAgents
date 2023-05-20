@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Board from './Board';
 import Agent from './Agent';
 import Target from './Target';
@@ -11,6 +11,9 @@ import { handleShakeItem } from '../libs/animations';
 import { initGameState } from '../libs/initialization';
 
 const Game = () => {
+
+  // Ref 
+  const over = useRef(false);
 
   // States
   const [bullets, setBullets] = useState([]);
@@ -120,6 +123,20 @@ const Game = () => {
   };
 
 
+  // handle win
+  const handleWin = (team) => {
+    if (over.current) {
+      return;
+    }
+    over.current = true;
+    alert(`${team} team wins!`);
+    console.log("New game in 10 seconds")
+    setTimeout(() => {
+      over.current = false;
+      setGameState(initGameState())
+    }, 10000);
+  };
+
 
 
 
@@ -153,18 +170,15 @@ const Game = () => {
     
     // check if all agents of one team are dead
     if (redTeamAgents.every(agent => agent.life <= 0)) {
-      alert('Blue team wins!');
-      // add code to end game
+      handleWin('Blue!');
     }
     if (blueTeamAgents.every(agent => agent.life <= 0)) {
-      alert('Red team wins!');
-      // add code to end game
+      handleWin('Red');
     }
-    
+
     // check if a target is destroyed
     if (gameState.targets.some(target => target.life <= 0)) {
-      alert(`${gameState.targets[0].life > 0 ? 'Red' : 'Blue'} team wins!`);
-      // add code to end game
+      handleWin(gameState.targets[0].life > 0 ? 'Red' : 'Blue');
     }
   }, [gameState]);
   
