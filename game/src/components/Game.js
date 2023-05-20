@@ -20,8 +20,8 @@ const Game = () => {
       { id: 2, team: 'blue', life: 100, initialPosition: [-2, 0], position: [-2, 0]},
     ],
     targets: [
-      { id: 1, team: 'blue', position: [-1, 0] },
-      { id: 2, team: 'red', position: [1, 0] },
+      { id: 1, team: 'blue', position: [-1, 0], life: 100, },
+      { id: 2, team: 'red', position: [1, 0], life: 100 },
     ],
     obstacles: [
       { id: 1, position: [0, 0] },

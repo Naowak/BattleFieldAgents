@@ -12,7 +12,7 @@ export default function Bullet ({ id, initialPosition, target, removeBullet, gam
   useFrame(() => {
     if (ref.current) {
       bulletMovement(ref, target);
-      bulletCollision(ref, id, gameState, removeBullet) 
+      bulletCollision(ref, id, initialPosition, gameState, removeBullet) 
     }
   });
 
