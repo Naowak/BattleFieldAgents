@@ -9,7 +9,7 @@ import {
 
 
 // Move an agent to a 2D position
-const agentMovement = (ref, position, upDown) => {
+const agentMovement = (ref, position, upDown, onAnimationEnd) => {
 
   // Calculate direction vector
   const direction = new THREE.Vector3(
@@ -25,10 +25,11 @@ const agentMovement = (ref, position, upDown) => {
     ref.current.position.z + direction.z * AGENT_SPEED
   );
 
-  // If nextPosition is close enough to the target position, just set it directly to the target position
+  // If nextPosition is close enough to the target position, just set it directly to the target position, movement over
   const targetPosition = new THREE.Vector3(position[0], AGENT_TRANSLATE_Y, position[1]);
   if (nextPosition.distanceTo(targetPosition) < AGENT_SPEED) {
     ref.current.position.set(targetPosition.x, targetPosition.y, targetPosition.z);
+    onAnimationEnd(); // Indicate animation over
   } else {
     // Update position with rounded coordinates
     ref.current.position.set(
@@ -40,7 +41,7 @@ const agentMovement = (ref, position, upDown) => {
 }
 
 // Move a bullet to a 2D position
-const bulletMovement = (ref, position) => {
+const bulletMovement = (ref, position, onAnimationEnd) => {
 
   // Calculate direction vector
   const direction = new THREE.Vector3(
@@ -56,10 +57,11 @@ const bulletMovement = (ref, position) => {
     ref.current.position.z + direction.z * BULLET_SPEED
   );
 
-  // If nextPosition is close enough to the target position, just set it directly to the target position
+  // If nextPosition is close enough to the target position, just set it directly to the target position, movement over
   const targetPosition = new THREE.Vector3(position[0], BULLET_TRANSLATE_Y, position[1]);
   if (nextPosition.distanceTo(targetPosition) < BULLET_SPEED) {
     ref.current.position.set(targetPosition.x, targetPosition.y, targetPosition.z);
+    onAnimationEnd(); // Indicate animation over
   } else {
     // Update position with rounded coordinates
     ref.current.position.set(

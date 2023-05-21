@@ -97,6 +97,7 @@ const initGameState = () => {
     targets,
     agents,
     obstacles,
+    isAnimation: false,
   }
 
 };

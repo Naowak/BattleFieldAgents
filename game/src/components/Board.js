@@ -22,7 +22,7 @@ const BoardTile = ({ position }) => {
   );
 }
 
-export default function Board({ }) {
+export default function Board() {
   const tiles = [];
   for (let i = 0; i < 2*BOARD_SIZE+1; i++) {
     for (let j = 0; j < 2*BOARD_SIZE+1; j++) {
