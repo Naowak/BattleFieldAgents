@@ -23,9 +23,6 @@ const Game = ({ gameState, setGameState }) => {
     setBullets(bullets.filter((bullet) => bullet.id !== bulletId));
   };
 
-  const onAnimationEnd = (agentId) => {
-    return { ...gameState, isAnimation: false };
-  };
     
 
   // Remove agent from the gameState.turn.order
@@ -39,15 +36,12 @@ const Game = ({ gameState, setGameState }) => {
   useEffect(() => {
     
     const handleKeyPress = (event) => {
-      // Get the current ref value inside the event handler
-      if (!gameState.isAnimation) {
-        // Get the id of the current agent
-        if (event.key === "ArrowUp") { handleMove('up', gameState, setGameState) }
-        if (event.key === "ArrowDown") { handleMove('down', gameState, setGameState) }
-        if (event.key === "ArrowLeft") { handleMove('left', gameState, setGameState) }
-        if (event.key === "ArrowRight") { handleMove('right', gameState, setGameState) }
-        if (event.key === " ") { handleAttack(gameState, setGameState, setBullets) }
-      }
+      // Get the id of the current agent
+      if (event.key === "ArrowUp") { handleMove('up', gameState, setGameState) }
+      if (event.key === "ArrowDown") { handleMove('down', gameState, setGameState) }
+      if (event.key === "ArrowLeft") { handleMove('left', gameState, setGameState) }
+      if (event.key === "ArrowRight") { handleMove('right', gameState, setGameState) }
+      if (event.key === " ") { handleAttack(gameState, setGameState, setBullets) }
     };    
 
     // Add event listener for keypress
@@ -118,7 +112,6 @@ const Game = ({ gameState, setGameState }) => {
             life={agent.life} 
             shake={agent.shake}
             isCurrent={agent.id === gameState.turn.agentId}
-            onAnimationEnd={onAnimationEnd}
           />
         )
       ))}
@@ -142,7 +135,6 @@ const Game = ({ gameState, setGameState }) => {
           gameState={gameState}
           handleShakeItem={(itemId, kind) => handleShakeItem(itemId, kind, gameState, setGameState)}
           killAgent={killAgent}
-          onAnimationEnd={onAnimationEnd}
         />
       ))}
     </Canvas>

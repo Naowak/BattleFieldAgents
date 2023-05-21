@@ -12,7 +12,7 @@ import {
 } from '../libs/constants';
 
 
-const Agent = ({ initialPosition, team, life, position, shake, isCurrent, onAnimationEnd }) => {
+const Agent = ({ initialPosition, team, life, position, shake, isCurrent }) => {
   
   const ref = useRef();  
   let upDown = 1;  // Used to animate the agent up and down
@@ -26,7 +26,7 @@ const Agent = ({ initialPosition, team, life, position, shake, isCurrent, onAnim
       if (ref.current.position.y <= AGENT_TRANSLATE_Y) { upDown = 1; }
 
       // Move the agent
-      agentMovement(ref, position, upDown, onAnimationEnd);
+      agentMovement(ref, position, upDown);
 
       // Shake the agent when it gets hit
       if (shake) {

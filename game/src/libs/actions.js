@@ -65,7 +65,6 @@ const handleMove = (direction, gameState, setGameState) => {
 
     // Update gameState => launch animation
     let newGameState = { ...gameState };
-    newGameState.isAnimation = true;
     newGameState.agents[agentIndex].position = newPosition;
     setGameState(newGameState);
 
@@ -91,7 +90,6 @@ const handleAttack = (gameState, setGameState, setBullets) => {
 
   // Launch animation
   let newGameState = { ...gameState };
-  newGameState.isAnimation = true;
   setGameState(newGameState);
 
   setBullets(prevBullets => ([

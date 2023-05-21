@@ -9,7 +9,7 @@ import {
 
 
 // Move an agent to a 2D position
-const agentMovement = (ref, position, upDown, onAnimationEnd) => {
+const agentMovement = (ref, position, upDown) => {
 
   // Calculate direction vector
   const direction = new THREE.Vector3(
@@ -29,7 +29,6 @@ const agentMovement = (ref, position, upDown, onAnimationEnd) => {
   const targetPosition = new THREE.Vector3(position[0], AGENT_TRANSLATE_Y, position[1]);
   if (nextPosition.distanceTo(targetPosition) < AGENT_SPEED) {
     ref.current.position.set(targetPosition.x, targetPosition.y, targetPosition.z);
-    onAnimationEnd(); // Indicate animation over
   } else {
     // Update position with rounded coordinates
     ref.current.position.set(
@@ -41,7 +40,7 @@ const agentMovement = (ref, position, upDown, onAnimationEnd) => {
 }
 
 // Move a bullet to a 2D position
-const bulletMovement = (ref, position, onAnimationEnd) => {
+const bulletMovement = (ref, position) => {
 
   // Calculate direction vector
   const direction = new THREE.Vector3(
@@ -61,7 +60,6 @@ const bulletMovement = (ref, position, onAnimationEnd) => {
   const targetPosition = new THREE.Vector3(position[0], BULLET_TRANSLATE_Y, position[1]);
   if (nextPosition.distanceTo(targetPosition) < BULLET_SPEED) {
     ref.current.position.set(targetPosition.x, targetPosition.y, targetPosition.z);
-    onAnimationEnd(); // Indicate animation over
   } else {
     // Update position with rounded coordinates
     ref.current.position.set(
