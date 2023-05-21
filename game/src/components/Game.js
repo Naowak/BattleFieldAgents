@@ -192,7 +192,7 @@ const Game = ({ gameState, setGameState }) => {
     >
       <OrbitControls target={[0, 0, 0]} />
       <Stars />
-      <ambientLight intensity={0.7} />
+      <ambientLight intensity={1.2} />
       <spotLight position={[0, 10, 0]} angle={1} />
       <Board />
       {/* Here you can add your agents, targets, and obstacles. */}
