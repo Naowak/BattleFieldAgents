@@ -45,15 +45,14 @@ const Agent = ({ initialPosition, team, life, position, shake, isCurrent }) => {
     height: 25,
     fontSize: 16, 
     borderRadius: 15,
-    border: '1px solid darkgrey',
-    borderColor: COLOR_FONT,
+    border: '1px solid lightgrey',
     backgroundColor: COLOR_BG_ITEM,
     color: COLOR_FONT, 
   }
 
   return (
     <mesh ref={ref} position={[initialPosition[0], AGENT_TRANSLATE_Y, initialPosition[1]]}>
-      <sphereBufferGeometry attach='geometry' args={[AGENT_RADIUS, 32, 32]} />
+      <capsuleBufferGeometry attach='geometry' args={[AGENT_RADIUS, AGENT_RADIUS, 32, 32]} />
       <meshStandardMaterial attach='material' color={team === 'red' ? COLOR_RED : COLOR_BLUE} />
 
       {isCurrent && (

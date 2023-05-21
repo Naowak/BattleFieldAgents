@@ -6,7 +6,7 @@ import Obstacle from './Obstacle';
 import Bullet from './Bullet';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
-import { BOARD_SIZE } from '../libs/constants';
+import { BOARD_SIZE, COLOR_BG_GAME } from '../libs/constants';
 import { handleShakeItem } from '../libs/animations';
 import { initGameState } from '../libs/initialization';
 
@@ -188,7 +188,7 @@ const Game = ({ gameState, setGameState }) => {
   return (
     <Canvas 
       camera={{ position: [0, 14, 14] }} 
-      style={{ background: "#111111", flex: 3}}
+      style={{ background: COLOR_BG_GAME, flex: 3}}
     >
       <OrbitControls target={[0, 0, 0]} />
       <Stars />

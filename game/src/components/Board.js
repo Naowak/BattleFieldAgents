@@ -14,7 +14,7 @@ const BoardTile = ({ position }) => {
         <boxBufferGeometry attach='geometry' args={[1, 1, 1]} />
         <meshLambertMaterial attach="material" color="lightgrey" />
         <lineSegments>
-          <edgesGeometry attach="geometry" args={[new Three.BoxBufferGeometry(1, 1, 1)]} />
+          <edgesGeometry attach="geometry" args={[new Three.BoxGeometry(1, 1, 1)]} />
           <lineBasicMaterial attach="material" color="darkgrey" linewidth={2} />
         </lineSegments>
       </mesh>
