@@ -10,6 +10,7 @@ const AGENT_RADIUS = 0.3;
 const AGENT_SPEED = 0.1;
 const AGENT_TOP_HEIGHT = 0.05; // BE CAREFUL TO ADJUST THIS VALUE IN FUNCTION OF THE SPEED
 const AGENT_LIFE = 100;
+const AGENT_BUBBLE_TRANSLATE_Y = 1;
 const NB_AGENTS_PER_TEAM = 5;
 
 // Targets
@@ -29,6 +30,9 @@ const PRECISION = 3;  // Number of decimal places for position coordinates
 const SPAWN_RANGE = 3;  // Range of cells around the target where the agents can spawn
 const COLOR_RED = '#aa4444';
 const COLOR_BLUE = '#444499';
+const COLOR_BG_PANEL = '#222222';
+const COLOR_BG_ITEM = '#3a3a3a';
+const COLOR_FONT = '#ffffff';
 
 export {
   BULLET_TRANSLATE_Y,
@@ -41,6 +45,7 @@ export {
   AGENT_SPEED,
   AGENT_TOP_HEIGHT,
   AGENT_LIFE,
+  AGENT_BUBBLE_TRANSLATE_Y,
   NB_AGENTS_PER_TEAM,
 
   TARGET_TRANSLATE_Y,
@@ -55,5 +60,8 @@ export {
   PRECISION,
   SPAWN_RANGE,
   COLOR_RED,
-  COLOR_BLUE
+  COLOR_BLUE,
+  COLOR_BG_PANEL,
+  COLOR_BG_ITEM,
+  COLOR_FONT,
 }

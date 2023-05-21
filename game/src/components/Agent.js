@@ -1,15 +1,20 @@
 import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { AGENT_RADIUS, AGENT_TRANSLATE_Y, AGENT_TOP_HEIGHT } from '../libs/constants';
+import { Html } from '@react-three/drei';
+import { AGENT_RADIUS, AGENT_TRANSLATE_Y, AGENT_TOP_HEIGHT, AGENT_BUBBLE_TRANSLATE_Y } from '../libs/constants';
 import { agentMovement } from '../libs/movements';
 import { shake as ShakeAgent } from '../libs/animations';
-import { COLOR_BLUE, COLOR_RED } from '../libs/constants';
+import { 
+  COLOR_BLUE, 
+  COLOR_RED,
+  COLOR_BG_ITEM,
+  COLOR_FONT,
+} from '../libs/constants';
 
 
-const Agent = ({ initialPosition, team, life, position, shake }) => {
+const Agent = ({ initialPosition, team, life, position, shake, isCurrent }) => {
   
   const ref = useRef();  
-  const precision = 3;  // Number of decimal places for position coordinates
   let upDown = 1;  // Used to animate the agent up and down
 
   useFrame(() => {
@@ -31,10 +36,34 @@ const Agent = ({ initialPosition, team, life, position, shake }) => {
     }
   });
 
+  const bubbleStyles = {
+    display: 'flex', 
+    flexDirection: 'row', 
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 80,
+    height: 25,
+    fontSize: 16, 
+    borderRadius: 15,
+    border: '1px solid darkgrey',
+    borderColor: COLOR_FONT,
+    backgroundColor: COLOR_BG_ITEM,
+    color: COLOR_FONT, 
+  }
+
   return (
     <mesh ref={ref} position={[initialPosition[0], AGENT_TRANSLATE_Y, initialPosition[1]]}>
       <sphereBufferGeometry attach='geometry' args={[AGENT_RADIUS, 32, 32]} />
       <meshStandardMaterial attach='material' color={team === 'red' ? COLOR_RED : COLOR_BLUE} />
+
+      {isCurrent && (
+        <Html position={[0, AGENT_BUBBLE_TRANSLATE_Y, 0]} center>
+          <div style={bubbleStyles}>
+            <p>Life: {life}</p>
+          </div>
+        </Html>
+      )}
+      
     </mesh>
   );
 };

@@ -1,5 +1,11 @@
 import React from 'react';
-import { COLOR_BLUE, COLOR_RED } from '../libs/constants';
+import { 
+  COLOR_BLUE, 
+  COLOR_RED,
+  COLOR_BG_PANEL,
+  COLOR_BG_ITEM,
+  COLOR_FONT, 
+} from '../libs/constants';
 
 export default function Panel ({ gameState }) {
   const { turn, agents } = gameState;
@@ -13,8 +19,8 @@ export default function Panel ({ gameState }) {
     flexDirection: 'column',
     justifyContent: 'flex-start',
     alignItems: 'center',
-    backgroundColor: '#222222',
-    color: '#fff',
+    backgroundColor: COLOR_BG_PANEL,
+    color: COLOR_FONT,
   };
   
   const headerStyles = {
@@ -29,7 +35,7 @@ export default function Panel ({ gameState }) {
     flexDirection: 'column',
     justifyContent: 'flex-start',
     alignItems: 'center',
-    backgroundColor: '#3a3a3a',
+    backgroundColor: COLOR_BG_ITEM,
     borderRadius: '5px',
     marginBottom: '20px',
   };

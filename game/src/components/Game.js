@@ -107,6 +107,7 @@ const Game = ({ gameState, setGameState }) => {
     newGameState.turn.actions += 1;
 
     if (newGameState.turn.actions % 4 === 0) { // if 4 actions completed, next turn (agent)
+      newGameState.turn.actions = 0;
       newGameState.turn.current = newGameState.turn.current + 1;
       newGameState.turn.agentId = gameState.turn.order[gameState.turn.current % gameState.turn.order.length]
     }
@@ -204,6 +205,7 @@ const Game = ({ gameState, setGameState }) => {
             team={agent.team} 
             life={agent.life} 
             shake={agent.shake}
+            isCurrent={agent.id === gameState.turn.agentId}
           />
         )
       ))}
