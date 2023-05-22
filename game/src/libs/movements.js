@@ -29,6 +29,7 @@ const agentMovement = (ref, position, upDown) => {
   const targetPosition = new THREE.Vector3(position[0], AGENT_TRANSLATE_Y, position[1]);
   if (nextPosition.distanceTo(targetPosition) < AGENT_SPEED) {
     ref.current.position.set(targetPosition.x, targetPosition.y, targetPosition.z);
+    return true // arrived
   } else {
     // Update position with rounded coordinates
     ref.current.position.set(
@@ -36,6 +37,7 @@ const agentMovement = (ref, position, upDown) => {
       +nextPosition.y.toFixed(PRECISION),
       +nextPosition.z.toFixed(PRECISION)
     );
+    return false // not arrived
   }
 }
 

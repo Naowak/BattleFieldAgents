@@ -1,22 +1,6 @@
 import { BOARD_SIZE } from './constants';
 
-// Returnt the next turn
-const nextTurn = (turn) => {
-  let newTurn = { ...turn };
-  newTurn.actions += 1;
-
-  if (newTurn.actions % 4 === 0) { // if 4 actions completed, next turn (agent)
-    newTurn.actions = 0;
-    newTurn.current += 1;
-    newTurn.agentId = newTurn.order[newTurn.current % newTurn.order.length]
-  }
-
-  return newTurn;
-};
-
-
-const handleMove = (direction, turn, agents, targets, obstacles, setTurn, setAgents) => {
-
+const handleMove = (direction, turn, agents, targets, obstacles, setAgents) => {
 
   // Create vector in the direction of the move
   let directionVector = [0, 0];
@@ -66,13 +50,10 @@ const handleMove = (direction, turn, agents, targets, obstacles, setTurn, setAge
     let newAgents = [...agents];
     newAgents[agentIndex].position = newPosition;
     setAgents(newAgents);
-
-    // Update turn
-    setTurn(nextTurn(turn));
   }
 };
 
-const handleAttack = (turn, agents, setTurn, setBullets) => {
+const handleAttack = (turn, agents, setBullets) => {
 
   // Find the agent in the gameState
   const agentIndex = agents.findIndex((agent) => agent.id === turn.agentId);
@@ -95,9 +76,6 @@ const handleAttack = (turn, agents, setTurn, setBullets) => {
       target: [targetX, targetY]
     }
   ]));
-
-  // Update turn
-  setTurn(nextTurn(turn));
 };
 
 

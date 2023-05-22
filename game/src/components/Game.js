@@ -8,7 +8,7 @@ import Bullet from './Bullet';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
 import { COLOR_BG_GAME } from '../libs/constants';
-import { handleMove, handleAttack } from '../libs/actions';
+import { handleMove, handleAttack, nextTurn } from '../libs/actions';
 
 const Game = () => {
 
@@ -20,9 +20,10 @@ const Game = () => {
     targets,
     bullets, setBullets, 
     obstacles,
-    animationQueue, setAnimationQueue,
+    animationQueue,
     animationRunning, setAnimationRunning,
     newGame,
+    nextTurn,
   } = useContext(GameContext);
 
   // CONTROLS WITH KEYBOARD
@@ -31,8 +32,8 @@ const Game = () => {
     const handleKeyPress = (event) => { 
 
       // Define arguments
-      const moveArgs = [turn, agents, targets, obstacles, setTurn, setAgents, setAnimationRunning];
-      const attackArgs = [turn, agents, setTurn, setBullets, setAnimationRunning];
+      const moveArgs = [turn, agents, targets, obstacles, setAgents];
+      const attackArgs = [turn, agents, setBullets];
 
       // Define actions
       const actions = {
@@ -47,6 +48,7 @@ const Game = () => {
       if (actions[event.key]) {
         animationQueue.push(actions[event.key]);
         !animationRunning && setAnimationRunning(true);
+        nextTurn();
       }
     };    
 
@@ -57,7 +59,7 @@ const Game = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyPress);
     }
-  }, [turn, agents, targets, obstacles, setTurn, setAgents, setBullets]);
+  }, [turn, agents, targets, obstacles, setAgents, setBullets]);
   
 
   // GAME LOOP : check win 

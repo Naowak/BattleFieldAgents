@@ -1,4 +1,5 @@
-import React, { useRef } from 'react';
+import React, { useRef, useContext } from 'react';
+import { GameContext } from '../contexts/GameContext';
 import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import { AGENT_RADIUS, AGENT_TRANSLATE_Y, AGENT_TOP_HEIGHT, AGENT_BUBBLE_TRANSLATE_Y } from '../libs/constants';
@@ -15,6 +16,7 @@ import {
 const Agent = ({ initialPosition, team, life, position, shake, isCurrent }) => {
   
   const ref = useRef();  
+  const { setAnimationRunning } = useContext(GameContext);
   let upDown = 1;  // Used to animate the agent up and down
 
   useFrame(() => {
@@ -25,8 +27,11 @@ const Agent = ({ initialPosition, team, life, position, shake, isCurrent }) => {
       if (ref.current.position.y >= AGENT_TOP_HEIGHT) { upDown = -1; }
       if (ref.current.position.y <= AGENT_TRANSLATE_Y) { upDown = 1; }
 
-      // Move the agent
-      agentMovement(ref, position, upDown);
+      if (ref.current.position.x !== position[0] || ref.current.position.z !== position[1]) {
+        // Move the agent
+        const arrived = agentMovement(ref, position, upDown);
+        arrived && setAnimationRunning(false);
+      }
 
       // Shake the agent when it gets hit
       if (shake) {

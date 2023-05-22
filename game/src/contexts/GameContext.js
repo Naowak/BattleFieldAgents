@@ -35,6 +35,20 @@ export default function GameContextProvider (props) {
     setObstacles(init.obstacles);
   };
 
+  // Return the next turn
+  const nextTurn = () => {
+    let newTurn = { ...turn };
+    newTurn.actions += 1;
+
+    if (newTurn.actions % 4 === 0) { // if 4 actions completed, next turn (agent)
+      newTurn.actions = 0;
+      newTurn.current += 1;
+      newTurn.agentId = newTurn.order[newTurn.current % newTurn.order.length]
+    }
+
+    setTurn(newTurn);
+  };
+
   // Update Agents and check win
   const updateAgents = (newAgents) => {
     const blues = newAgents.filter(agent => agent.team === 'blue');
@@ -59,8 +73,6 @@ export default function GameContextProvider (props) {
     setTargets(newTargets);
   };
 
-  // Animation Queue
-
   return (
     <GameContext.Provider value={{ 
       win, setWin,
@@ -71,6 +83,7 @@ export default function GameContextProvider (props) {
       obstacles, setObstacles,
       animationQueue, setAnimationQueue,
       animationRunning, setAnimationRunning,
+      nextTurn,
       removeBullet,
       newGame,
     }}>
