@@ -27,6 +27,11 @@ export default function Bullet ({ id, initialPosition, target }) {
     handleShakeItem(itemId, kind, agents, targets, setAgents, setTargets);
   };
 
+  const rmBullet = (id) => {
+    removeBullet(id);
+    ref.current = null;
+  };
+
   useFrame(() => {
     // if bullet ref is not valid, return immediately
     if (!ref.current) {
@@ -37,13 +42,15 @@ export default function Bullet ({ id, initialPosition, target }) {
 
     // if bullet has already reached the target, stop the animation and remove the bullet
     if (bulletPosition[0] === target[0] && bulletPosition[1] === target[1]) {
-      removeBullet(id);
+      rmBullet(id);
       return;
     }
+    else {
+      // Move the bullet and check for collisions
+      bulletMovement(ref, target);
+      bulletCollision(ref, id, initialPosition, turn, agents, targets, obstacles, setTurn, rmBullet, handleShake) 
+    }
 
-    // Move the bullet and check for collisions
-    bulletMovement(ref, target);
-    bulletCollision(ref, id, initialPosition, turn, agents, targets, obstacles, setTurn, removeBullet, handleShake) 
   });
 
   return (
