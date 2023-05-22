@@ -41,8 +41,8 @@ const Agent = ({ initialPosition, team, life, position, shake, isCurrent }) => {
     flexDirection: 'row', 
     alignItems: 'center',
     justifyContent: 'center',
-    width: 130,
-    height: 30,
+    width: 25,
+    height: 25,
     fontSize: 16, 
     borderRadius: 15,
     border: '1px solid lightgrey',
@@ -58,7 +58,7 @@ const Agent = ({ initialPosition, team, life, position, shake, isCurrent }) => {
       {isCurrent && (
         <Html position={[0, AGENT_BUBBLE_TRANSLATE_Y, 0]} center>
           <div style={bubbleStyles}>
-            <p style={{margin: 0, padding: 0, fontWeight: 'bold'}}>Current Player</p>
+            <p style={{margin: 0, padding: 0, fontWeight: 'bold'}}>!</p>
           </div>
         </Html>
       )}

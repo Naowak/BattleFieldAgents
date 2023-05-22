@@ -41,8 +41,8 @@ const Target = ({ position, team, life, shake }) => {
     alignItems: 'center',
     justifyContent: 'center',
     gap: 5,
-    width: 100,
-    height: 50,
+    width: 90,
+    height: 25,
     fontSize: 16, 
     borderRadius: 10,
     border: '1px solid #666666',
@@ -68,7 +68,6 @@ const Target = ({ position, team, life, shake }) => {
       </mesh>
       <Html position={[position[0], TARGET_BUBBLE_TRANSLATE_Y, position[1]]} center>
         <div style={bubbleStyles}>
-          <p style={{margin: 0, padding: 0, fontWeight: 'bold'}}>{team === "red" ? "Red" : "Blue"} Target</p>
           <p style={{margin: 0, padding: 0}}>{life} / {TARGET_LIFE}</p>
         </div>
       </Html>
