@@ -4,7 +4,7 @@ import { BULLET_TRANSLATE_Y, BULLET_RADIUS } from '../libs/constants';
 import { bulletMovement } from '../libs/movements';
 import { bulletCollision } from '../libs/collisions';
 
-export default function Bullet ({ id, initialPosition, target, removeBullet, gameState, handleShakeItem, killAgent }) {
+export default function Bullet ({ id, initialPosition, target, removeBullet, gameState, setGameState, handleShakeItem }) {
   
   const ref = useRef();
 
@@ -12,7 +12,7 @@ export default function Bullet ({ id, initialPosition, target, removeBullet, gam
     // Move the bullet towards the target, and check for collisions
     if (ref.current) {
       bulletMovement(ref, target);
-      bulletCollision(ref, id, initialPosition, gameState, removeBullet, handleShakeItem, killAgent) 
+      bulletCollision(ref, id, initialPosition, gameState, setGameState, removeBullet, handleShakeItem) 
     }
     // Check that the bullet is in target position, if so remove it
     if (ref.current) {

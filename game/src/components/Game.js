@@ -22,15 +22,6 @@ const Game = ({ gameState, setGameState }) => {
   const removeBullet = (bulletId) => {
     setBullets(bullets.filter((bullet) => bullet.id !== bulletId));
   };
-
-    
-
-  // Remove agent from the gameState.turn.order
-  const killAgent = (agentId) => {
-    let newGameState = { ...gameState };
-    newGameState.turn.order = newGameState.turn.order.filter((id) => id !== agentId);
-    setGameState(newGameState);
-  };
   
   // CONTROLS WITH KEYBOARD
   useEffect(() => {
@@ -133,8 +124,8 @@ const Game = ({ gameState, setGameState }) => {
           {...bullet} 
           removeBullet={removeBullet}
           gameState={gameState}
+          setGameState={setGameState}
           handleShakeItem={(itemId, kind) => handleShakeItem(itemId, kind, gameState, setGameState)}
-          killAgent={killAgent}
         />
       ))}
     </Canvas>
