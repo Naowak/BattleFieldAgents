@@ -3,21 +3,29 @@ const shake = (ref) => {
   ref.current.position.z += (Math.random() - 0.5) * 0.1;
 }
 
-const handleShakeItem = (itemId, kind, gameState, setGameState) => {
+const handleShakeItem = (itemId, kind, agents, targets, setAgents, setTargets) => {
+  
+  let items = agents;
+  let setItems = setAgents;
+  if (kind === 'targets') {
+    items = targets;
+    setItems = setTargets;
+  }
+
   // Find the item in the gameState
-  const itemIndex = gameState[kind].findIndex((item) => item.id === itemId);
+  const itemIndex = items.findIndex((item) => item.id === itemId);
 
   // If the item is found
   if (itemIndex !== -1) {
-    let newGameState = { ...gameState };
-    newGameState[kind][itemIndex].shake = true;
-    setGameState(newGameState);
+    let newItems = [...items];
+    newItems[itemIndex].shake = true;
+    setItems(items);
 
     // Reset shake state after 500ms
     setTimeout(() => {
-      newGameState = { ...gameState };
-      newGameState[kind][itemIndex].shake = false;
-      setGameState(newGameState);
+      newItems = [...items];
+      newItems[itemIndex].shake = false;
+      setItems(items);
     }, 500);
   }
 };

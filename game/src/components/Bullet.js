@@ -1,18 +1,37 @@
-import React, { useRef } from 'react';
+import React, { useRef, useContext } from 'react';
+import { GameContext } from '../contexts/GameContext';
 import { useFrame } from '@react-three/fiber';
 import { BULLET_TRANSLATE_Y, BULLET_RADIUS } from '../libs/constants';
 import { bulletMovement } from '../libs/movements';
 import { bulletCollision } from '../libs/collisions';
+import { handleShakeItem } from '../libs/animations';
 
-export default function Bullet ({ id, initialPosition, target, removeBullet, gameState, setGameState, handleShakeItem }) {
+export default function Bullet ({ id, initialPosition, target }) {
   
+  // ref 
   const ref = useRef();
+
+  // Context
+  const { 
+    turn,
+    agents, 
+    targets,
+    obstacles,
+    setTurn,
+    setAgents,
+    setTargets, 
+    removeBullet 
+  } = useContext(GameContext);
+
+  const handleShake = (itemId, kind) => {
+    handleShakeItem(itemId, kind, agents, targets, setAgents, setTargets);
+  };
 
   useFrame(() => {
     // Move the bullet towards the target, and check for collisions
     if (ref.current) {
       bulletMovement(ref, target);
-      bulletCollision(ref, id, initialPosition, gameState, setGameState, removeBullet, handleShakeItem) 
+      bulletCollision(ref, id, initialPosition, turn, agents, targets, obstacles, setTurn, removeBullet, handleShake) 
     }
     // Check that the bullet is in target position, if so remove it
     if (ref.current) {

@@ -1,20 +1,21 @@
 import { BOARD_SIZE } from './constants';
 
-// Update the gameState after each action
-const updateTurn = (gameState, setGameState) => {
-  let newGameState = { ...gameState };
-  newGameState.turn.actions += 1;
+// Returnt the next turn
+const nextTurn = (turn) => {
+  let newTurn = { ...turn };
+  newTurn.actions += 1;
 
-  if (newGameState.turn.actions % 4 === 0) { // if 4 actions completed, next turn (agent)
-    newGameState.turn.actions = 0;
-    newGameState.turn.current = newGameState.turn.current + 1;
-    newGameState.turn.agentId = gameState.turn.order[gameState.turn.current % gameState.turn.order.length]
+  if (newTurn.actions % 4 === 0) { // if 4 actions completed, next turn (agent)
+    newTurn.actions = 0;
+    newTurn.current += 1;
+    newTurn.agentId = newTurn.order[newTurn.current % newTurn.order.length]
   }
-  
-  setGameState(newGameState);
+
+  return newTurn;
 };
 
-const handleMove = (direction, gameState, setGameState) => {
+
+const handleMove = (direction, turn, agents, targets, obstacles, setTurn, setAgents) => {
 
 
   // Create vector in the direction of the move
@@ -25,34 +26,32 @@ const handleMove = (direction, gameState, setGameState) => {
   else if (direction === 'down') { directionVector[1] = 1; }
     
   // Find the agent in the gameState
-  const agentId = gameState.turn.agentId;
-  const agentIndex = gameState.agents.findIndex((agent) => agent.id === agentId);
-
+  const agentIndex = agents.findIndex((agent) => agent.id === turn.agentId);
   if (agentIndex === -1) {
     return
   }
 
   // Calculate new position based on direction
-  let newPosition = [...gameState.agents[agentIndex].position];
+  let newPosition = [...agents[agentIndex].position];
   newPosition[0] += directionVector[0];
   newPosition[1] += directionVector[1];
 
   // Check if new position is valid (not colliding with obstacles)
-  const obstacleCollision = gameState.obstacles.some((obstacle) => {
+  const obstacleCollision = obstacles.some((obstacle) => {
     return JSON.stringify(obstacle.position) === JSON.stringify(newPosition);
   });
 
   // Check if new position is valid (not colliding with other agents)
-  const agentCollision = gameState.agents.some((agent) => {
+  const agentCollision = agents.some((agent) => {
     // Check if agent is dead
-    if (!gameState.turn.order.includes(agent.id)) {
+    if (!turn.order.includes(agent.id)) {
       return false;
     }
     return JSON.stringify(agent.position) === JSON.stringify(newPosition);
   });
 
   // Check if new position is valid (not colliding with targets)
-  const targetCollision = gameState.targets.some((target) => {
+  const targetCollision = targets.some((target) => {
     return JSON.stringify(target.position) === JSON.stringify(newPosition);
   });
 
@@ -63,21 +62,20 @@ const handleMove = (direction, gameState, setGameState) => {
 
   if (!obstacleCollision && !agentCollision && !targetCollision && !outOfBounds) {
 
-    // Update gameState => launch animation
-    let newGameState = { ...gameState };
-    newGameState.agents[agentIndex].position = newPosition;
-    setGameState(newGameState);
+    // Update agent
+    let newAgents = [...agents];
+    newAgents[agentIndex].position = newPosition;
+    setAgents(newAgents);
 
     // Update turn
-    updateTurn(gameState, setGameState);
+    setTurn(nextTurn(turn));
   }
 };
 
-const handleAttack = (gameState, setGameState, setBullets) => {
+const handleAttack = (turn, agents, setTurn, setBullets) => {
 
   // Find the agent in the gameState
-  const agentId = gameState.turn.agentId;
-  const agentIndex = gameState.agents.findIndex((agent) => agent.id === agentId);
+  const agentIndex = agents.findIndex((agent) => agent.id === turn.agentId);
 
   // If the agent is not found, return
   if (agentIndex === -1) {
@@ -89,19 +87,17 @@ const handleAttack = (gameState, setGameState, setBullets) => {
   let targetY = Math.floor(Math.random() * (2*BOARD_SIZE + 1)) - BOARD_SIZE; 
 
   // Launch animation
-  let newGameState = { ...gameState };
-  setGameState(newGameState);
-
-  setBullets(prevBullets => ([
-    ...prevBullets, 
-    { 
+  setBullets(prev => ([
+    ...prev,
+    {
       id: Date.now(),  // Unique id for the bullet
-      initialPosition: gameState.agents[agentIndex].position, 
-      target: [targetX, targetY] 
+      initialPosition: agents[agentIndex].position,
+      target: [targetX, targetY]
     }
   ]));
 
-  updateTurn(gameState, setGameState);
+  // Update turn
+  setTurn(nextTurn(turn));
 };
 
 

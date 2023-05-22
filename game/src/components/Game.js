@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useContext } from 'react';
+import { GameContext } from '../contexts/GameContext';
 import Board from './Board';
 import Agent from './Agent';
 import Target from './Target';
@@ -7,32 +8,36 @@ import Bullet from './Bullet';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
 import { COLOR_BG_GAME } from '../libs/constants';
-import { handleShakeItem } from '../libs/animations';
-import { initGameState } from '../libs/initialization';
 import { handleMove, handleAttack } from '../libs/actions';
 
-const Game = ({ gameState, setGameState }) => {
+const Game = ({ }) => {
 
-  // Ref 
-  const over = useRef(false);
-
-  // States
-  const [bullets, setBullets] = useState([]);
-  
-  const removeBullet = (bulletId) => {
-    setBullets(bullets.filter((bullet) => bullet.id !== bulletId));
-  };
+  // Get context
+  const { 
+    over,
+    turn, 
+    agents, 
+    targets, 
+    bullets, 
+    obstacles,
+    setOver,
+    setTurn,
+    setAgents,
+    setBullets,
+    newGame,
+  } = useContext(GameContext);
   
   // CONTROLS WITH KEYBOARD
   useEffect(() => {
     
     const handleKeyPress = (event) => {
+
       // Get the id of the current agent
-      if (event.key === "ArrowUp") { handleMove('up', gameState, setGameState) }
-      if (event.key === "ArrowDown") { handleMove('down', gameState, setGameState) }
-      if (event.key === "ArrowLeft") { handleMove('left', gameState, setGameState) }
-      if (event.key === "ArrowRight") { handleMove('right', gameState, setGameState) }
-      if (event.key === " ") { handleAttack(gameState, setGameState, setBullets) }
+      if (event.key === "ArrowUp") { handleMove('up', turn, agents, targets, obstacles, setTurn, setAgents) }
+      if (event.key === "ArrowDown") { handleMove('down', turn, agents, targets, obstacles, setTurn, setAgents) }
+      if (event.key === "ArrowLeft") { handleMove('left', turn, agents, targets, obstacles, setTurn, setAgents) }
+      if (event.key === "ArrowRight") { handleMove('right', turn, agents, targets, obstacles, setTurn, setAgents) }
+      if (event.key === " ") { handleAttack(turn, agents, setTurn, setBullets) }
     };    
 
     // Add event listener for keypress
@@ -42,7 +47,7 @@ const Game = ({ gameState, setGameState }) => {
     return () => {
       window.removeEventListener('keydown', handleKeyPress);
     }
-  }, [gameState, setGameState]);
+  }, [turn, agents, targets, obstacles, setTurn, setAgents, setBullets]);
   
 
   // GAME LOOP
@@ -50,20 +55,18 @@ const Game = ({ gameState, setGameState }) => {
 
     // handle win
     const handleWin = (team) => {
-      if (over.current) {
+      if (over) {
         return;
       }
-      over.current = true;
-      alert(`${team} team wins!`);
-      console.log("New game in 10 seconds")
+      setOver(true);
+      alert(`${team} team wins!\nNew game in 10 seconds.`);
       setTimeout(() => {
-        over.current = false;
-        setGameState(initGameState())
+        newGame()
       }, 10000);
     };
 
-    const redTeamAgents = gameState.agents.filter(agent => agent.team === 'red');
-    const blueTeamAgents = gameState.agents.filter(agent => agent.team === 'blue');
+    const redTeamAgents = agents.filter(agent => agent.team === 'red');
+    const blueTeamAgents = agents.filter(agent => agent.team === 'blue');
     
     // check if all agents of one team are dead
     if (redTeamAgents.every(agent => agent.life <= 0)) {
@@ -74,10 +77,10 @@ const Game = ({ gameState, setGameState }) => {
     }
 
     // check if a target is destroyed
-    if (gameState.targets.some(target => target.life <= 0)) {
-      handleWin(gameState.targets[0].life > 0 ? 'Red' : 'Blue');
+    if (targets.some(target => target.life <= 0)) {
+      handleWin(targets[0].life > 0 ? 'Red' : 'Blue');
     }
-  }, [gameState, setGameState]);
+  }, [over, agents, targets, setOver]);
   
   
   
@@ -93,7 +96,7 @@ const Game = ({ gameState, setGameState }) => {
       <spotLight position={[0, 10, 0]} angle={1} />
       <Board />
       {/* Here you can add your agents, targets, and obstacles. */}
-      {gameState.agents.map(agent => (
+      {agents.map(agent => (
         agent.life > 0 && (
           <Agent 
             key={agent.id} 
@@ -102,11 +105,11 @@ const Game = ({ gameState, setGameState }) => {
             team={agent.team} 
             life={agent.life} 
             shake={agent.shake}
-            isCurrent={agent.id === gameState.turn.agentId}
+            isCurrent={agent.id === turn.agentId}
           />
         )
       ))}
-      {gameState.targets.map(target => (
+      {targets.map(target => (
         target.life > 0 && (
           <Target 
             key={target.id} 
@@ -117,15 +120,12 @@ const Game = ({ gameState, setGameState }) => {
           />
         )
       ))}
-      {gameState.obstacles.map(obstacle => <Obstacle key={obstacle.id} position={obstacle.position} />)}
+      {obstacles.map(obstacle => <Obstacle key={obstacle.id} position={obstacle.position} />)}
       {bullets.map((bullet) => (
         <Bullet 
-          key={bullet.id} 
-          {...bullet} 
-          removeBullet={removeBullet}
-          gameState={gameState}
-          setGameState={setGameState}
-          handleShakeItem={(itemId, kind) => handleShakeItem(itemId, kind, gameState, setGameState)}
+          key={bullet.id}
+          initialPosition={bullet.initialPosition}
+          target={bullet.target}
         />
       ))}
     </Canvas>

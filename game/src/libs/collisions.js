@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { BULLET_SPEED, BULLET_DAMAGE } from "./constants";
 
 // Check for collision with agents and targets
-const bulletCollision = (ref, id, initialPosition, gameState, setGameState, removeBullet, handleShakeItem) => {
+const bulletCollision = (ref, id, initialPosition, turn, agents, targets, obstacles, setTurn, removeBullet, handleShakeItem) => {
   
   // Get bullet position
   const bulletPosition = new THREE.Vector3(
@@ -12,10 +12,10 @@ const bulletCollision = (ref, id, initialPosition, gameState, setGameState, remo
   );
 
   // Check for collision with agents
-  for (let agent of gameState.agents) {
+  for (let agent of agents) {
 
     // Check if the agent is dead
-    if (!gameState.turn.order.includes(agent.id)) {
+    if (!turn.order.includes(agent.id)) {
       continue;
     }
 
@@ -31,14 +31,12 @@ const bulletCollision = (ref, id, initialPosition, gameState, setGameState, remo
     if (agentPosition.distanceTo(bulletPosition) < BULLET_SPEED) {
       agent.life -= BULLET_DAMAGE;  // Decrease life by 25
       handleShakeItem(agent.id, 'agents');  // Shake the agent
+      
       // Remove agent if dead
       if (agent.life <= 0) {
-        setGameState(prev => ({
+        setTurn(prev => ({  
           ...prev,
-          turn: {
-            ...prev.turn,
-            order: [...prev.turn.order].filter((id) => id !== agent.id),
-          },
+          order: [...prev.order].filter((id) => id !== agent.id),
         }));
       }
 
@@ -48,7 +46,7 @@ const bulletCollision = (ref, id, initialPosition, gameState, setGameState, remo
   }
 
   // Check for collision with targets
-  for (let target of gameState.targets) {
+  for (let target of targets) {
     const targetPosition = new THREE.Vector3(target.position[0], 0, target.position[1]);
     if (targetPosition.distanceTo(bulletPosition) < BULLET_SPEED) {
       target.life -= BULLET_DAMAGE;  // Decrease life by 25
@@ -58,7 +56,7 @@ const bulletCollision = (ref, id, initialPosition, gameState, setGameState, remo
   }
 
   // Check for collision with obstacles
-  for (let obstacle of gameState.obstacles) {
+  for (let obstacle of obstacles) {
     const obstaclePosition = new THREE.Vector3(obstacle.position[0], 0, obstacle.position[1]);
     if (obstaclePosition.distanceTo(bulletPosition) < BULLET_SPEED) {
       removeBullet(id);
