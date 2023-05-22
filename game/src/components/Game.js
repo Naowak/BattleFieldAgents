@@ -15,28 +15,30 @@ const Game = () => {
   // Get context
   const { 
     win,
-    turn, 
-    agents, 
-    targets, 
-    bullets, 
+    turn, setTurn,
+    agents, setAgents,
+    targets,
+    bullets, setBullets, 
     obstacles,
-    setTurn,
-    setAgents,
-    setBullets,
+    animationQueue, setAnimationQueue,
+    animationCounter, setAnimationCounter,
     newGame,
   } = useContext(GameContext);
 
   // CONTROLS WITH KEYBOARD
   useEffect(() => {
     
-    const handleKeyPress = (event) => {
+    const handleKeyPress = (event) => { 
+
+      const moveArgs = [turn, agents, targets, obstacles, setTurn, setAgents];
+      const attackArgs = [turn, agents, setTurn, setBullets];
 
       // Get the id of the current agent
-      if (event.key === "ArrowUp") { handleMove('up', turn, agents, targets, obstacles, setTurn, setAgents) }
-      if (event.key === "ArrowDown") { handleMove('down', turn, agents, targets, obstacles, setTurn, setAgents) }
-      if (event.key === "ArrowLeft") { handleMove('left', turn, agents, targets, obstacles, setTurn, setAgents) }
-      if (event.key === "ArrowRight") { handleMove('right', turn, agents, targets, obstacles, setTurn, setAgents) }
-      if (event.key === " ") { handleAttack(turn, agents, setTurn, setBullets) }
+      if (event.key === "ArrowUp") { handleMove('up', ...moveArgs) }
+      if (event.key === "ArrowDown") { handleMove('down', ...moveArgs) }
+      if (event.key === "ArrowLeft") { handleMove('left', ...moveArgs) }
+      if (event.key === "ArrowRight") { handleMove('right', ...moveArgs) }
+      if (event.key === " ") { handleAttack(...attackArgs) }
     };    
 
     // Add event listener for keypress

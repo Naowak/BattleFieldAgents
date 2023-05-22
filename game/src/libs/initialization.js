@@ -98,6 +98,8 @@ const initGameState = () => {
     agents,
     obstacles,
     bullets: [],
+    animationQueue: [],
+    animationCounter: 0,
   }
 
 };
