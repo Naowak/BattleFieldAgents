@@ -27,6 +27,8 @@ export default function Bullet ({ id, initialPosition, target }) {
     handleShakeItem(itemId, kind, agents, targets, setAgents, setTargets);
   };
 
+  console.log(id)
+
   useFrame(() => {
     // Move the bullet towards the target, and check for collisions
     if (ref.current) {

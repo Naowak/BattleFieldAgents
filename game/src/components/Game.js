@@ -124,6 +124,7 @@ const Game = ({ }) => {
       {bullets.map((bullet) => (
         <Bullet 
           key={bullet.id}
+          id={bullet.id}
           initialPosition={bullet.initialPosition}
           target={bullet.target}
         />
