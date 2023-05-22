@@ -30,15 +30,23 @@ const Game = () => {
     
     const handleKeyPress = (event) => { 
 
+      // Define arguments
       const moveArgs = [turn, agents, targets, obstacles, setTurn, setAgents];
       const attackArgs = [turn, agents, setTurn, setBullets];
 
-      // Get the id of the current agent
-      if (event.key === "ArrowUp") { handleMove('up', ...moveArgs) }
-      if (event.key === "ArrowDown") { handleMove('down', ...moveArgs) }
-      if (event.key === "ArrowLeft") { handleMove('left', ...moveArgs) }
-      if (event.key === "ArrowRight") { handleMove('right', ...moveArgs) }
-      if (event.key === " ") { handleAttack(...attackArgs) }
+      // Define actions
+      const actions = {
+        'ArrowUp': () => handleMove('up', ...moveArgs),
+        'ArrowDown': () => handleMove('down', ...moveArgs),
+        'ArrowLeft': () => handleMove('left', ...moveArgs),
+        'ArrowRight': () => handleMove('right', ...moveArgs),
+        ' ': () => handleAttack(...attackArgs),
+      }
+
+      // Add action to animation queue
+      if (actions[event.key]) {
+        animationQueue.push(actions[event.key]);
+      }
     };    
 
     // Add event listener for keypress
@@ -55,9 +63,7 @@ const Game = () => {
   useEffect(() => {
     if (win) {
       alert(`${win === 'red' ? 'Red' : 'Blue'} team wins!\nNew game in 10 seconds.`);
-      setTimeout(() => {
-        newGame()
-      }, 10000);
+      setTimeout(() => newGame(), 10000);
     }
   }, [win, newGame]);
   
