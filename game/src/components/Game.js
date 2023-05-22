@@ -10,7 +10,7 @@ import { OrbitControls, Stars } from '@react-three/drei';
 import { COLOR_BG_GAME } from '../libs/constants';
 import { handleMove, handleAttack } from '../libs/actions';
 
-const Game = ({ }) => {
+const Game = () => {
 
   // Get context
   const { 
@@ -57,7 +57,7 @@ const Game = ({ }) => {
         newGame()
       }, 10000);
     }
-  }, [win]);
+  }, [win, newGame]);
   
 
   return (
