@@ -11,7 +11,6 @@ const AGENT_SPEED = 0.1;
 const AGENT_TOP_HEIGHT = 0.2; // BE CAREFUL TO ADJUST THIS VALUE IN FUNCTION OF THE SPEED
 const AGENT_LIFE = 100;
 const AGENT_BUBBLE_TRANSLATE_Y = 1;
-const NB_AGENTS_PER_TEAM = 5;
 
 // Targets
 const TARGET_TRANSLATE_Y = -0.1;
@@ -28,6 +27,7 @@ const OBSTACLE_TRANSLATE_Y = 0;
 const NB_OBSTACLES = 50;
 
 // Others
+const NB_AGENTS_PER_TEAM = 1;
 const PRECISION = 3;  // Number of decimal places for position coordinates
 const SPAWN_RANGE = 3;  // Range of cells around the target where the agents can spawn
 const COLOR_RED = '#aa4444';
@@ -49,19 +49,19 @@ export {
   AGENT_TOP_HEIGHT,
   AGENT_LIFE,
   AGENT_BUBBLE_TRANSLATE_Y,
-  NB_AGENTS_PER_TEAM,
-
+  
   TARGET_TRANSLATE_Y,
   TARGET_LIFE,
   TARGET_RADIUS,
   TARGET_BUBBLE_TRANSLATE_Y,
-
+  
   BOARD_SIZE,
   BOARD_TRANSLATE_Y,
-
+  
   OBSTACLE_TRANSLATE_Y,
   NB_OBSTACLES,
-
+  
+  NB_AGENTS_PER_TEAM,
   PRECISION,
   SPAWN_RANGE,
   COLOR_RED,

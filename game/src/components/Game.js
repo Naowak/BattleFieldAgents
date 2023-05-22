@@ -26,7 +26,7 @@ const Game = ({ }) => {
     setBullets,
     newGame,
   } = useContext(GameContext);
-  
+
   // CONTROLS WITH KEYBOARD
   useEffect(() => {
     
@@ -121,14 +121,16 @@ const Game = ({ }) => {
         )
       ))}
       {obstacles.map(obstacle => <Obstacle key={obstacle.id} position={obstacle.position} />)}
-      {bullets.map((bullet) => (
+      {bullets.map((bullet) => {
+        console.log('bullet', bullet)
+        return (
         <Bullet 
           key={bullet.id}
           id={bullet.id}
           initialPosition={bullet.initialPosition}
           target={bullet.target}
         />
-      ))}
+        )})}
     </Canvas>
   );
 };

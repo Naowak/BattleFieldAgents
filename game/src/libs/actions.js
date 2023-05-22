@@ -90,7 +90,7 @@ const handleAttack = (turn, agents, setTurn, setBullets) => {
   setBullets(prev => ([
     ...prev,
     {
-      id: Date.now(),  // Unique id for the bullet
+      id: `${Date.now()}_${Math.random()}`,  // Unique id for the bullet
       initialPosition: agents[agentIndex].position,
       target: [targetX, targetY]
     }

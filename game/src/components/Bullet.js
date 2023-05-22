@@ -27,21 +27,23 @@ export default function Bullet ({ id, initialPosition, target }) {
     handleShakeItem(itemId, kind, agents, targets, setAgents, setTargets);
   };
 
-  console.log(id)
-
   useFrame(() => {
-    // Move the bullet towards the target, and check for collisions
-    if (ref.current) {
-      bulletMovement(ref, target);
-      bulletCollision(ref, id, initialPosition, turn, agents, targets, obstacles, setTurn, removeBullet, handleShake) 
+    // if bullet ref is not valid, return immediately
+    if (!ref.current) {
+      return;
     }
-    // Check that the bullet is in target position, if so remove it
-    if (ref.current) {
-      const bulletPosition = [ref.current.position.x, ref.current.position.z];
-      if (bulletPosition[0] === target[0] && bulletPosition[1] === target[1]) {
-        removeBullet(id);
-      }
+
+    const bulletPosition = [ref.current.position.x, ref.current.position.z];
+
+    // if bullet has already reached the target, stop the animation and remove the bullet
+    if (bulletPosition[0] === target[0] && bulletPosition[1] === target[1]) {
+      removeBullet(id);
+      return;
     }
+
+    // Move the bullet and check for collisions
+    bulletMovement(ref, target);
+    bulletCollision(ref, id, initialPosition, turn, agents, targets, obstacles, setTurn, removeBullet, handleShake) 
   });
 
   return (
