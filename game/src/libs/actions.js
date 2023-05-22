@@ -12,7 +12,7 @@ const handleMove = (direction, turn, agents, targets, obstacles, setAgents) => {
   // Find the agent in the gameState
   const agentIndex = agents.findIndex((agent) => agent.id === turn.agentId);
   if (agentIndex === -1) {
-    return
+    return false;
   }
 
   // Calculate new position based on direction
@@ -50,7 +50,10 @@ const handleMove = (direction, turn, agents, targets, obstacles, setAgents) => {
     let newAgents = [...agents];
     newAgents[agentIndex].position = newPosition;
     setAgents(newAgents);
+    return true;
   }
+  
+  return false;
 };
 
 const handleAttack = (turn, agents, setBullets) => {
@@ -60,7 +63,7 @@ const handleAttack = (turn, agents, setBullets) => {
 
   // If the agent is not found, return
   if (agentIndex === -1) {
-    return
+    return false;
   }
 
   // Create a bullet with a random target
@@ -76,6 +79,8 @@ const handleAttack = (turn, agents, setBullets) => {
       target: [targetX, targetY]
     }
   ]));
+
+  return true;
 };
 
 

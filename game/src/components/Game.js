@@ -72,10 +72,15 @@ const Game = () => {
 
   // GAME LOOP : animation queue
   useEffect(() => {
+    // Start next animation, cancel it if it not valid
     if (animationRunning) {
-      animationQueue[0]();
+      const started = animationQueue[0]();
       animationQueue.shift();
+      if (!started) {
+        setAnimationRunning(false);
+      }
     }
+    // Start animation if not running
     if (!animationRunning && animationQueue.length > 0) {
       setAnimationRunning(true);
     }
