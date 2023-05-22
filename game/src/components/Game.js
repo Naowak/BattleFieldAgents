@@ -50,15 +50,14 @@ const Game = ({ }) => {
   
 
   // GAME LOOP : check win 
-  // useEffect(() => {
-  //   console.log('win', win)
-  //   if (win) {
-  //     alert(`${win === 'red' ? 'Red' : 'Blue'} team wins!\nNew game in 10 seconds.`);
-  //     setTimeout(() => {
-  //       newGame()
-  //     }, 10000);
-  //   }
-  // }, [win]);
+  useEffect(() => {
+    if (win) {
+      alert(`${win === 'red' ? 'Red' : 'Blue'} team wins!\nNew game in 10 seconds.`);
+      setTimeout(() => {
+        newGame()
+      }, 10000);
+    }
+  }, [win]);
   
 
   return (

@@ -35,8 +35,8 @@ export default function GameContextProvider (props) {
 
   // Update Agents and check win
   const updateAgents = (newAgents) => {
-    const blues = newAgents.filter(agent => agent.kind === 'blue');
-    const reds = newAgents.filter(agent => agent.kind === 'red');
+    const blues = newAgents.filter(agent => agent.team === 'blue');
+    const reds = newAgents.filter(agent => agent.team === 'red');
     if (blues.every(agent => agent.life <= 0)) {
       setWin('red');
     } else if (reds.every(agent => agent.life <= 0)) {
@@ -47,11 +47,11 @@ export default function GameContextProvider (props) {
 
   // Update Targets and check win
   const updateTargets = (newTargets) => {
-    const blues = newTargets.filter(agent => agent.kind === 'blue');
-    const reds = newTargets.filter(agent => agent.kind === 'red');
-    if (blues.every(agent => agent.life <= 0)) {
+    const blues = newTargets.filter(target => target.team === 'blue');
+    const reds = newTargets.filter(target => target.team === 'red');
+    if (blues.every(target => target.life <= 0)) {
       setWin('red');
-    } else if (reds.every(agent => agent.life <= 0)) {
+    } else if (reds.every(target => target.life <= 0)) {
       setWin('blue');
     }
     setTargets(newTargets);
