@@ -14,13 +14,12 @@ const Game = ({ }) => {
 
   // Get context
   const { 
-    over,
+    win,
     turn, 
     agents, 
     targets, 
     bullets, 
     obstacles,
-    setOver,
     setTurn,
     setAgents,
     setBullets,
@@ -50,39 +49,16 @@ const Game = ({ }) => {
   }, [turn, agents, targets, obstacles, setTurn, setAgents, setBullets]);
   
 
-  // GAME LOOP
-  useEffect(() => {
-
-    // handle win
-    const handleWin = (team) => {
-      if (over) {
-        return;
-      }
-      setOver(true);
-      alert(`${team} team wins!\nNew game in 10 seconds.`);
-      setTimeout(() => {
-        newGame()
-      }, 10000);
-    };
-
-    const redTeamAgents = agents.filter(agent => agent.team === 'red');
-    const blueTeamAgents = agents.filter(agent => agent.team === 'blue');
-    
-    // check if all agents of one team are dead
-    if (redTeamAgents.every(agent => agent.life <= 0)) {
-      handleWin('Blue!');
-    }
-    if (blueTeamAgents.every(agent => agent.life <= 0)) {
-      handleWin('Red');
-    }
-
-    // check if a target is destroyed
-    if (targets.some(target => target.life <= 0)) {
-      handleWin(targets[0].life > 0 ? 'Red' : 'Blue');
-    }
-  }, [over, agents, targets, setOver]);
-  
-  
+  // GAME LOOP : check win 
+  // useEffect(() => {
+  //   console.log('win', win)
+  //   if (win) {
+  //     alert(`${win === 'red' ? 'Red' : 'Blue'} team wins!\nNew game in 10 seconds.`);
+  //     setTimeout(() => {
+  //       newGame()
+  //     }, 10000);
+  //   }
+  // }, [win]);
   
 
   return (
@@ -121,16 +97,14 @@ const Game = ({ }) => {
         )
       ))}
       {obstacles.map(obstacle => <Obstacle key={obstacle.id} position={obstacle.position} />)}
-      {bullets.map((bullet) => {
-        console.log('bullet', bullet)
-        return (
+      {bullets.map((bullet) => (
         <Bullet 
           key={bullet.id}
           id={bullet.id}
           initialPosition={bullet.initialPosition}
           target={bullet.target}
         />
-        )})}
+        ))}
     </Canvas>
   );
 };

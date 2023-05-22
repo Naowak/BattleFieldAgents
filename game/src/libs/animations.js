@@ -4,7 +4,7 @@ const shake = (ref) => {
 }
 
 const handleShakeItem = (itemId, kind, agents, targets, setAgents, setTargets) => {
-  
+
   let items = agents;
   let setItems = setAgents;
   if (kind === 'targets') {
@@ -19,13 +19,13 @@ const handleShakeItem = (itemId, kind, agents, targets, setAgents, setTargets) =
   if (itemIndex !== -1) {
     let newItems = [...items];
     newItems[itemIndex].shake = true;
-    setItems(items);
+    setItems(newItems);
 
     // Reset shake state after 500ms
     setTimeout(() => {
       newItems = [...items];
       newItems[itemIndex].shake = false;
-      setItems(items);
+      setItems(newItems);
     }, 500);
   }
 };

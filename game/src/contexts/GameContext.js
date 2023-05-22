@@ -10,7 +10,7 @@ export default function GameContextProvider (props) {
   const init = initGameState();
 
   // Set up state
-  const [over, setOver] = useState(false);
+  const [win, setWin] = useState('');
   const [turn, setTurn] = useState(init.turn);
   const [agents, setAgents] = useState(init.agents);
   const [targets, setTargets] = useState(init.targets);
@@ -25,7 +25,7 @@ export default function GameContextProvider (props) {
   // New Game : reset state
   const newGame = () => {
     const init = initGameState();
-    setOver(false);
+    setWin('');
     setTurn(init.turn);
     setAgents(init.agents);
     setTargets(init.targets);
@@ -33,12 +33,36 @@ export default function GameContextProvider (props) {
     setObstacles(init.obstacles);
   };
 
+  // Update Agents and check win
+  const updateAgents = (newAgents) => {
+    const blues = newAgents.filter(agent => agent.kind === 'blue');
+    const reds = newAgents.filter(agent => agent.kind === 'red');
+    if (blues.every(agent => agent.life <= 0)) {
+      setWin('red');
+    } else if (reds.every(agent => agent.life <= 0)) {
+      setWin('blue');
+    }
+    setAgents(newAgents);
+  };
+
+  // Update Targets and check win
+  const updateTargets = (newTargets) => {
+    const blues = newTargets.filter(agent => agent.kind === 'blue');
+    const reds = newTargets.filter(agent => agent.kind === 'red');
+    if (blues.every(agent => agent.life <= 0)) {
+      setWin('red');
+    } else if (reds.every(agent => agent.life <= 0)) {
+      setWin('blue');
+    }
+    setTargets(newTargets);
+  };
+
   return (
     <GameContext.Provider value={{ 
-      over, setOver,
+      win, setWin,
       turn, setTurn,
-      agents, setAgents,
-      targets, setTargets,
+      agents, setAgents: updateAgents,
+      targets, setTargets: updateTargets,
       bullets, setBullets,
       obstacles, setObstacles,
       removeBullet,
