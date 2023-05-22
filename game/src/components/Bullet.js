@@ -24,20 +24,19 @@ export default function Bullet ({ id, initialPosition, target }) {
     setAnimationRunning,
   } = useContext(GameContext);
 
-
+  // Handle collision
   const handleCollision = (collision) => {
 
     if (collision.kind === 'agents') {
       // Decrease life of the agent
-      setAgents(prev => ({
-        ...prev,
-        agents: [...prev].map((agent) => {
-          if (agent.id === collision.agent.id) {
-            agent.life -= BULLET_DAMAGE;  // Decrease life by 25
-          }
-          return agent;
-        })
-      }));
+      let newAgents = [...agents];
+      newAgents = newAgents.map((agent) => {
+        if (agent.id === collision.agent.id) {
+          agent.life -= BULLET_DAMAGE;  // Decrease life by 25
+        }
+        return agent;
+      });
+      setAgents(newAgents)
       // Make him shake
       handleShakeItem(collision.agent.id, 'agents', agents, targets, setAgents, setTargets);
       // Remove agent if dead
@@ -51,25 +50,25 @@ export default function Bullet ({ id, initialPosition, target }) {
 
     else if (collision.kind === 'targets') {
       // Decrease life of the target
-      setTargets(prev => ({
-        ...prev,
-        targets: [...prev].map((target) => {
-          if (target.id === collision.target.id) {
-            target.life -= BULLET_DAMAGE;  // Decrease life by 25
-          }
-          return target;
-        })
-      }));
+      let newTargets = [...targets];
+      newTargets = newTargets.map((target) => {
+        if (target.id === collision.target.id) {
+          target.life -= BULLET_DAMAGE;  // Decrease life by 25
+        }
+        return target;
+      });
+      setTargets(newTargets)
       // Make him shake
       handleShakeItem(collision.target.id, 'targets', agents, targets, setAgents, setTargets);
     }
 
   };
 
-
+  // Remove bullet from the game
   const rmBullet = (id) => {
     removeBullet(id);
     ref.current = null;
+    setAnimationRunning(false);
   };
 
   useFrame(() => {
