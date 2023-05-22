@@ -21,7 +21,7 @@ const Game = () => {
     bullets, setBullets, 
     obstacles,
     animationQueue, setAnimationQueue,
-    animationCounter, setAnimationCounter,
+    animationRunning, setAnimationRunning,
     newGame,
   } = useContext(GameContext);
 
@@ -31,8 +31,8 @@ const Game = () => {
     const handleKeyPress = (event) => { 
 
       // Define arguments
-      const moveArgs = [turn, agents, targets, obstacles, setTurn, setAgents];
-      const attackArgs = [turn, agents, setTurn, setBullets];
+      const moveArgs = [turn, agents, targets, obstacles, setTurn, setAgents, setAnimationRunning];
+      const attackArgs = [turn, agents, setTurn, setBullets, setAnimationRunning];
 
       // Define actions
       const actions = {
@@ -43,9 +43,10 @@ const Game = () => {
         ' ': () => handleAttack(...attackArgs),
       }
 
-      // Add action to animation queue
+      // Add action to animation queue and start animation
       if (actions[event.key]) {
         animationQueue.push(actions[event.key]);
+        !animationRunning && setAnimationRunning(true);
       }
     };    
 
@@ -66,6 +67,18 @@ const Game = () => {
       setTimeout(() => newGame(), 10000);
     }
   }, [win, newGame]);
+
+  // GAME LOOP : animation queue
+  useEffect(() => {
+    if (animationRunning) {
+      animationQueue[0]();
+      animationQueue.shift();
+    }
+    if (!animationRunning && animationQueue.length > 0) {
+      setAnimationRunning(true);
+    }
+    
+  }, [animationQueue, animationRunning]);
   
 
   return (

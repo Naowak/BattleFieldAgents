@@ -99,7 +99,7 @@ const initGameState = () => {
     obstacles,
     bullets: [],
     animationQueue: [],
-    animationCounter: 0,
+    animationRunning: false,
   }
 
 };

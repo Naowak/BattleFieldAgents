@@ -17,7 +17,7 @@ export default function GameContextProvider (props) {
   const [bullets, setBullets] = useState(init.bullets);
   const [obstacles, setObstacles] = useState(init.obstacles);
   const [animationQueue, setAnimationQueue] = useState(init.animationQueue);
-  const [animationCounter, setAnimationCounter] = useState(init.animationCounter);
+  const [animationRunning, setAnimationRunning] = useState(init.animationRunning);
 
   // Set up functions
   const removeBullet = (bulletId) => {
@@ -70,7 +70,7 @@ export default function GameContextProvider (props) {
       bullets, setBullets,
       obstacles, setObstacles,
       animationQueue, setAnimationQueue,
-      animationCounter, setAnimationCounter,
+      animationRunning, setAnimationRunning,
       removeBullet,
       newGame,
     }}>
