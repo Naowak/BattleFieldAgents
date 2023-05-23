@@ -27,8 +27,6 @@ export default function Bullet ({ id, initialPosition, target }) {
   // Handle collision
   const handleCollision = (collision) => {
 
-    console.log('Collision: ', collision)
-
     if (collision.kind === 'agents') {
       // Decrease life of the agent
       let newAgents = [...agents];
@@ -78,7 +76,7 @@ export default function Bullet ({ id, initialPosition, target }) {
     if (!ref.current) {
       return;
     }
-    
+
     // Move the bullet and check for collisions
     const arrived = bulletMovement(ref, target);
     const collision = bulletCollision(ref, initialPosition, turn, agents, targets, obstacles) 

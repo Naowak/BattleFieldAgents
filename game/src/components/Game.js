@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect, useContext, useRef } from 'react';
 import { GameContext } from '../contexts/GameContext';
 import Board from './Board';
 import Agent from './Agent';
@@ -15,7 +15,7 @@ const Game = () => {
   // Get context
   const { 
     win,
-    turn, setTurn,
+    turn,
     agents, setAgents,
     targets,
     bullets, setBullets, 
@@ -26,10 +26,17 @@ const Game = () => {
     nextTurn,
   } = useContext(GameContext);
 
+  // Keyboard input waiting ref
+  const waitingInput = useRef(false);
+
   // CONTROLS WITH KEYBOARD
   useEffect(() => {
     
     const handleKeyPress = (event) => { 
+
+      // Prevent multiple inputs
+      if (waitingInput.current) return;
+      waitingInput.current = true;
 
       // Define arguments
       const moveArgs = [turn, agents, targets, obstacles, setAgents];
@@ -47,10 +54,12 @@ const Game = () => {
       // Add action to animation queue and start animation
       if (actions[event.key]) {
         setAnimationQueue([...animationQueue, actions[event.key]]);
-        !animationRunning && setAnimationRunning(true);
         nextTurn();
       }
-    };    
+
+      // Reset input
+      setTimeout(() => waitingInput.current = false, 500);
+    };
 
     // Add event listener for keypress
     window.addEventListener('keydown', handleKeyPress);
@@ -72,20 +81,13 @@ const Game = () => {
 
   // GAME LOOP : animation queue
   useEffect(() => {
-    // Start next animation, cancel it if it not valid
-    if (animationRunning) {
-      console.log('animationQueue', animationQueue.length)
-      const started = animationQueue[0]();
-      animationQueue.shift();
-      if (!started) {
-        setAnimationRunning(false);
-      }
-    }
-    // Start animation if not running
     if (!animationRunning && animationQueue.length > 0) {
-      setAnimationRunning(true);
+      let queue = [...animationQueue];
+      const animation = queue.shift();
+      const started = animation();
+      started && setAnimationRunning(true);
+      setAnimationQueue(queue)
     }
-    
   }, [animationQueue, animationRunning]);
   
 
