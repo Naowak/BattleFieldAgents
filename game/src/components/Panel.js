@@ -4,11 +4,11 @@ import {
   COLOR_BLUE, 
   COLOR_RED,
   COLOR_BG_PANEL,
-  COLOR_BG_ITEM,
+  COLOR_BUBBLE_AGENT,
   COLOR_FONT, 
 } from '../libs/constants';
 
-export default function Panel ({ }) {
+export default function Panel () {
 
   // Retrieve context
   const { turn, agents } = useContext(GameContext);
@@ -37,7 +37,7 @@ export default function Panel ({ }) {
       flexDirection: 'column',
       justifyContent: 'flex-start',
       alignItems: 'center',
-      backgroundColor: COLOR_BG_ITEM,
+      backgroundColor: COLOR_BUBBLE_AGENT,
       borderRadius: '5px',
       marginBottom: '20px',
     },

@@ -2,13 +2,17 @@ import React, { useRef, useContext } from 'react';
 import { GameContext } from '../contexts/GameContext';
 import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
-import { AGENT_RADIUS, AGENT_TRANSLATE_Y, AGENT_TOP_HEIGHT, AGENT_BUBBLE_TRANSLATE_Y } from '../libs/constants';
 import { agentMovement } from '../libs/movements';
 import { shake as shakeAgent } from '../libs/animations';
 import { 
+  AGENT_RADIUS,
+  AGENT_TRANSLATE_Y,
+  AGENT_TOP_HEIGHT,
+  AGENT_BUBBLE_TRANSLATE_Y,
   COLOR_BLUE, 
   COLOR_RED,
-  COLOR_BG_ITEM,
+  COLOR_BUBBLE_AGENT,
+  COLOR_BUBBLE_BORDER,
   COLOR_FONT,
 } from '../libs/constants';
 
@@ -50,8 +54,8 @@ const Agent = ({ initialPosition, team, life, position, shake, isCurrent }) => {
     height: 25,
     fontSize: 16, 
     borderRadius: 15,
-    border: '1px solid lightgrey',
-    backgroundColor: COLOR_BG_ITEM,
+    border: `1px solid ${COLOR_BUBBLE_BORDER}`,
+    backgroundColor: COLOR_BUBBLE_AGENT,
     color: COLOR_FONT, 
   }
 

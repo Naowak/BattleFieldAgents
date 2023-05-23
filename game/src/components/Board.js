@@ -3,19 +3,24 @@ import * as Three from 'three';
 import {
   BOARD_TRANSLATE_Y,
   BOARD_SIZE,
+  COLOR_CELL_1,
+  COLOR_CELL_2,
+  COLOR_CELL_BORDER,
 } from '../libs/constants';
 
 const BoardTile = ({ position }) => {
   const ref = useRef();
 
+  const color = (position[0] + position[1]) % 2 === 0 ? COLOR_CELL_1 : COLOR_CELL_2;
+
   return (
     <>
       <mesh ref={ref} position={[position[0], BOARD_TRANSLATE_Y, position[1]]}>
         <boxBufferGeometry attach='geometry' args={[1, 1, 1]} />
-        <meshLambertMaterial attach="material" color="lightgrey" />
+        <meshLambertMaterial attach="material" color={color} />
         <lineSegments>
           <edgesGeometry attach="geometry" args={[new Three.BoxGeometry(1, 1, 1)]} />
-          <lineBasicMaterial attach="material" color="darkgrey" linewidth={2} />
+          <lineBasicMaterial attach="material" color={COLOR_CELL_BORDER} linewidth={2} />
         </lineSegments>
       </mesh>
     </>

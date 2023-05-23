@@ -1,15 +1,16 @@
 import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
-import { TARGET_TRANSLATE_Y } from '../libs/constants';
 import { shake as ShakeTarget } from '../libs/animations';
 import { 
+  COLOR_BUBBLE_BORDER,
   COLOR_BLUE, 
   COLOR_RED, 
   TARGET_RADIUS, 
   TARGET_BUBBLE_TRANSLATE_Y, 
   COLOR_FONT, 
   TARGET_LIFE,
+  TARGET_TRANSLATE_Y
 } from '../libs/constants';
 
 const Target = ({ position, team, life, shake }) => {
@@ -45,7 +46,7 @@ const Target = ({ position, team, life, shake }) => {
     height: 25,
     fontSize: 16, 
     borderRadius: 10,
-    border: '1px solid #666666',
+    border: `1px solid ${COLOR_BUBBLE_BORDER}`,
     backgroundColor: team === "red" ? COLOR_RED : COLOR_BLUE,
     color: COLOR_FONT, 
   }
