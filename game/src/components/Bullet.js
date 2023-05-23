@@ -98,7 +98,7 @@ export default function Bullet ({ id, initialPosition, target }) {
   return (
     <mesh ref={ref} position={[initialPosition[0], BULLET_TRANSLATE_Y, initialPosition[1]]}>
       <sphereBufferGeometry attach='geometry' args={[BULLET_RADIUS, 32, 32]} />
-      <meshStandardMaterial attach='material' color='#707070' />
+      <meshStandardMaterial attach='material' color='#222222' />
     </mesh>
   );
 };

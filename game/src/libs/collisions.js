@@ -23,24 +23,27 @@ const bulletCollision = (ref, initialPosition, turn, agents, targets, obstacles)
     if (agentPosition.distanceTo(new THREE.Vector3(initialPosition[0], 0, initialPosition[1])) < BULLET_SPEED) {
       continue;
     }
-    // Check if the agent is close enough to the bullet
-    if (agentPosition.distanceTo(bulletPosition) < BULLET_SPEED) {
-      return { kind: 'agents', agent}
+    // Check if the bullet is in the square of the agent
+    if (agentPosition.x < bulletPosition.x + 0.5 && agentPosition.x > bulletPosition.x - 0.5 && 
+      agentPosition.z < bulletPosition.z + 0.5 && agentPosition.z > bulletPosition.z - 0.5) {
+      return { kind: 'argent', agent}
     }
   }
 
-  // Check for collision with targets
+  // Check for collision with targets (is in square)
   for (let target of targets) {
     const targetPosition = new THREE.Vector3(target.position[0], 0, target.position[1]);
-    if (targetPosition.distanceTo(bulletPosition) < BULLET_SPEED) {
+    if (targetPosition.x < bulletPosition.x + 0.5 && targetPosition.x > bulletPosition.x - 0.5 && 
+      targetPosition.z < bulletPosition.z + 0.5 && targetPosition.z > bulletPosition.z - 0.5) {
       return { kind: 'targets', target}
     }
   }
 
-  // Check for collision with obstacles
+  // Check for collision with obstacles (is in square)
   for (let obstacle of obstacles) {
     const obstaclePosition = new THREE.Vector3(obstacle.position[0], 0, obstacle.position[1]);
-    if (obstaclePosition.distanceTo(bulletPosition) < BULLET_SPEED) {
+    if (obstaclePosition.x < bulletPosition.x + 0.5 && obstaclePosition.x > bulletPosition.x - 0.5 && 
+      obstaclePosition.z < bulletPosition.z + 0.5 && obstaclePosition.z > bulletPosition.z - 0.5) {
       return { kind: 'obstacles', obstacle}
     }
   }
