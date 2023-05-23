@@ -35,17 +35,19 @@ export default function GameContextProvider (props) {
     setObstacles(init.obstacles);
   };
 
+  // Next action
+  const nextAction = () => {
+    let newTurn = { ...turn };
+    newTurn.actions += 1;
+    setTurn(newTurn);
+  }
+
   // Return the next turn
   const nextTurn = () => {
     let newTurn = { ...turn };
-    newTurn.actions += 1;
-
-    if (newTurn.actions % 4 === 0) { // if 4 actions completed, next turn (agent)
-      newTurn.actions = 0;
-      newTurn.current += 1;
-      newTurn.agentId = newTurn.order[newTurn.current % newTurn.order.length]
-    }
-
+    newTurn.actions = 0;
+    newTurn.current += 1;
+    newTurn.agentId = newTurn.order[newTurn.current % newTurn.order.length]
     setTurn(newTurn);
   };
 
@@ -83,6 +85,7 @@ export default function GameContextProvider (props) {
       obstacles, setObstacles,
       animationQueue, setAnimationQueue,
       animationRunning, setAnimationRunning,
+      nextAction,
       nextTurn,
       removeBullet,
       newGame,

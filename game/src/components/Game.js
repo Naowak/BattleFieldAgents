@@ -7,7 +7,7 @@ import Obstacle from './Obstacle';
 import Bullet from './Bullet';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
-import { COLOR_BG_GAME } from '../libs/constants';
+import { COLOR_BG_GAME, NB_ACTIONS_PER_TURN } from '../libs/constants';
 import { handleMove, handleAttack } from '../libs/actions';
 
 const Game = () => {
@@ -23,6 +23,7 @@ const Game = () => {
     animationQueue, setAnimationQueue,
     animationRunning, setAnimationRunning,
     newGame,
+    nextAction,
     nextTurn,
   } = useContext(GameContext);
 
@@ -33,9 +34,12 @@ const Game = () => {
   useEffect(() => {
     
     const handleKeyPress = (event) => { 
-
       // Prevent multiple inputs
       if (waitingInput.current) return;
+      // Prevent more than NB_ACTIONS_PER_TURN actions per turn
+      if (turn.actions === NB_ACTIONS_PER_TURN) return;
+    
+      // Prevent actions if animation is running
       waitingInput.current = true;
 
       // Define arguments
@@ -54,7 +58,7 @@ const Game = () => {
       // Add action to animation queue and start animation
       if (actions[event.key]) {
         setAnimationQueue([...animationQueue, actions[event.key]]);
-        nextTurn();
+        nextAction();
       }
 
       // Reset input
@@ -63,13 +67,19 @@ const Game = () => {
 
     // Add event listener for keypress
     window.addEventListener('keydown', handleKeyPress);
-  
     // Clean up when component unmounts
     return () => {
       window.removeEventListener('keydown', handleKeyPress);
     }
-  }, [turn, agents, targets, obstacles, setAgents, setBullets, animationQueue, setAnimationQueue, nextTurn]);
+  }, [turn, agents, targets, obstacles, setAgents, setBullets, animationQueue, setAnimationQueue, nextAction]);
   
+
+  // GAME LOOP : handle turns
+  useEffect(() => {
+    if (turn.actions === NB_ACTIONS_PER_TURN && !animationRunning && animationQueue.length === 0) {
+      nextTurn();
+    }
+  }, [turn, animationRunning, animationQueue, nextTurn]);
 
   // GAME LOOP : check win 
   useEffect(() => {

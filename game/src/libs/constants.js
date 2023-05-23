@@ -28,6 +28,7 @@ const NB_OBSTACLES = 50;
 
 // Others
 const NB_AGENTS_PER_TEAM = 5;
+const NB_ACTIONS_PER_TURN = 4;
 const PRECISION = 3;  // Number of decimal places for position coordinates
 const SPAWN_RANGE = 3;  // Range of cells around the target where the agents can spawn
 const COLOR_RED = '#aa4444';
@@ -62,6 +63,7 @@ export {
   NB_OBSTACLES,
   
   NB_AGENTS_PER_TEAM,
+  NB_ACTIONS_PER_TURN,
   PRECISION,
   SPAWN_RANGE,
   COLOR_RED,
