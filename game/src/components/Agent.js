@@ -4,7 +4,7 @@ import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import { AGENT_RADIUS, AGENT_TRANSLATE_Y, AGENT_TOP_HEIGHT, AGENT_BUBBLE_TRANSLATE_Y } from '../libs/constants';
 import { agentMovement } from '../libs/movements';
-import { shake as ShakeAgent } from '../libs/animations';
+import { shake as shakeAgent } from '../libs/animations';
 import { 
   COLOR_BLUE, 
   COLOR_RED,
@@ -35,7 +35,7 @@ const Agent = ({ initialPosition, team, life, position, shake, isCurrent }) => {
 
       // Shake the agent when it gets hit
       if (shake) {
-        ShakeAgent(ref);
+        shakeAgent(ref);
       }
       
     }

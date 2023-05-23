@@ -62,6 +62,7 @@ const bulletMovement = (ref, position) => {
   const targetPosition = new THREE.Vector3(position[0], BULLET_TRANSLATE_Y, position[1]);
   if (nextPosition.distanceTo(targetPosition) < BULLET_SPEED) {
     ref.current.position.set(targetPosition.x, targetPosition.y, targetPosition.z);
+    return true
   } else {
     // Update position with rounded coordinates
     ref.current.position.set(
@@ -69,6 +70,7 @@ const bulletMovement = (ref, position) => {
       +nextPosition.y.toFixed(PRECISION),
       +nextPosition.z.toFixed(PRECISION)
     );
+    return false
   }
 }
 

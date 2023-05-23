@@ -20,7 +20,7 @@ const Game = () => {
     targets,
     bullets, setBullets, 
     obstacles,
-    animationQueue,
+    animationQueue, setAnimationQueue,
     animationRunning, setAnimationRunning,
     newGame,
     nextTurn,
@@ -46,7 +46,7 @@ const Game = () => {
 
       // Add action to animation queue and start animation
       if (actions[event.key]) {
-        animationQueue.push(actions[event.key]);
+        setAnimationQueue([...animationQueue, actions[event.key]]);
         !animationRunning && setAnimationRunning(true);
         nextTurn();
       }
@@ -74,6 +74,7 @@ const Game = () => {
   useEffect(() => {
     // Start next animation, cancel it if it not valid
     if (animationRunning) {
+      console.log('animationQueue', animationQueue.length)
       const started = animationQueue[0]();
       animationQueue.shift();
       if (!started) {

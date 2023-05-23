@@ -27,6 +27,8 @@ export default function Bullet ({ id, initialPosition, target }) {
   // Handle collision
   const handleCollision = (collision) => {
 
+    console.log('Collision: ', collision)
+
     if (collision.kind === 'agents') {
       // Decrease life of the agent
       let newAgents = [...agents];
@@ -76,28 +78,23 @@ export default function Bullet ({ id, initialPosition, target }) {
     if (!ref.current) {
       return;
     }
-
-    const bulletPosition = [ref.current.position.x, ref.current.position.z];
-
-    // if bullet has already reached the target, stop the animation and remove the bullet
-    if (bulletPosition[0] === target[0] && bulletPosition[1] === target[1]) {
+    
+    // Move the bullet and check for collisions
+    const arrived = bulletMovement(ref, target);
+    const collision = bulletCollision(ref, initialPosition, turn, agents, targets, obstacles) 
+    
+    // If collision, handle it
+    if (collision) {
+      handleCollision(collision);
       rmBullet(id);
       return;
     }
-    else {
 
-      // Move the bullet and check for collisions
-      bulletMovement(ref, target);
-      const collision = bulletCollision(ref, initialPosition, turn, agents, targets, obstacles) 
-      
-      // If collision, handle it
-      if (collision) {
-        handleCollision(collision);
-        rmBullet(id);
-        return;
-      }
+    // If arrived, remove the bullet
+    if (arrived) {
+      rmBullet(id);
+      return;
     }
-
   });
 
   return (
