@@ -1,4 +1,5 @@
 import React, { useEffect, useContext, useRef } from 'react';
+import { Html } from '@react-three/drei';
 import { GameContext } from '../contexts/GameContext';
 import Board from './Board';
 import Agent from './Agent';
@@ -7,7 +8,7 @@ import Obstacle from './Obstacle';
 import Bullet from './Bullet';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
-import { COLOR_BG_GAME, NB_ACTIONS_PER_TURN } from '../libs/constants';
+import { COLOR_BG_GAME, COLOR_FONT, NB_ACTIONS_PER_TURN } from '../libs/constants';
 import { handleMove, handleAttack } from '../libs/actions';
 
 const Game = () => {
@@ -29,7 +30,6 @@ const Game = () => {
 
   // Refs
   const waitingInput = useRef(false);
-  const alertWinFlagRef = useRef(false);
 
   // CONTROLS WITH KEYBOARD
   useEffect(() => {
@@ -39,6 +39,8 @@ const Game = () => {
       if (waitingInput.current) return;
       // Prevent more than NB_ACTIONS_PER_TURN actions per turn
       if (turn.actions === NB_ACTIONS_PER_TURN) return;
+      // Prevent actions if game is over
+      if (win && event.key !== 'Enter') return;
     
       // Prevent actions if animation is running
       waitingInput.current = true;
@@ -54,6 +56,7 @@ const Game = () => {
         'ArrowLeft': () => handleMove('left', ...moveArgs),
         'ArrowRight': () => handleMove('right', ...moveArgs),
         ' ': () => handleAttack(...attackArgs),
+        'Enter': () => newGame(),
       }
 
       // Add action to animation queue and start animation
@@ -72,7 +75,7 @@ const Game = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyPress);
     }
-  }, [turn, agents, targets, obstacles, setAgents, setBullets, animationQueue, setAnimationQueue, nextAction]);
+  }, [turn, win, agents, targets, obstacles, setAgents, setBullets, animationQueue, setAnimationQueue, nextAction, newGame]);
   
 
   // GAME LOOP : handle turns
@@ -81,18 +84,6 @@ const Game = () => {
       nextTurn();
     }
   }, [turn, animationRunning, animationQueue, nextTurn]);
-
-  // GAME LOOP : check win 
-  useEffect(() => {
-    if (win && !alertWinFlagRef.current) {
-      alertWinFlagRef.current = true;
-      alert(`${win === 'red' ? 'Red' : 'Blue'} team wins!\nNew game in 10 seconds.`);
-      setTimeout(() => {
-        alertWinFlagRef.current = false;
-        newGame()
-    }, 10000);
-    }
-  }, [win, newGame]);
 
   // GAME LOOP : animation queue
   useEffect(() => {
@@ -150,8 +141,30 @@ const Game = () => {
           target={bullet.target}
         />
         ))}
+      {win ?
+        <Html position={[0, 0, 0]} center>
+          <div style={overPanelStyle}>
+            <p style={{margin: 0, padding: 0, fontWeight: 'bold', fontSize: 25}}>{win === 'red' ? 'Red' : 'Blue'} team won !</p>
+            <p style={{margin: 0, padding: 0, fontSize: 18}}>Press Enter to launch a new game !</p>
+          </div>
+        </Html>
+        : null
+      }
     </Canvas>
   );
 };
+
+const overPanelStyle = {
+  height: 200,
+  width: 400,
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  alignItems: 'center',
+  gap: 12,
+  color: COLOR_FONT,
+  borderRadius: 15,
+  backgroundColor: 'rgba(0, 0, 0, 0.6)',
+}
 
 export default Game;
