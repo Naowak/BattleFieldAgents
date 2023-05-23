@@ -8,7 +8,7 @@ import Bullet from './Bullet';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
 import { COLOR_BG_GAME } from '../libs/constants';
-import { handleMove, handleAttack, nextTurn } from '../libs/actions';
+import { handleMove, handleAttack } from '../libs/actions';
 
 const Game = () => {
 
@@ -68,7 +68,7 @@ const Game = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyPress);
     }
-  }, [turn, agents, targets, obstacles, setAgents, setBullets]);
+  }, [turn, agents, targets, obstacles, setAgents, setBullets, animationQueue, setAnimationQueue, nextTurn]);
   
 
   // GAME LOOP : check win 
@@ -88,7 +88,7 @@ const Game = () => {
       started && setAnimationRunning(true);
       setAnimationQueue(queue)
     }
-  }, [animationQueue, animationRunning]);
+  }, [animationQueue, animationRunning, setAnimationQueue, setAnimationRunning]);
   
 
   return (
