@@ -27,8 +27,9 @@ const Game = () => {
     nextTurn,
   } = useContext(GameContext);
 
-  // Keyboard input waiting ref
+  // Refs
   const waitingInput = useRef(false);
+  const alertWinFlagRef = useRef(false);
 
   // CONTROLS WITH KEYBOARD
   useEffect(() => {
@@ -83,9 +84,13 @@ const Game = () => {
 
   // GAME LOOP : check win 
   useEffect(() => {
-    if (win) {
+    if (win && !alertWinFlagRef.current) {
+      alertWinFlagRef.current = true;
       alert(`${win === 'red' ? 'Red' : 'Blue'} team wins!\nNew game in 10 seconds.`);
-      setTimeout(() => newGame(), 10000);
+      setTimeout(() => {
+        alertWinFlagRef.current = false;
+        newGame()
+    }, 10000);
     }
   }, [win, newGame]);
 

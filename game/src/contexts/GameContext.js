@@ -60,6 +60,7 @@ export default function GameContextProvider (props) {
     } else if (reds.every(agent => agent.life <= 0)) {
       setWin('blue');
     }
+    console.log('newAgents', newAgents)
     setAgents(newAgents);
   };
 

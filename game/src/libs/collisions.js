@@ -26,7 +26,7 @@ const bulletCollision = (ref, initialPosition, turn, agents, targets, obstacles)
     // Check if the bullet is in the square of the agent
     if (agentPosition.x < bulletPosition.x + 0.5 && agentPosition.x > bulletPosition.x - 0.5 && 
       agentPosition.z < bulletPosition.z + 0.5 && agentPosition.z > bulletPosition.z - 0.5) {
-      return { kind: 'argent', agent}
+      return { kind: 'agents', agent}
     }
   }
 
