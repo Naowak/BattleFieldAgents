@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
 import { GameContext } from '../contexts/GameContext';
+import { sightToText } from '../libs/sight';
 import { 
   COLOR_BLUE, 
   COLOR_RED,
@@ -8,23 +9,13 @@ import {
   COLOR_FONT, 
 } from '../libs/constants';
 
+
 export default function Panel () {
 
   // Retrieve context
   const { turn, agents } = useContext(GameContext);
   const currentAgent = agents.find(agent => agent.id === turn.agentId);
-  const currentSight = currentAgent.sight.map(o => {
-    if (o.kind === 'agents') {
-      return `Agent ${o.id} (${o.position[0]}, ${o.position[1]})`;
-    }
-    if (o.kind === 'targets') {
-      return `Target ${o.team} (${o.position[0]}, ${o.position[1]})`;
-    }
-    if (o.kind === 'obstacles') {
-      return `Obstacle ${o.id} (${o.position[0]}, ${o.position[1]})`;
-    }
-    return '???'
-  })
+  const currentSight = sightToText(currentAgent);
   
   // Define styles in a JavaScript object
   const styles = {
@@ -68,6 +59,7 @@ export default function Panel () {
     sightLine: {
       margin: 3,
       padding: 0,
+      whiteSpace: "pre-line"
     }
   }
 
@@ -88,7 +80,7 @@ export default function Panel () {
           <h4 style={styles.itemField}>Life: {currentAgent.life}</h4>
           <h4 style={styles.itemField}>Position: ({currentAgent.position[0]}, {currentAgent.position[1]})</h4>
           <h4 style={styles.itemField}>Sight:</h4>
-          {currentSight.map(o => <p style={styles.sightLine} key={o}>{o}</p>)}
+          <p style={styles.sightLine}>{currentSight}</p>
         </div>
       )}
     </div>

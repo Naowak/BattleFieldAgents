@@ -75,7 +75,7 @@ const Agent = ({ id, initialPosition, team, life, position, shake, isCurrent }) 
       {DEBUG &&
         <Html position={[0, 0, 0]} center>
           <div>
-            <p style={{margin: 0, padding: 0, fontWeight: 'bold'}}>{id}</p>
+            <p style={{margin: 0, padding: 0, fontWeight: 'bold'}}>{position[0]},{position[1]}</p>
           </div>
         </Html>
       }

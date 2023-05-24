@@ -35,13 +35,10 @@ const intersection = (start, end, position) => {
 // Compute all the objects visible by an agent
 const computeSight = (agent, agents, obstacles, targets) => {
   
-  // Define the field of view
+  // Define the field of view (manhattan distance)
   const sight = [];
   const visibleObjects = [...agents.filter(a => a.id !== agent.id), ...targets, ...obstacles].filter(
-    o => Math.sqrt(
-      (agent.position[0] - o.position[0]) * (agent.position[0] - o.position[0]) +
-      (agent.position[1] - o.position[1]) * (agent.position[1] - o.position[1])
-    ) < SIGHT_RANGE
+    o => Math.abs(agent.position[0] - o.position[0]) + Math.abs(agent.position[1] - o.position[1]) < SIGHT_RANGE
   )
 
   // For each visible object, check if it is hidden by another object, if not, add it to the sight
@@ -56,8 +53,23 @@ const computeSight = (agent, agents, obstacles, targets) => {
   return sight;
 };
 
+const sightToText = (agent) => {
+  let text = '';
+  const friends = agent.sight.filter(o => o.kind === 'agents' && o.team === agent.team);
+  const ennemies = agent.sight.filter(o => o.kind === 'agents' && o.team !== agent.team);
+  const friendTargets = agent.sight.filter(o => o.kind === 'targets' && o.team === agent.team);
+  const ennemyTargets = agent.sight.filter(o => o.kind === 'targets' && o.team !== agent.team);
+  const obstacles = agent.sight.filter(o => o.kind === 'obstacles');
+  text += `Friends: ${friends.map(f => `[${f.position[0]}, ${f.position[1]}]`).join(', ')}\n`;
+  text += `Ennemies: ${ennemies.map(e => `[${e.position[0]}, ${e.position[1]}]`).join(', ')}\n`;
+  text += `Friend targets: ${friendTargets.map(f => `[${f.position[0]}, ${f.position[1]}]`).join(', ')}\n`;
+  text += `Ennemy targets: ${ennemyTargets.map(e => `[${e.position[0]}, ${e.position[1]}]`).join(', ')}\n`;
+  text += `Obstacles: ${obstacles.map(o => `[${o.position[0]}, ${o.position[1]}]`).join(', ')}`;
+  return text;
+};
 
 
 export {
   computeSight,
+  sightToText,
 }
