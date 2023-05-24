@@ -14,10 +14,11 @@ import {
   COLOR_BUBBLE_AGENT,
   COLOR_BUBBLE_BORDER,
   COLOR_FONT,
+  DEBUG,
 } from '../libs/constants';
 
 
-const Agent = ({ initialPosition, team, life, position, shake, isCurrent }) => {
+const Agent = ({ id, initialPosition, team, life, position, shake, isCurrent }) => {
   
   const ref = useRef();  
   const { setAnimationRunning } = useContext(GameContext);
@@ -71,7 +72,13 @@ const Agent = ({ initialPosition, team, life, position, shake, isCurrent }) => {
           </div>
         </Html>
       )}
-      
+      {DEBUG &&
+        <Html position={[0, 0, 0]} center>
+          <div>
+            <p style={{margin: 0, padding: 0, fontWeight: 'bold'}}>{id}</p>
+          </div>
+        </Html>
+      }
     </mesh>
   );
 };

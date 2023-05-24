@@ -1,4 +1,5 @@
 import { BOARD_SIZE } from './constants';
+import { computeSight } from './sight';
 
 const handleMove = (direction, turn, agents, targets, obstacles, setAgents) => {
 
@@ -49,6 +50,7 @@ const handleMove = (direction, turn, agents, targets, obstacles, setAgents) => {
     // Update agent
     let newAgents = [...agents];
     newAgents[agentIndex].position = newPosition;
+    newAgents[agentIndex].sight = computeSight(newAgents[agentIndex], newAgents, targets, obstacles);
     setAgents(newAgents);
     return true;
   }

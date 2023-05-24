@@ -11,7 +11,7 @@ const isInBox = (position, boxPosition, boxRange) => {
 };
 
 // Check if a ray intersects a cell (position)
-const intersects = (start, end, position) => {
+const intersection = (start, end, position) => {
 
   // Compute the direction of the ray
   const STEP_SIZE = 0.1;
@@ -22,7 +22,7 @@ const intersects = (start, end, position) => {
 
   // Check if the ray intersects the object
   let pos = [...start];
-  while (!isInBox(pos, position, 0.5) && (pos[0] !== end[0] || pos[1] !== end[1])) {
+  while (!isInBox(pos, position, 0.5) && !isInBox(pos, end, 0.5)) {
     pos[0] += stepDirection[0];
     pos[1] += stepDirection[1];
   }
@@ -38,18 +38,16 @@ const computeSight = (agent, agents, obstacles, targets) => {
   // Define the field of view
   const sight = [];
   const visibleObjects = [...agents.filter(a => a.id !== agent.id), ...targets, ...obstacles].filter(
-    object => {
-      Math.sqrt(
-        (agent.position[0] - object.position[0]) * (agent.position[0] - object.position[0]) +
-        (agent.position[1] - object.position[1]) * (agent.position[1] - object.position[1])
-      ) < SIGHT_RANGE
-    }
+    o => Math.sqrt(
+      (agent.position[0] - o.position[0]) * (agent.position[0] - o.position[0]) +
+      (agent.position[1] - o.position[1]) * (agent.position[1] - o.position[1])
+    ) < SIGHT_RANGE
   )
 
   // For each visible object, check if it is hidden by another object, if not, add it to the sight
   visibleObjects.forEach(object => {
-    const hidders = otherObjects.filter(o => o.id !== object.id);
-    const intersects = hidders.some(h => intersects(agent.position, object.position, h.position));
+    const hidders = visibleObjects.filter(o => o.id !== object.id);
+    const intersects = hidders.some(h => intersection(agent.position, object.position, h.position));
     if (!intersects) {
       sight.push(object);
     }

@@ -32,7 +32,9 @@ const NB_ACTIONS_PER_TURN = 4;
 const PRECISION = 3;  // Number of decimal places for position coordinates
 const SPAWN_RANGE = 3;  // Range of cells around the target where the agents can spawn
 const SIGHT_RANGE = 5;  // Range of cells around the agent where it can see
+const DEBUG = true;
 
+// Colors
 const COLOR_CELL_1 = '#999999';
 const COLOR_CELL_2 = '#BBBBBB';
 const COLOR_CELL_BORDER = '#939393';
@@ -75,6 +77,7 @@ export {
   PRECISION,
   SPAWN_RANGE,
   SIGHT_RANGE,
+  DEBUG,
 
   COLOR_CELL_1,
   COLOR_CELL_2,

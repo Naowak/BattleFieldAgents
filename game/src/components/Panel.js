@@ -13,6 +13,18 @@ export default function Panel () {
   // Retrieve context
   const { turn, agents } = useContext(GameContext);
   const currentAgent = agents.find(agent => agent.id === turn.agentId);
+  const currentSight = currentAgent.sight.map(o => {
+    if (o.kind === 'agents') {
+      return `Agent ${o.id} (${o.position[0]}, ${o.position[1]})`;
+    }
+    if (o.kind === 'targets') {
+      return `Target ${o.team} (${o.position[0]}, ${o.position[1]})`;
+    }
+    if (o.kind === 'obstacles') {
+      return `Obstacle ${o.id} (${o.position[0]}, ${o.position[1]})`;
+    }
+    return '???'
+  })
   
   // Define styles in a JavaScript object
   const styles = {
@@ -53,6 +65,10 @@ export default function Panel () {
       textAlign: 'center',
       margin: 20,
     },
+    sightLine: {
+      margin: 3,
+      padding: 0,
+    }
   }
 
   return (
@@ -69,9 +85,10 @@ export default function Panel () {
         <div style={styles.item}>
           <h2 style={styles.itemTitle}>Agent Details</h2>
           <h4 style={styles.itemField}>ID: {currentAgent.id}</h4>
-          <h4 style={styles.itemField}>Team: {currentAgent.team}</h4>
           <h4 style={styles.itemField}>Life: {currentAgent.life}</h4>
           <h4 style={styles.itemField}>Position: ({currentAgent.position[0]}, {currentAgent.position[1]})</h4>
+          <h4 style={styles.itemField}>Sight:</h4>
+          {currentSight.map(o => <p style={styles.sightLine} key={o}>{o}</p>)}
         </div>
       )}
     </div>

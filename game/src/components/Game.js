@@ -112,6 +112,7 @@ const Game = () => {
         agent.life > 0 && (
           <Agent 
             key={agent.id} 
+            id={agent.id}
             initialPosition={agent.initialPosition} 
             position={agent.position} 
             team={agent.team} 
