@@ -2,39 +2,16 @@ import {
   SIGHT_RANGE,
 } from './constants.js';
 
-// Compute all the positions that are in the field of view of an agent
-const computeSight = (agent, agents, obstacles, targets) => {
-  const sight = [];
-  for (let x = -SIGHT_RANGE; x <= SIGHT_RANGE; x++) {
-    for (let y = -SIGHT_RANGE; y <= SIGHT_RANGE; y++) {
-      
-      // Define start and end of the ray
-      const start = agent.position;
-      const end = [agent.position[0] + x, agent.position[1] + y];
 
-      // Check for intersections with other agents and obstacles
-      const intersectsAgent = agents.some(otherAgent => intersects(start, end, otherAgent));
-      const intersectsObstacle = obstacles.some(obstacle => intersects(start, end, obstacle));
-      const intersectsTarget = targets.some(target => intersects(start, end, target));
-
-      // If the ray does not intersect any agents or obstacles or targets, add the end position of the ray to the field of view
-      if (!intersectsAgent && !intersectsObstacle && !intersectsTarget) {
-        sight.push(end);
-      }
-    }
-  }
-
-  // Store the updated field of view in the agent's state
-  agent.sight = sight;
+const isInBox = (position, boxPosition, boxRange) => {
+  return position[0] <= boxPosition[0] + boxRange
+  && position[0] >= boxPosition[0] - boxRange
+  && position[1] <= boxPosition[1] + boxRange
+  && position[1] >= boxPosition[1] - boxRange
 };
 
-// Check if a ray intersects an object
-const intersects = (start, end, object) => {
-
-  // Ignore if the object is at the end or at the start of the ray
-  if (isInObject(end, object) || isInObject(start, object)) {
-    return false;
-  }
+// Check if a ray intersects a cell (position)
+const intersects = (start, end, position) => {
 
   // Compute the direction of the ray
   const STEP_SIZE = 0.1;
@@ -45,22 +22,42 @@ const intersects = (start, end, object) => {
 
   // Check if the ray intersects the object
   let pos = [...start];
-  while (!isInObject(pos, object) && pos[0] !== end[0] && pos[1] !== end[1]) {
+  while (!isInBox(pos, position, 0.5) && (pos[0] !== end[0] || pos[1] !== end[1])) {
     pos[0] += stepDirection[0];
     pos[1] += stepDirection[1];
   }
-  if (isInObject(pos, object)) {
+  if (isInBox(pos, position, 0.5)) {
     return true;
   }
   return false;
 };
 
-const isInObject = (position, object) => {
-  return position[0] < object.position.x + 0.5 
-    && position[0] > object.position.x - 0.5 
-    && position[1] < object.position.y + 0.5 
-    && position[1] > object.position.y - 0.5
-}
+// Compute all the objects visible by an agent
+const computeSight = (agent, agents, obstacles, targets) => {
+  
+  // Define the field of view
+  const sight = [];
+  const visibleObjects = [...agents.filter(a => a.id !== agent.id), ...targets, ...obstacles].filter(
+    object => {
+      Math.sqrt(
+        (agent.position[0] - object.position[0]) * (agent.position[0] - object.position[0]) +
+        (agent.position[1] - object.position[1]) * (agent.position[1] - object.position[1])
+      ) < SIGHT_RANGE
+    }
+  )
+
+  // For each visible object, check if it is hidden by another object, if not, add it to the sight
+  visibleObjects.forEach(object => {
+    const hidders = otherObjects.filter(o => o.id !== object.id);
+    const intersects = hidders.some(h => intersects(agent.position, object.position, h.position));
+    if (!intersects) {
+      sight.push(object);
+    }
+  });
+
+  return sight;
+};
+
 
 
 export {
