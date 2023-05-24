@@ -1,6 +1,6 @@
 import React, { useState, createContext } from 'react'
 import { initGameState } from '../libs/initialization';
-
+import { computeSight } from '../libs/sight';
 
 export const GameContext = createContext()
 
@@ -35,6 +35,14 @@ export default function GameContextProvider (props) {
     setObstacles(init.obstacles);
   };
 
+  // Update Current Agent Sight
+  const updateSight = (newTurn) => {
+    let newAgents = [...agents];
+    const currentAgent = newAgents.find(agent => agent.id === newTurn.agentId);
+    currentAgent.sight = computeSight(currentAgent, agents, targets, obstacles);
+    setAgents(newAgents);
+  };
+
   // Next action
   const nextAction = () => {
     let newTurn = { ...turn };
@@ -49,7 +57,9 @@ export default function GameContextProvider (props) {
     newTurn.current += 1;
     newTurn.agentId = newTurn.order[newTurn.current % newTurn.order.length]
     setTurn(newTurn);
+    updateSight(newTurn);
   };
+
 
   // Update Agents and check win
   const updateAgents = (newAgents) => {
