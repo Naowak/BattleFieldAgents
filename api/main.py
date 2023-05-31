@@ -1,19 +1,21 @@
+import os
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import HumanMessage, SystemMessage
-import os
 from dotenv import load_dotenv
 
 # Load env variables
 load_dotenv()
 
 app = Flask(__name__)
+CORS(app)
 
 # Initialize the model
 model = ChatOpenAI(
-    client="openai",
+    client="openai", 
+    model_name="gpt-3.5-turbo", 
     temperature=0.7,
-    model_name="gpt-3.5-turbo",
     openai_api_key=os.getenv('OPENAI_API_KEY'),
 )
 
@@ -23,24 +25,26 @@ system_message = SystemMessage(
         "You are a soldier in a battle.\n"
         "You have to protect your camp, and destory the ennemy's camp.\n"
         "The only informations you have are your state, and what you see.\n"
-        "You must make one of the following actions :\n"
+        "You must make four of the following actions :\n"
         "- MOVE UP\n"
         "- MOVE LEFT\n"
         "- MOVE RIGHT\n"
         "- MOVE DOWN\n"
-        "- ATTACK (direction)\n"
-        "If you choose to attack, then you have to calculate a vector to indicate the direction you want to fire a bullet.\n"
+        "- ATTACK (position)\n"
+        "If you choose to attack, you have to indicate the position [x, y] where you want to fire.\n"
         "You must answer in the following format :\n"
         "\"TOUGHTS : [your thoughts]\n"
-        "ACTION : [the action you choose]\"\n"
+        "ACTIONS : [the action you choose]\"\n"
         "Do not add anything else."
     )
 )
 
-@app.route('/api/make_decision', methods=['POST'])
-def make_decision():
+@app.route('/play_one_turn', methods=['POST'])
+def play():
     # Get the state from the request
     state = request.json['state']
+    with open('state.txt', 'w') as f:
+        f.write(state)
 
     # Set the message for the model
     message = HumanMessage(content=state)
@@ -50,13 +54,17 @@ def make_decision():
 
     # Parse the response into thoughts and action
     split_response = [s for s in response.content.split('\n') if s != '']
-    thoughts = split_response[0].replace('TOUGHTS : ', '')
-    action = split_response[1].replace('ACTION : ', '')
+    thoughts = split_response[0].replace('TOUGHTS:\n', '')
+    actions = split_response[1].replace('ACTIONS:\n', '').split('\n')
+    actions = [a[3:] for a in actions]
+
+    with open('response.txt', 'w') as f:
+        f.write(response.content)
 
     # Return the thoughts and action
     return jsonify({
         'thoughts': thoughts,
-        'action': action
+        'actions': actions
     })
 
 if __name__ == '__main__':

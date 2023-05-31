@@ -56,7 +56,7 @@ const handleMove = (direction, turn, agents, targets, obstacles, setAgents) => {
   return false;
 };
 
-const handleAttack = (turn, agents, setBullets) => {
+const handleAttack = (position, turn, agents, setBullets) => {
 
   // Find the agent in the gameState
   const agentIndex = agents.findIndex((agent) => agent.id === turn.agentId);
@@ -66,9 +66,18 @@ const handleAttack = (turn, agents, setBullets) => {
     return false;
   }
 
-  // Create a bullet with a random target
-  let targetX = Math.floor(Math.random() * (2*BOARD_SIZE + 1)) - BOARD_SIZE; // Random cell in the range [-BOARD_SIZE, BOARD_SIZE]
-  let targetY = Math.floor(Math.random() * (2*BOARD_SIZE + 1)) - BOARD_SIZE; 
+  let targetX, targetY;
+
+  if (position) {
+    // Create a bullet with a random target
+    targetX = Math.floor(Math.random() * (2*BOARD_SIZE + 1)) - BOARD_SIZE; // Random cell in the range [-BOARD_SIZE, BOARD_SIZE]
+    targetY = Math.floor(Math.random() * (2*BOARD_SIZE + 1)) - BOARD_SIZE;
+  } else {
+    // Create a bullet with a target on the position
+    targetX = position[0];
+    targetY = position[1];
+  }
+    
 
   // Launch animation
   setBullets(prev => ([

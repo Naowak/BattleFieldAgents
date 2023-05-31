@@ -10,6 +10,7 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
 import { COLOR_BG_GAME, COLOR_FONT, NB_ACTIONS_PER_TURN } from '../libs/constants';
 import { handleMove, handleAttack } from '../libs/actions';
+import { sightToText } from '../libs/sight';
 
 const Game = () => {
 
@@ -55,7 +56,7 @@ const Game = () => {
         'ArrowDown': () => handleMove('down', ...moveArgs),
         'ArrowLeft': () => handleMove('left', ...moveArgs),
         'ArrowRight': () => handleMove('right', ...moveArgs),
-        ' ': () => handleAttack(...attackArgs),
+        ' ': () => handleAttack(null, ...attackArgs),
         'Enter': () => newGame(),
       }
 
@@ -77,6 +78,71 @@ const Game = () => {
     }
   }, [turn, win, agents, targets, obstacles, setAgents, setBullets, animationQueue, setAnimationQueue, nextAction, newGame]);
   
+
+  // AI : handle turns
+  useEffect(() => {
+
+    const handleAgents = async () => {
+
+      // Find current agent
+      const currentAgent = agents.find(agent => agent.id === turn.agentId);
+      const currentSight = sightToText(currentAgent);
+
+      // Send a POST request to the API with the current game state
+      const response = await fetch('http://localhost:5000/play_one_turn', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          state: `Position: ${currentAgent.position}\n${currentSight}`,
+        })
+      });
+    
+      // Parse the response JSON
+      const { toughts, actions } = await response.json();
+
+      console.log(toughts, actions);
+
+      actions.forEach(action => {
+
+        // Prevent more than NB_ACTIONS_PER_TURN actions per turn
+        if (turn.actions === NB_ACTIONS_PER_TURN) return;
+        // Prevent actions if game is over
+        if (win) return;
+
+        let animation = null;
+
+        if (action.slice(0, 4) === 'MOVE') {
+          const moveArgs = [turn, agents, targets, obstacles, setAgents];
+          const actions = {
+            'MOVE UP': () => handleMove('up', ...moveArgs),
+            'MOVE DOWN': () => handleMove('down', ...moveArgs),
+            'MOVE LEFT': () => handleMove('left', ...moveArgs),
+            'MOVE RIGHT': () => handleMove('right', ...moveArgs),
+          }
+          animation = actions[action];
+
+        } else if (action.slice(0, 6) === 'ATTACK') {
+          const attackArgs = [turn, agents, setBullets];
+          const position = action.slice(7, -1).split(',').map(Number);
+          animation = () => handleAttack(position, ...attackArgs);
+        }
+
+        // Add action to animation queue and start animation
+        if (animation) {
+          setAnimationQueue([...animationQueue, animation]);
+          nextAction();
+        }
+
+      });
+    };
+
+    if (turn.actions === 0 && !animationRunning && animationQueue.length === 0) {
+      handleAgents();
+    }
+
+  }, [turn, animationRunning, animationQueue, nextTurn, agents, targets, obstacles, setAgents, setBullets, setAnimationQueue, setAnimationRunning]);
 
   // GAME LOOP : handle turns
   useEffect(() => {

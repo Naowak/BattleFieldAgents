@@ -1,0 +1,7 @@
+THOUGHTS: I need to protect the camp and take down the enemy's camp. I need to be careful of the obstacles and make sure I don't hit any of my friends. 
+
+ACTIONS: 
+1. MOVE RIGHT to position [6, -6] to get a better view of the area. 
+2. ATTACK [4, -7], taking out an enemy and avoiding hitting any of my friends. 
+3. MOVE UP to position [6, -5] to get closer to the enemy's camp. 
+4. ATTACK [6, -4], hopefully taking out another enemy.

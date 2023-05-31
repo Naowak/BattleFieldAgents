@@ -1,0 +1,6 @@
+Position: 5,-6
+Friends: [7, -6]
+Ennemies: 
+Friend targets: 
+Ennemy targets: 
+Obstacles: [7, -7], [5, -2], [4, -7], [6, -4], [2, -6]
