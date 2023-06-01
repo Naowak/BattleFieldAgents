@@ -45,25 +45,49 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
       return null;
   }
 
+  
   // Find current agent
   const currentAgent = agents.find(agent => agent.id === turn.agentId);
   const currentSight = sightToText(currentAgent);
 
+  // Update agent thinking 
+  setAgents(agents.map(agent => {
+    if (agent.id === currentAgent.id) {
+      return {
+        ...agent,
+        thinking: true,
+      }
+    }
+    return agent;
+  }));
+  
   // Send a POST request to the API with the current game state
   const response = await fetch('http://localhost:5000/play_one_turn', {
     method: 'POST',
     headers: {
-    'Content-Type': 'application/json'
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify({ 
-    state: `Position: ${currentAgent.position}\n${currentSight}`,
+      state: `Position: ${currentAgent.position}\n${currentSight}`,
     })
   });
-
+  
   // Parse the response JSON
   const { toughts, actions } = await response.json();
 
+  // Update agent thinking 
+  setAgents(agents.map(agent => {
+    if (agent.id === currentAgent.id) {
+      return {
+        ...agent,
+        thinking: false,
+      }
+    }
+    return agent;
+  }));
+
   console.log(toughts, actions);
+  return null;
 
   actions.forEach(action => {
 

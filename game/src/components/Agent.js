@@ -18,7 +18,7 @@ import {
 } from '../libs/constants';
 
 
-const Agent = ({ id, initialPosition, team, life, position, shake, isCurrent }) => {
+const Agent = ({ id, initialPosition, team, life, position, shaking, thinking, isCurrent }) => {
   
   const ref = useRef();  
   const { setAnimationRunning } = useContext(GameContext);
@@ -39,7 +39,7 @@ const Agent = ({ id, initialPosition, team, life, position, shake, isCurrent }) 
       }
 
       // Shake the agent when it gets hit
-      if (shake) {
+      if (shaking) {
         shakeAgent(ref);
       }
       
@@ -51,7 +51,7 @@ const Agent = ({ id, initialPosition, team, life, position, shake, isCurrent }) 
     flexDirection: 'row', 
     alignItems: 'center',
     justifyContent: 'center',
-    width: 25,
+    width: thinking ? 80 : 25,
     height: 25,
     fontSize: 16, 
     borderRadius: 15,
@@ -65,10 +65,17 @@ const Agent = ({ id, initialPosition, team, life, position, shake, isCurrent }) 
       <capsuleBufferGeometry attach='geometry' args={[AGENT_RADIUS, AGENT_RADIUS, 32, 32]} />
       <meshStandardMaterial attach='material' color={team === 'red' ? COLOR_RED : COLOR_BLUE} />
 
-      {isCurrent && (
+      {isCurrent && !thinking && (
         <Html position={[0, AGENT_BUBBLE_TRANSLATE_Y, 0]} center>
           <div style={bubbleStyles}>
             <p style={{margin: 0, padding: 0, fontWeight: 'bold'}}>!</p>
+          </div>
+        </Html>
+      )}
+      {isCurrent && thinking && (
+        <Html position={[0, AGENT_BUBBLE_TRANSLATE_Y, 0]} center>
+          <div style={bubbleStyles}>
+            <p style={{margin: 0, padding: 0, fontWeight: 'bold'}}>Thinking...</p>
           </div>
         </Html>
       )}

@@ -36,7 +36,7 @@ const initGameState = () => {
       position,
       team: ['red', 'blue'][i],
       life: TARGET_LIFE,
-      shake: false,
+      shaking: false,
     });
   }
 
@@ -60,7 +60,8 @@ const initGameState = () => {
         sight: [],
         team: ['red', 'blue'][i],
         life: AGENT_LIFE,
-        shake: false,
+        shaking: false,
+        thinking: false,
       });
       selectedPositions.push(position);
     }

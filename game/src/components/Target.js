@@ -13,13 +13,13 @@ import {
   TARGET_TRANSLATE_Y
 } from '../libs/constants';
 
-const Target = ({ position, team, life, shake }) => {
+const Target = ({ position, team, life, shaking }) => {
   const ref = useRef();  
 
   useFrame(() => {
     if (ref.current) {
-      if (shake) {
-        // re-position before shake, otherwise the target will move away
+      if (shaking) {
+        // re-position before shaking, otherwise the target will move away
         ref.current.position.x = position[0];
         ref.current.position.z = position[1];
         ShakeTarget(ref);

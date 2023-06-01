@@ -47,7 +47,7 @@ const Game = () => {
     return () => {
       window.removeEventListener('keydown', func);
     }
-  }, [turn, animationRunning, animationQueue, nextTurn, agents, targets, obstacles, setAgents, setBullets, setAnimationQueue, setAnimationRunning]);
+  }, [turn, animationRunning, animationQueue, nextTurn, agents, targets, obstacles, setAgents, setBullets, setAnimationQueue, setAnimationRunning, nextAction, win]);
 
   // Game loop logic, handle turns
   useEffect(() => {
@@ -88,7 +88,8 @@ const Game = () => {
             position={agent.position} 
             team={agent.team} 
             life={agent.life} 
-            shake={agent.shake}
+            shaking={agent.shaking}
+            thinking={agent.thinking}
             isCurrent={agent.id === turn.agentId}
           />
         )
@@ -100,7 +101,7 @@ const Game = () => {
             position={target.position} 
             team={target.team} 
             life={target.life}
-            shake={target.shake}
+            shaking={target.shaking}
           />
         )
       ))}

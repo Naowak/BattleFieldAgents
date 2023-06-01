@@ -18,13 +18,13 @@ const handleShakeItem = (itemId, kind, agents, targets, setAgents, setTargets) =
   // If the item is found
   if (itemIndex !== -1) {
     let newItems = [...items];
-    newItems[itemIndex].shake = true;
+    newItems[itemIndex].shaking = true;
     setItems(newItems);
 
-    // Reset shake state after 500ms
+    // Reset shaking state after 500ms
     setTimeout(() => {
       newItems = [...items];
-      newItems[itemIndex].shake = false;
+      newItems[itemIndex].shaking = false;
       setItems(newItems);
     }, 500);
   }
