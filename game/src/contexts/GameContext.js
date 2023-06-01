@@ -45,9 +45,7 @@ export default function GameContextProvider (props) {
 
   // Next action
   const nextAction = () => {
-    let newTurn = { ...turn };
-    newTurn.actions += 1;
-    setTurn(newTurn);
+    setTurn(prev => ({ ...prev, actions: prev.actions + 1 }));
   }
 
   // Return the next turn

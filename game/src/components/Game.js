@@ -63,7 +63,7 @@ const Game = () => {
       const animation = queue.shift();
       const started = animation();
       started && setAnimationRunning(true);
-      setAnimationQueue(queue)
+      setAnimationQueue(queue);
     }
   }, [animationQueue, animationRunning, setAnimationQueue, setAnimationRunning]);
   

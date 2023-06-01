@@ -2,6 +2,8 @@ import { NB_ACTIONS_PER_TURN } from './constants';
 import { handleMove, handleAttack } from './actions';
 import { sightToText } from './sight';
 
+
+// Function called when a key [up, down, left, right, space, enter] is pressed
 const playKeyboard = (event, waitingInput, turn, win, agents, targets, obstacles, setAgents, setBullets, animationQueue, setAnimationQueue, nextAction, newGame) => { 
   // Prevent multiple inputs
   if (waitingInput.current) return;
@@ -38,6 +40,9 @@ const playKeyboard = (event, waitingInput, turn, win, agents, targets, obstacles
 };
 
 
+
+
+// Function called when key "A" is pressed, to play the AI
 const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBullets, animationRunning, animationQueue, setAnimationQueue, nextAction) => {
 
   // Prevent more than NB_ACTIONS_PER_TURN actions per turn
@@ -87,9 +92,9 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
   }));
 
   console.log(thoughts, actions);
-  return null;
 
-  actions.forEach(action => {
+
+  actions.forEach((action, index) => {
 
     // Prevent more than NB_ACTIONS_PER_TURN actions per turn
     if (turn.actions === NB_ACTIONS_PER_TURN) return;
@@ -99,24 +104,24 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
     let animation = null;
 
     if (action.slice(0, 4) === 'MOVE') {
-    const moveArgs = [turn, agents, targets, obstacles, setAgents];
-    const actions = {
-      'MOVE UP': () => handleMove('up', ...moveArgs),
-      'MOVE DOWN': () => handleMove('down', ...moveArgs),
-      'MOVE LEFT': () => handleMove('left', ...moveArgs),
-      'MOVE RIGHT': () => handleMove('right', ...moveArgs),
-    }
-    animation = actions[action];
+      const moveArgs = [turn, agents, targets, obstacles, setAgents];
+      const actions = {
+        'MOVE UP': () => handleMove('up', ...moveArgs),
+        'MOVE DOWN': () => handleMove('down', ...moveArgs),
+        'MOVE LEFT': () => handleMove('left', ...moveArgs),
+        'MOVE RIGHT': () => handleMove('right', ...moveArgs),
+      }
+      animation = actions[action];
 
     } else if (action.slice(0, 6) === 'ATTACK') {
       const attackArgs = [turn, agents, setBullets];
-      const position = action.slice(7, -1).split(',').map(Number);
+      const position = action.slice(8, -1).split(', ').map(Number);
       animation = () => handleAttack(position, ...attackArgs);
     }
 
     // Add action to animation queue and start animation
     if (animation) {
-      setAnimationQueue([...animationQueue, animation]);
+      setTimeout(() => setAnimationQueue([...animationQueue, animation]), 1000*index);
       nextAction();
     }
 
