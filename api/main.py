@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, abort
 from flask_cors import CORS
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import HumanMessage, SystemMessage
@@ -14,7 +14,7 @@ CORS(app)
 # Initialize the model
 model = ChatOpenAI(
     client="openai", 
-    model_name="gpt-3.5-turbo", 
+    model="gpt-3.5-turbo", 
     temperature=0.7,
     openai_api_key=os.getenv('OPENAI_API_KEY'),
 )
@@ -89,16 +89,15 @@ def read_answer(response):
 
 @app.route('/play_one_turn', methods=['POST'])
 def play():
-    # Get the state from the request
-    state = request.json['state']
 
-    # Set the message for the model
-    message = HumanMessage(content=state)
+    # Get the state from the request
+    if not (request.json and 'state' in request.json):
+        abort(400, 'Missing state parameter')
 
     # Get the response from the model
+    message = HumanMessage(content=request.json['state'])
     response = model([system_message, message])
     thoughts, actions = read_answer(response)
-
 
     # Return the thoughts and action
     return jsonify({
