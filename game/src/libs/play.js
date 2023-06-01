@@ -73,7 +73,7 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
   });
   
   // Parse the response JSON
-  const { toughts, actions } = await response.json();
+  const { thoughts, actions } = await response.json();
 
   // Update agent thinking 
   setAgents(agents.map(agent => {
@@ -86,7 +86,7 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
     return agent;
   }));
 
-  console.log(toughts, actions);
+  console.log(thoughts, actions);
   return null;
 
   actions.forEach(action => {
