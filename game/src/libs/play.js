@@ -68,7 +68,7 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({ 
-      state: `Position: ${currentAgent.position}\n${currentSight}`,
+      state: `Position: [${currentAgent.position[0]}, ${currentAgent.position[1]}]\n${currentSight}`,
     })
   });
   

@@ -51,7 +51,7 @@ const Agent = ({ id, initialPosition, team, life, position, shaking, thinking, i
     flexDirection: 'row', 
     alignItems: 'center',
     justifyContent: 'center',
-    width: thinking ? 80 : 25,
+    width: thinking ? 110 : 25,
     height: 25,
     fontSize: 16, 
     borderRadius: 15,
@@ -75,7 +75,8 @@ const Agent = ({ id, initialPosition, team, life, position, shaking, thinking, i
       {isCurrent && thinking && (
         <Html position={[0, AGENT_BUBBLE_TRANSLATE_Y, 0]} center>
           <div style={bubbleStyles}>
-            <p style={{margin: 0, padding: 0, fontWeight: 'bold'}}>Thinking...</p>
+            <div className="spinner"/>
+            <p style={{margin: 0, padding: 0, marginLeft: 5}}>Thinking...</p>
           </div>
         </Html>
       )}

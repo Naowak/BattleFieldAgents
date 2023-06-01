@@ -1,3 +1,10 @@
-THOUGHTS: I need to be careful while approaching the enemy's camp. I should avoid the obstacles and make sure my friends are safe.
+THOUGHTS: 
 
-ACTIONS: MOVE LEFT, MOVE LEFT, MOVE DOWN, ATTACK [7,10]
+I need to protect my camp by eliminating the enemy camp. My friend is nearby, but I must watch out for the obstacles. The enemy is positioned at [7, 2], and there are no other enemy targets in sight. I need to move closer to the enemy camp and find a clear shot to attack.
+
+ACTIONS: 
+
+MOVE RIGHT
+MOVE RIGHT
+MOVE UP
+ATTACK [7, 2]
