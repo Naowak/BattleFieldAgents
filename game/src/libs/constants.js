@@ -19,12 +19,12 @@ const TARGET_RADIUS = 0.3;
 const TARGET_BUBBLE_TRANSLATE_Y = 1;
 
 // Board
-const BOARD_SIZE = 10;
+const BOARD_SIZE = 6;
 const BOARD_TRANSLATE_Y = -1;
 
 // Obstacles
 const OBSTACLE_TRANSLATE_Y = 0;
-const NB_OBSTACLES = 50;
+const NB_OBSTACLES = 15;
 
 // Others
 const NB_AGENTS_PER_TEAM = 5;

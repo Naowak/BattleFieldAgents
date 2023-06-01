@@ -70,7 +70,7 @@ const Game = () => {
 
   return (
     <Canvas 
-      camera={{ position: [0, 14, 14] }} 
+      camera={{ position: [0, 10, 8] }} 
       style={{ background: COLOR_BG_GAME, flex: 3}}
     >
       <OrbitControls target={[0, 0, 0]} />
