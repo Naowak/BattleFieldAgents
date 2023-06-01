@@ -9,8 +9,7 @@ import Bullet from './Bullet';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
 import { COLOR_BG_GAME, COLOR_FONT, NB_ACTIONS_PER_TURN } from '../libs/constants';
-import { handleMove, handleAttack } from '../libs/actions';
-import { sightToText } from '../libs/sight';
+import { playAI, playKeyboard } from '../libs/play';
 
 const Game = () => {
 
@@ -32,126 +31,32 @@ const Game = () => {
   // Refs
   const waitingInput = useRef(false);
 
-  // CONTROLS WITH KEYBOARD
+  // Play with keyboard, each action one by one
   useEffect(() => {
-    
-    const handleKeyPress = (event) => { 
-      // Prevent multiple inputs
-      if (waitingInput.current) return;
-      // Prevent more than NB_ACTIONS_PER_TURN actions per turn
-      if (turn.actions === NB_ACTIONS_PER_TURN) return;
-      // Prevent actions if game is over
-      if (win && event.key !== 'Enter') return;
-    
-      // Prevent actions if animation is running
-      waitingInput.current = true;
-
-      // Define arguments
-      const moveArgs = [turn, agents, targets, obstacles, setAgents];
-      const attackArgs = [turn, agents, setBullets];
-
-      // Define actions
-      const actions = {
-        'ArrowUp': () => handleMove('up', ...moveArgs),
-        'ArrowDown': () => handleMove('down', ...moveArgs),
-        'ArrowLeft': () => handleMove('left', ...moveArgs),
-        'ArrowRight': () => handleMove('right', ...moveArgs),
-        ' ': () => handleAttack(null, ...attackArgs),
-        'Enter': () => newGame(),
-      }
-
-      // Add action to animation queue and start animation
-      if (actions[event.key]) {
-        setAnimationQueue([...animationQueue, actions[event.key]]);
-        nextAction();
-      }
-
-      // Reset input
-      setTimeout(() => waitingInput.current = false, 500);
-    };
-
-    // Add event listener for keypress
-    window.addEventListener('keydown', handleKeyPress);
-    // Clean up when component unmounts
+    const func = (event) => playKeyboard(event, waitingInput, turn, win, agents, targets, obstacles, setAgents, setBullets, animationQueue, setAnimationQueue, nextAction, newGame);
+    window.addEventListener('keydown', func);
     return () => {
-      window.removeEventListener('keydown', handleKeyPress);
+      window.removeEventListener('keydown', func);
     }
   }, [turn, win, agents, targets, obstacles, setAgents, setBullets, animationQueue, setAnimationQueue, nextAction, newGame]);
-  
 
-  // AI : handle turns
+  // Play with AI, each turn at once
   useEffect(() => {
-
-    const handleAgents = async () => {
-
-      // Find current agent
-      const currentAgent = agents.find(agent => agent.id === turn.agentId);
-      const currentSight = sightToText(currentAgent);
-
-      // Send a POST request to the API with the current game state
-      const response = await fetch('http://localhost:5000/play_one_turn', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ 
-          state: `Position: ${currentAgent.position}\n${currentSight}`,
-        })
-      });
-    
-      // Parse the response JSON
-      const { toughts, actions } = await response.json();
-
-      console.log(toughts, actions);
-
-      actions.forEach(action => {
-
-        // Prevent more than NB_ACTIONS_PER_TURN actions per turn
-        if (turn.actions === NB_ACTIONS_PER_TURN) return;
-        // Prevent actions if game is over
-        if (win) return;
-
-        let animation = null;
-
-        if (action.slice(0, 4) === 'MOVE') {
-          const moveArgs = [turn, agents, targets, obstacles, setAgents];
-          const actions = {
-            'MOVE UP': () => handleMove('up', ...moveArgs),
-            'MOVE DOWN': () => handleMove('down', ...moveArgs),
-            'MOVE LEFT': () => handleMove('left', ...moveArgs),
-            'MOVE RIGHT': () => handleMove('right', ...moveArgs),
-          }
-          animation = actions[action];
-
-        } else if (action.slice(0, 6) === 'ATTACK') {
-          const attackArgs = [turn, agents, setBullets];
-          const position = action.slice(7, -1).split(',').map(Number);
-          animation = () => handleAttack(position, ...attackArgs);
-        }
-
-        // Add action to animation queue and start animation
-        if (animation) {
-          setAnimationQueue([...animationQueue, animation]);
-          nextAction();
-        }
-
-      });
-    };
-
-    if (turn.actions === 0 && !animationRunning && animationQueue.length === 0) {
-      handleAgents();
+    const func = (event) => event.key === 'a' && playAI(turn, win, agents, targets, obstacles, setAgents, setBullets, animationRunning, animationQueue, setAnimationQueue, nextAction);
+    window.addEventListener('keydown', func);
+    return () => {
+      window.removeEventListener('keydown', func);
     }
-
   }, [turn, animationRunning, animationQueue, nextTurn, agents, targets, obstacles, setAgents, setBullets, setAnimationQueue, setAnimationRunning]);
 
-  // GAME LOOP : handle turns
+  // Game loop logic, handle turns
   useEffect(() => {
     if (turn.actions === NB_ACTIONS_PER_TURN && !animationRunning && animationQueue.length === 0) {
       nextTurn();
     }
   }, [turn, animationRunning, animationQueue, nextTurn]);
 
-  // GAME LOOP : animation queue
+  // GGame loop logic, handle animations
   useEffect(() => {
     if (!animationRunning && animationQueue.length > 0) {
       let queue = [...animationQueue];
