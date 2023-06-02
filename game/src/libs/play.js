@@ -1,6 +1,5 @@
-import { NB_ACTIONS_PER_TURN } from './constants';
+import { NB_ACTIONS_PER_TURN, BOARD_SIZE } from './constants';
 import { handleMove, handleAttack } from './actions';
-import { sightToText } from './sight';
 
 
 // Function called when a key [up, down, left, right, space, enter] is pressed
@@ -41,6 +40,29 @@ const playKeyboard = (event, waitingInput, turn, win, agents, targets, obstacles
 
 // Function that converts an agent's sight and infos to a state
 const getAgentState = (agent) => {
+
+  // Compute which movement are possible
+  const adjacantCells = [
+    {key: 'MOVE UP', pos: [agent.position[0], agent.position[1] - 1]},
+    {key: 'MOVE DOWN', pos: [agent.position[0], agent.position[1] + 1]}, 
+    {key: 'MOVE RIGHT', pos: [agent.position[0] - 1, agent.position[1]]}, 
+    {key: 'MOVE LEFT', pos: [agent.position[0] + 1, agent.position[1]]}, 
+  ];
+  const possibleMoves = []
+  adjacantCells.forEach(cell => {
+    const free = agent.sight.find(o => o.position[0] === cell.pos[0] && o.position[1] === cell.pos[1]) === undefined;
+    const inBoard = cell.pos[0] >= -BOARD_SIZE && cell.pos[0] <= BOARD_SIZE && cell.pos[1] >= -BOARD_SIZE && cell.pos[1] <= BOARD_SIZE;
+    if (free && inBoard) possibleMoves.push(cell.key)
+  });
+
+  // Compute which cell he can attack
+  const possibleAttacks = agent.sight.filter(o => ((o.kind === 'agents' || o.kind === 'targets') && o.team !== agent.team)).map(
+    o => `ATTACK [${o.position[0]}, ${o.position[1]}]`
+  );
+
+  console.log(possibleMoves, possibleAttacks)
+
+  // Create state
   const state = {}
   state['Your Position'] = agent.position;
   state['Your Health'] = agent.health;
@@ -57,6 +79,9 @@ const getAgentState = (agent) => {
     o => ({ position: o.position, health: o.health })
   )
   state['Obstacles'] = agent.sight.filter(o => o.kind === 'obstacles').map(o => o.position);
+  state['Turn'] = agent.turn.current;
+  state['Actions Left'] = NB_ACTIONS_PER_TURN - agent.turn.actions;
+  state['Possible Actions'] = possibleMoves + possibleAttacks;
   return state;
 }
 
@@ -65,13 +90,15 @@ const getAgentState = (agent) => {
 const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBullets, animationRunning, animationQueue, setAnimationQueue, nextAction) => {
 
   // Prevent more than NB_ACTIONS_PER_TURN actions per turn
-  if (turn.actions !== 0 || animationRunning || animationQueue.length !== 0) {
+  if (turn.actions === NB_ACTIONS_PER_TURN || animationRunning || animationQueue.length !== 0 || win) {
       return null;
   }
 
-  
   // Find current agent
   const currentAgent = agents.find(agent => agent.id === turn.agentId);
+  console.log(getAgentState(currentAgent))
+
+  return
 
   // Update agent thinking 
   setAgents(agents.map(agent => {
@@ -96,7 +123,7 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
   });
   
   // Parse the response JSON
-  const { thoughts, actions } = await response.json();
+  const { thoughts, action } = await response.json();
 
   // Update agent thinking 
   setAgents(agents.map(agent => {
@@ -109,41 +136,31 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
     return agent;
   }));
 
-  console.log(thoughts, actions);
+  console.log(thoughts, action);
 
-
-  actions.forEach((action, index) => {
-
-    // Prevent more than NB_ACTIONS_PER_TURN actions per turn
-    if (turn.actions === NB_ACTIONS_PER_TURN) return;
-    // Prevent actions if game is over
-    if (win) return;
-
-    let animation = null;
-
-    if (action.slice(0, 4) === 'MOVE') {
-      const moveArgs = [turn, agents, targets, obstacles, setAgents];
-      const actions = {
-        'MOVE UP': () => handleMove('up', ...moveArgs),
-        'MOVE DOWN': () => handleMove('down', ...moveArgs),
-        'MOVE LEFT': () => handleMove('left', ...moveArgs),
-        'MOVE RIGHT': () => handleMove('right', ...moveArgs),
-      }
-      animation = actions[action];
-
-    } else if (action.slice(0, 6) === 'ATTACK') {
-      const attackArgs = [turn, agents, setBullets];
-      const position = action.slice(8, -1).split(', ').map(Number);
-      animation = () => handleAttack(position, ...attackArgs);
+  // Select corresponding action
+  let animation = null;
+  if (action.slice(0, 4) === 'MOVE') {
+    const moveArgs = [turn, agents, targets, obstacles, setAgents];
+    const actions = {
+      'MOVE UP': () => handleMove('up', ...moveArgs),
+      'MOVE DOWN': () => handleMove('down', ...moveArgs),
+      'MOVE LEFT': () => handleMove('left', ...moveArgs),
+      'MOVE RIGHT': () => handleMove('right', ...moveArgs),
     }
+    animation = actions[action];
+  } else if (action.slice(0, 6) === 'ATTACK') {
+    const attackArgs = [turn, agents, setBullets];
+    const position = action.slice(8, -1).split(', ').map(Number);
+    animation = () => handleAttack(position, ...attackArgs);
+  }
 
-    // Add action to animation queue and start animation
-    if (animation) {
-      setTimeout(() => setAnimationQueue([...animationQueue, animation]), 1000*index);
-      nextAction();
-    }
+  // Add action to animation queue and start animation
+  if (animation) {
+    setAnimationQueue([...animationQueue, animation]);
+    nextAction();
+  }
 
-  });
 };
 
 export {
