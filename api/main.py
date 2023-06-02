@@ -52,13 +52,14 @@ def play():
     if not (request.json and 'state' in request.json):
         abort(400, 'Missing state parameter')
     
-    with open('state.txt', 'w') as f:
-        f.write(str(request.json['state']))
 
     # Get the response from the model
     message = HumanMessage(content=str(request.json['state']))
     response = model([system_message, message])
     thoughts, action = read_answer(response)
+
+    with open('state.txt', 'w') as f:
+        f.write(thoughts + '\n' + action)
 
     # Return the thoughts and action
     return jsonify({

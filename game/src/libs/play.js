@@ -70,7 +70,7 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({ 
-      state: getAgentState(currentAgent),
+      state: getAgentState(currentAgent, turn),
     })
   });
   
@@ -111,8 +111,8 @@ export {
   playAI,
 }
 
-// FUNCTIONS
 
+// FUNCTIONS
 const getPossibleMoves = (agent) => {
   const adjacantCells = [
     [agent.position[0], agent.position[1] - 1],
@@ -161,7 +161,6 @@ const getAgentState = (agent, turn) => {
     o => ({ position: o.position, health: o.life })
   )
   state['Obstacles'] = agent.sight.filter(o => o.kind === 'obstacles').map(o => o.position);
-  state['Turn'] = turn.current;
   state['Actions Left'] = NB_ACTIONS_PER_TURN - turn.actions;
   state['Possible Actions'] = [...possibleMoves, ...possibleAttacks];
   return state;
@@ -169,7 +168,7 @@ const getAgentState = (agent, turn) => {
 
 const readAIAction = (action, turn, agents, targets, obstacles, setAgents, setBullets) => {
 
-  const currAgent = agents.find(o => o.id === turn.currentAgent);
+  const currAgent = agents.find(o => o.id === turn.agentId);
 
   if (action.slice(0, 4) === 'MOVE') {
 
