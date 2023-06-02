@@ -15,8 +15,8 @@ CORS(app)
 # Initialize the model
 model = ChatOpenAI(
     client="openai", 
-    model="gpt-3.5-turbo", 
-    #model="gpt-4", 
+    #model="gpt-3.5-turbo", 
+    model="gpt-4", 
     temperature=0.7,
     openai_api_key=os.getenv('OPENAI_API_KEY'),
 )
@@ -57,9 +57,6 @@ def play():
     message = HumanMessage(content=str(request.json['state']))
     response = model([system_message, message])
     thoughts, action = read_answer(response)
-
-    with open('state.txt', 'w') as f:
-        f.write(thoughts + '\n' + action)
 
     # Return the thoughts and action
     return jsonify({

@@ -1,2 +1,0 @@
-The enemy is far away and there are obstacles in my view. I should move to a better position to attack. I should also try to protect myself by staying close to my friends and avoiding obstacles. 
-MOVE [5, 0]

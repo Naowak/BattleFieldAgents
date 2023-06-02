@@ -14,12 +14,12 @@ Possible Actions: you have to choose one of them
 You must follow the following criteria:
 1/ You must act as a strategic warlord and make the best decision for the mission.
 2/ Please be very clear about your concerns and the reasons for your actions.
-3/ The next action must be on the list of possible actions. Any action not included will be punished. Do not choose more than one action. Don't mention anything more than the chosen action. 
+3/ The next action must be in the list of possible actions. Any action not included will be punished. Do not choose more than one action. Don't mention anything more than the chosen action. 
 
 You should only respond in the format as described below:
 RESPONSE FORMAT:
 THOUGHTS: Based on the information I listed above, in 50 words, do reasoning about what the next task should be.
-ACTION: The only one action you have chosen.
+ACTION: The next action.
 
 Here's an example response:
 THOUGHTS: The enemy target is in my sight, I should attack it.
