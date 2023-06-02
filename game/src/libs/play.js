@@ -56,6 +56,7 @@ const getAgentState = (agent) => {
   state['Enemie\'s Target'] = agent.sight.filter(o => o.kind === 'targets' && o.team !== agent.team).map(
     o => ({ position: o.position, health: o.health })
   )
+  state['Obstacles'] = agent.sight.filter(o => o.kind === 'obstacles').map(o => o.position);
   return state;
 }
 
