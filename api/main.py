@@ -14,8 +14,8 @@ CORS(app)
 # Initialize the model
 model = ChatOpenAI(
     client="openai", 
-    #model="gpt-3.5-turbo", 
-    model="gpt-4", 
+    model="gpt-3.5-turbo", 
+    #model="gpt-4", 
     temperature=0.7,
     openai_api_key=os.getenv('OPENAI_API_KEY'),
 )
@@ -84,9 +84,12 @@ def play():
     # Get the state from the request
     if not (request.json and 'state' in request.json):
         abort(400, 'Missing state parameter')
+    
+    with open('state.txt', 'w') as f:
+        f.write(str(request.json['state']))
 
     # Get the response from the model
-    message = HumanMessage(content=request.json['state'])
+    message = HumanMessage(content=str(request.json['state']))
     response = model([system_message, message])
     thoughts, actions = read_answer(response)
 

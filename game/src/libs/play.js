@@ -39,7 +39,25 @@ const playKeyboard = (event, waitingInput, turn, win, agents, targets, obstacles
   setTimeout(() => waitingInput.current = false, 500);
 };
 
-
+// Function that converts an agent's sight and infos to a state
+const getAgentState = (agent) => {
+  const state = {}
+  state['Your Position'] = agent.position;
+  state['Your Health'] = agent.health;
+  state['Your Friends'] = agent.sight.filter(o => o.kind === 'agents' && o.team === agent.team).map(
+    o => ({ position: o.position, health: o.health })
+  );
+  state['Enemies'] = agent.sight.filter(o => o.kind === 'agents' && o.team !== agent.team).map(
+    o => ({ position: o.position, health: o.health })
+  );
+  state['Your Target'] = agent.sight.filter(o => o.kind === 'targets' && o.team === agent.team).map(
+    o => ({ position: o.position, health: o.health })
+  )
+  state['Enemie\'s Target'] = agent.sight.filter(o => o.kind === 'targets' && o.team !== agent.team).map(
+    o => ({ position: o.position, health: o.health })
+  )
+  return state;
+}
 
 
 // Function called when key "A" is pressed, to play the AI
@@ -53,7 +71,6 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
   
   // Find current agent
   const currentAgent = agents.find(agent => agent.id === turn.agentId);
-  const currentSight = sightToText(currentAgent);
 
   // Update agent thinking 
   setAgents(agents.map(agent => {
@@ -73,7 +90,7 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({ 
-      state: `Position: [${currentAgent.position[0]}, ${currentAgent.position[1]}]\n${currentSight}`,
+      state: getAgentState(currentAgent),
     })
   });
   
