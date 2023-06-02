@@ -39,20 +39,20 @@ const playKeyboard = (event, waitingInput, turn, win, agents, targets, obstacles
 };
 
 // Function that converts an agent's sight and infos to a state
-const getAgentState = (agent) => {
+const getAgentState = (agent, turn) => {
 
   // Compute which movement are possible
   const adjacantCells = [
-    {key: 'MOVE UP', pos: [agent.position[0], agent.position[1] - 1]},
-    {key: 'MOVE DOWN', pos: [agent.position[0], agent.position[1] + 1]}, 
-    {key: 'MOVE RIGHT', pos: [agent.position[0] - 1, agent.position[1]]}, 
-    {key: 'MOVE LEFT', pos: [agent.position[0] + 1, agent.position[1]]}, 
+    [agent.position[0], agent.position[1] - 1],
+    [agent.position[0], agent.position[1] + 1], 
+    [agent.position[0] - 1, agent.position[1]], 
+    [agent.position[0] + 1, agent.position[1]], 
   ];
   const possibleMoves = []
   adjacantCells.forEach(cell => {
-    const free = agent.sight.find(o => o.position[0] === cell.pos[0] && o.position[1] === cell.pos[1]) === undefined;
-    const inBoard = cell.pos[0] >= -BOARD_SIZE && cell.pos[0] <= BOARD_SIZE && cell.pos[1] >= -BOARD_SIZE && cell.pos[1] <= BOARD_SIZE;
-    if (free && inBoard) possibleMoves.push(cell.key)
+    const free = agent.sight.find(o => o.position[0] === cell[0] && o.position[1] === cell[1]) === undefined;
+    const inBoard = cell[0] >= -BOARD_SIZE && cell[0] <= BOARD_SIZE && cell[1] >= -BOARD_SIZE && cell[1] <= BOARD_SIZE;
+    if (free && inBoard) possibleMoves.push(`MOVE [${cell[0]}, ${cell[1]}]`)
   });
 
   // Compute which cell he can attack
@@ -65,23 +65,23 @@ const getAgentState = (agent) => {
   // Create state
   const state = {}
   state['Your Position'] = agent.position;
-  state['Your Health'] = agent.health;
-  state['Your Friends'] = agent.sight.filter(o => o.kind === 'agents' && o.team === agent.team).map(
-    o => ({ position: o.position, health: o.health })
+  state['Your Health'] = agent.life;
+  state['Friends'] = agent.sight.filter(o => o.kind === 'agents' && o.team === agent.team).map(
+    o => ({ position: o.position, health: o.life })
   );
   state['Enemies'] = agent.sight.filter(o => o.kind === 'agents' && o.team !== agent.team).map(
-    o => ({ position: o.position, health: o.health })
+    o => ({ position: o.position, health: o.life })
   );
-  state['Your Target'] = agent.sight.filter(o => o.kind === 'targets' && o.team === agent.team).map(
-    o => ({ position: o.position, health: o.health })
+  state['Friend Target'] = agent.sight.filter(o => o.kind === 'targets' && o.team === agent.team).map(
+    o => ({ position: o.position, health: o.life })
   )
-  state['Enemie\'s Target'] = agent.sight.filter(o => o.kind === 'targets' && o.team !== agent.team).map(
-    o => ({ position: o.position, health: o.health })
+  state['Enemy Target'] = agent.sight.filter(o => o.kind === 'targets' && o.team !== agent.team).map(
+    o => ({ position: o.position, health: o.life })
   )
   state['Obstacles'] = agent.sight.filter(o => o.kind === 'obstacles').map(o => o.position);
-  state['Turn'] = agent.turn.current;
-  state['Actions Left'] = NB_ACTIONS_PER_TURN - agent.turn.actions;
-  state['Possible Actions'] = possibleMoves + possibleAttacks;
+  state['Turn'] = turn.current;
+  state['Actions Left'] = NB_ACTIONS_PER_TURN - turn.actions;
+  state['Possible Actions'] = [...possibleMoves, ...possibleAttacks];
   return state;
 }
 
@@ -96,7 +96,7 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
 
   // Find current agent
   const currentAgent = agents.find(agent => agent.id === turn.agentId);
-  console.log(getAgentState(currentAgent))
+  console.log(getAgentState(currentAgent, turn))
 
   return
 
