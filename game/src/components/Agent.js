@@ -21,7 +21,7 @@ import {
 const Agent = ({ id, initialPosition, team, life, position, shaking, thinking, isCurrent }) => {
   
   const ref = useRef();  
-  const { setAnimationRunning } = useContext(GameContext);
+  const { setAnimationRunning, updateSight } = useContext(GameContext);
   let upDown = 1;  // Used to animate the agent up and down
 
   useFrame(() => {
@@ -36,6 +36,7 @@ const Agent = ({ id, initialPosition, team, life, position, shaking, thinking, i
         // Move the agent
         const arrived = agentMovement(ref, position, upDown);
         arrived && setAnimationRunning(false);
+        arrived && updateSight()
       }
 
       // Shake the agent when it gets hit

@@ -38,15 +38,16 @@ export default function GameContextProvider (props) {
 
   // Update Current Agent Sight
   const updateSight = (newTurn) => {
+    const curTurn = newTurn ? newTurn : turn;
     let newAgents = [...agents];
-    const currentAgent = newAgents.find(agent => agent.id === newTurn.agentId);
+    const currentAgent = newAgents.find(agent => agent.id === curTurn.agentId);
     currentAgent.sight = computeSight(currentAgent, agents, targets, obstacles);
     setAgents(newAgents);
   };
 
   // Next action
   const nextAction = () => {
-    (turn.actions + 1) < NB_ACTIONS_PER_TURN && updateSight(turn); 
+    if (turn.actions === NB_ACTIONS_PER_TURN) return;
     setTurn(prev => ({ ...prev, actions: prev.actions + 1 }));
   }
 
@@ -99,6 +100,7 @@ export default function GameContextProvider (props) {
       nextTurn,
       removeBullet,
       newGame,
+      updateSight,
     }}>
       {props.children}
     </GameContext.Provider>

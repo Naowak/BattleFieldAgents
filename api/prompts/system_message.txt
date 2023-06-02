@@ -19,7 +19,7 @@ You must follow the following criteria:
 You should only respond in the format as described below:
 RESPONSE FORMAT:
 THOUGHTS: Based on the information I listed above, in 50 words, do reasoning about what the next task should be.
-ACTION: The next action. Only one. No more. No less.
+ACTION: The only one action you have chosen.
 
 Here's an example response:
 THOUGHTS: The enemy target is in my sight, I should attack it.

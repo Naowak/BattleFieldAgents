@@ -22,6 +22,7 @@ export default function Bullet ({ id, initialPosition, target }) {
     setTargets, 
     removeBullet,
     setAnimationRunning,
+    updateSight,
   } = useContext(GameContext);
 
   // Handle collision
@@ -85,6 +86,7 @@ export default function Bullet ({ id, initialPosition, target }) {
     if (collision) {
       handleCollision(collision);
       rmBullet(id);
+      updateSight();
       return;
     }
 
