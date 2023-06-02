@@ -1,6 +1,7 @@
 import React, { useState, createContext } from 'react'
 import { initGameState } from '../libs/initialization';
 import { computeSight } from '../libs/sight';
+import { NB_ACTIONS_PER_TURN } from '../libs/constants';
 
 export const GameContext = createContext()
 
@@ -45,6 +46,7 @@ export default function GameContextProvider (props) {
 
   // Next action
   const nextAction = () => {
+    (turn.actions + 1) < NB_ACTIONS_PER_TURN && updateSight(turn); 
     setTurn(prev => ({ ...prev, actions: prev.actions + 1 }));
   }
 

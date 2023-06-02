@@ -1,2 +1,2 @@
-The enemy target has a high health and is far away, so I'll need to move closer to attack it. I also need to be aware of the enemies in my field of view and obstacles on the way. I can move to [4,-0] and attack the enemy target.
-MOVE [4, 0]
+The enemy is in my view, but I need to be cautious of the obstacles in my view. I should move to a more strategic position and try to attack the enemy from there.
+MOVE [3, -5]
