@@ -1,5 +1,6 @@
 import {
   SIGHT_RANGE,
+  BOARD_SIZE,
 } from './constants.js';
 
 
@@ -32,12 +33,35 @@ const intersection = (start, end, position) => {
   return false;
 };
 
+const computeVisibleCells = (agent, agents, obstacles, targets) => {
+  const hidders = [...agents.filter(a => a.id != agent.id), ...obstacles, ...targets];
+  const visibleCells = [];
+  // For each cell, check if it is hidden by another object, if not, add it to the sight
+  for (let i = -BOARD_SIZE; i <= BOARD_SIZE; i++) {
+    for (let j = -BOARD_SIZE; j <= BOARD_SIZE; j++) {
+      
+      // Check if the cell is in sight range
+      if ((agent.position[0] - i) * (agent.position[0] - i) + (agent.position[1] - j) * (agent.position[1] - j) > SIGHT_RANGE * SIGHT_RANGE) {
+        continue;
+      }
+
+      // Check if the cell is hidden by another object
+      const intersects = hidders.some(h => intersection(agent.position, [i, j], h.position));
+      if (!intersects) {
+        visibleCells.push([i, j]);
+      }
+    }
+  }
+  return visibleCells;
+};
+
 // Compute all the objects visible by an agent
 const computeSight = (agent, agents, obstacles, targets) => {
   
   // Define the field of view (manhattan distance)
   const sight = [];
-  const visibleObjects = [...agents.filter(a => a.id !== agent.id), ...targets, ...obstacles].filter(
+  const validAgents = agents.filter(a => a.id !== agent.id && a.life > 0);
+  const visibleObjects = [...validAgents, ...targets, ...obstacles].filter(
     o => Math.abs(agent.position[0] - o.position[0]) + Math.abs(agent.position[1] - o.position[1]) < SIGHT_RANGE
   )
 
@@ -70,6 +94,7 @@ const sightToText = (agent) => {
 
 
 export {
+  computeVisibleCells,
   computeSight,
   sightToText,
 }

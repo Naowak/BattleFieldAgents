@@ -1,6 +1,6 @@
 import React, { useState, createContext } from 'react'
 import { initGameState } from '../libs/initialization';
-import { computeSight } from '../libs/sight';
+import { computeSight, computeVisibleCells } from '../libs/sight';
 import { NB_ACTIONS_PER_TURN } from '../libs/constants';
 
 export const GameContext = createContext()
@@ -17,6 +17,7 @@ export default function GameContextProvider (props) {
   const [targets, setTargets] = useState(init.targets);
   const [bullets, setBullets] = useState(init.bullets);
   const [obstacles, setObstacles] = useState(init.obstacles);
+  const [visibleCells, setVisibleCells] = useState(init.visibleCells);
   const [animationQueue, setAnimationQueue] = useState(init.animationQueue);
   const [animationRunning, setAnimationRunning] = useState(init.animationRunning);
 
@@ -41,7 +42,8 @@ export default function GameContextProvider (props) {
     const curTurn = newTurn ? newTurn : turn;
     let newAgents = [...agents];
     const currentAgent = newAgents.find(agent => agent.id === curTurn.agentId);
-    currentAgent.sight = computeSight(currentAgent, agents, targets, obstacles);
+    currentAgent.sight = computeSight(currentAgent, agents, obstacles, targets);
+    setVisibleCells(computeVisibleCells(currentAgent, agents, obstacles, targets));
     setAgents(newAgents);
   };
 
@@ -94,6 +96,7 @@ export default function GameContextProvider (props) {
       targets, setTargets: updateTargets,
       bullets, setBullets,
       obstacles, setObstacles,
+      visibleCells, setVisibleCells,
       animationQueue, setAnimationQueue,
       animationRunning, setAnimationRunning,
       nextAction,

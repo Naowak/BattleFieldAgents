@@ -105,6 +105,7 @@ const initGameState = () => {
     targets,
     agents,
     obstacles,
+    visibleCells: [],
     bullets: [],
     animationQueue: [],
     animationRunning: false,
