@@ -12,15 +12,9 @@ import {
   DEBUG,
 } from '../libs/constants';
 
-const BoardTile = ({ position }) => {
+const BoardTile = ({ position, color }) => {
 
   const ref = useRef();
-  const { visibleCells } = useContext(GameContext);
-
-  // choose color in function of debug mode and visibility
-  const color = visibleCells.find(p => p[0] === position[0] && p[1] === position[1]) && DEBUG ? 
-    (position[0] + position[1]) % 2 === 0 ? COLOR_CELL_VISIBLE_1 : COLOR_CELL_VISIBLE_2
-    : (position[0] + position[1]) % 2 === 0 ? COLOR_CELL_1 : COLOR_CELL_2;
 
   return (
     <>
@@ -38,11 +32,26 @@ const BoardTile = ({ position }) => {
 
 export default function Board() {
 
+  // Retrieve context
+  const { visibleCells, agents, turn } = useContext(GameContext);
+
+  // Compute highlighted cells (visible cells + agent sight)
+  const hightlightedCells = [
+    ...visibleCells,
+    ...agents.find(a => a.id === turn.agentId).sight.map(o => o.position)
+  ]
+
+  // Create board tiles
   const tiles = [];
   for (let i = 0; i < 2*BOARD_SIZE+1; i++) {
     for (let j = 0; j < 2*BOARD_SIZE+1; j++) {
+
       const position = [i * 1 - BOARD_SIZE, j * 1 - BOARD_SIZE];
-      tiles.push(<BoardTile key={`${i}-${j}`} position={position} />);
+      const color = hightlightedCells.find(p => p[0] === position[0] && p[1] === position[1]) && DEBUG ? 
+        (position[0] + position[1]) % 2 === 0 ? COLOR_CELL_VISIBLE_1 : COLOR_CELL_VISIBLE_2
+        : (position[0] + position[1]) % 2 === 0 ? COLOR_CELL_1 : COLOR_CELL_2;
+
+      tiles.push(<BoardTile key={`${i}-${j}`} position={position} color={color}/>);
     }
   }
 

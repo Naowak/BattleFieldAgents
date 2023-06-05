@@ -17,7 +17,7 @@ export default function GameContextProvider (props) {
   const [targets, setTargets] = useState(init.targets);
   const [bullets, setBullets] = useState(init.bullets);
   const [obstacles, setObstacles] = useState(init.obstacles);
-  const [visibleCells, setVisibleCells] = useState(init.visibleCells);
+  const [visibleCells, setVisibleCells] = useState(init.visibleCells); // only for debug
   const [animationQueue, setAnimationQueue] = useState(init.animationQueue);
   const [animationRunning, setAnimationRunning] = useState(init.animationRunning);
 

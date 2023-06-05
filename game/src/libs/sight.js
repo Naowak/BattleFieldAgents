@@ -34,7 +34,7 @@ const intersection = (start, end, position) => {
 };
 
 const computeVisibleCells = (agent, agents, obstacles, targets) => {
-  const hidders = [...agents.filter(a => a.id != agent.id), ...obstacles, ...targets];
+  const hidders = [...agents.filter(a => a.id !== agent.id), ...obstacles, ...targets];
   const visibleCells = [];
   // For each cell, check if it is hidden by another object, if not, add it to the sight
   for (let i = -BOARD_SIZE; i <= BOARD_SIZE; i++) {

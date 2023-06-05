@@ -6,7 +6,7 @@ import {
   NB_OBSTACLES,
   SPAWN_RANGE
 } from './constants';
-import { computeSight } from './sight';
+import { computeSight, computeVisibleCells } from './sight';
 
 // Pick a random position on the board and remove it from the list of available positions
 const pickRandomPosition = (positions) => {
@@ -95,6 +95,9 @@ const initGameState = () => {
     order.push(`blue_${i}`);
   }
 
+  // Init visibleCells (usefull for the first turn: in debug mode to see fov)
+  const visibleCells = computeVisibleCells(agents.find(a => a.id === order[0]), agents, obstacles, targets);
+
   return {
     turn: {
       current: 0,
@@ -105,7 +108,7 @@ const initGameState = () => {
     targets,
     agents,
     obstacles,
-    visibleCells: [],
+    visibleCells,
     bullets: [],
     animationQueue: [],
     animationRunning: false,
