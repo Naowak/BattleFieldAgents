@@ -19,18 +19,18 @@ const TARGET_RADIUS = 0.3;
 const TARGET_BUBBLE_TRANSLATE_Y = 1;
 
 // Board
-const BOARD_SIZE = 6;
+const BOARD_SIZE = 5;
 const BOARD_TRANSLATE_Y = -1;
 
 // Obstacles
 const OBSTACLE_TRANSLATE_Y = 0;
-const NB_OBSTACLES = 20;
+const NB_OBSTACLES = 22;
 
 // Others
-const NB_AGENTS_PER_TEAM = 5;
-const NB_ACTIONS_PER_TURN = 4;
+const NB_AGENTS_PER_TEAM = 3;
+const NB_ACTIONS_PER_TURN = 3;
 const PRECISION = 3;  // Number of decimal places for position coordinates
-const SPAWN_RANGE = 3;  // Range of cells around the target where the agents can spawn
+const SPAWN_RANGE = 1;  // Range of cells around the target where the agents can spawn
 const SIGHT_RANGE = 99;  // Range of cells around the agent where it can see
 const DEBUG = false;
 
