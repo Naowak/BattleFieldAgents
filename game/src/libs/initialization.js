@@ -63,6 +63,7 @@ const initGameState = () => {
         shaking: false,
         thinking: false,
         thoughts: [],
+        actions: [],
       });
       selectedPositions.push(position);
     }

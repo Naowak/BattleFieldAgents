@@ -84,7 +84,8 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
       return {
         ...agent,
         thinking: false,
-        thoughts: [...agent.thoughts, thoughts]
+        thoughts: [...agent.thoughts, thoughts],
+        actions: [...agent.actions, action],
       }
     }
     return agent;

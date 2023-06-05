@@ -82,7 +82,7 @@ export default function Panel () {
           <h4 style={styles.itemField}>Life: {currentAgent.life}</h4>
           <h4 style={styles.itemField}>Position: ({currentAgent.position[0]}, {currentAgent.position[1]})</h4>
           <h4 style={styles.itemField}>Thoughts:</h4>
-          <p style={styles.sightLine}>{currentAgent.thoughts.map((t, i) => `${i}. ${t}\n\n`)}</p>
+          <p style={styles.sightLine}>{currentAgent.thoughts.map((t, i) => `${i}. ${t}\n${currentAgent.actions[i]}\n\n`)}</p>
         </div>
       )}
     </div>
