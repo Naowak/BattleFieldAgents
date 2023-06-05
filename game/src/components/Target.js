@@ -13,7 +13,9 @@ import {
   TARGET_TRANSLATE_Y
 } from '../libs/constants';
 
-const Target = ({ position, team, life, shaking }) => {
+const Target = ({ target }) => {
+
+  const { team, position, life, shaking } = target;
   const ref = useRef();  
 
   useFrame(() => {

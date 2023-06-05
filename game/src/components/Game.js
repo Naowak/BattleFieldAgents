@@ -82,14 +82,8 @@ const Game = () => {
       {agents.map(agent => (
         agent.life > 0 && (
           <Agent 
-            key={agent.id} 
-            id={agent.id}
-            initialPosition={agent.initialPosition} 
-            position={agent.position} 
-            team={agent.team} 
-            life={agent.life} 
-            shaking={agent.shaking}
-            thinking={agent.thinking}
+            key={agent.id}
+            agent={agent}
             isCurrent={agent.id === turn.agentId}
           />
         )
@@ -97,11 +91,8 @@ const Game = () => {
       {targets.map(target => (
         target.life > 0 && (
           <Target 
-            key={target.id} 
-            position={target.position} 
-            team={target.team} 
-            life={target.life}
-            shaking={target.shaking}
+            key={target.id}
+            target={target}
           />
         )
       ))}
@@ -109,9 +100,7 @@ const Game = () => {
       {bullets.map((bullet) => (
         <Bullet 
           key={bullet.id}
-          id={bullet.id}
-          initialPosition={bullet.initialPosition}
-          target={bullet.target}
+          bullet={bullet}
         />
         ))}
       {win ?

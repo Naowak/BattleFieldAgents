@@ -18,7 +18,9 @@ import {
 } from '../libs/constants';
 
 
-const Agent = ({ id, initialPosition, team, life, position, shaking, thinking, isCurrent }) => {
+const Agent = ({ agent, isCurrent }) => {
+
+  const { team, position, initialPosition, thinking, shaking } = agent;
   
   const ref = useRef();  
   const { setAnimationRunning, updateSight } = useContext(GameContext);

@@ -6,7 +6,9 @@ import { bulletMovement } from '../libs/movements';
 import { bulletCollision } from '../libs/collisions';
 import { handleShakeItem } from '../libs/animations';
 
-export default function Bullet ({ id, initialPosition, target }) {
+export default function Bullet ({ bullet }) {
+
+  const { id, initialPosition, target } = bullet;
   
   // ref 
   const ref = useRef();
