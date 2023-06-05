@@ -47,9 +47,19 @@ const handleMove = (direction, turn, agents, targets, obstacles, setAgents) => {
   if (!obstacleCollision && !agentCollision && !targetCollision && !outOfBounds) {
 
     // Update agent
-    let newAgents = [...agents];
-    newAgents[agentIndex].position = newPosition;
-    setAgents(newAgents);
+    setAgents(prev => {
+      const newAgents = prev.map((agent, index) => {
+        if (index === agentIndex) {
+          return {
+            ...agent,
+            position: newPosition,
+          }
+        }
+        return agent;
+      });
+      return newAgents;
+    });
+    
     return true;
   }
   

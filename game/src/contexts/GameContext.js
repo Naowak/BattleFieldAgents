@@ -63,17 +63,31 @@ export default function GameContextProvider (props) {
     updateSight(newTurn);
   };
 
-
-  // Update Agents and check win
-  const updateAgents = (newAgents) => {
-    const blues = newAgents.filter(agent => agent.team === 'blue');
-    const reds = newAgents.filter(agent => agent.team === 'red');
+  // check win
+  const checkWin = (agents) => {
+    const blues = agents.filter(agent => agent.team === 'blue');
+    const reds = agents.filter(agent => agent.team === 'red');
     if (blues.every(agent => agent.life <= 0)) {
       setWin('red');
     } else if (reds.every(agent => agent.life <= 0)) {
       setWin('blue');
     }
-    setAgents(newAgents);
+  };
+
+  // Update Agents and check win
+  const updateAgents = (arg) => {
+    // check if arg is a function
+    if (typeof arg === 'function') {
+      setAgents(prev => {
+        const newAgents = arg(prev);
+        checkWin(newAgents);
+        return newAgents;
+      });
+    } else {
+      // check win
+      checkWin(arg);
+      setAgents(arg);
+    }  
   };
 
   // Update Targets and check win
