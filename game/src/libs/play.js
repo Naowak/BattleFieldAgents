@@ -149,6 +149,12 @@ const getAgentState = (agent, turn) => {
 
   // Create state
   const state = {}
+  agent.thoughts.forEach((thought, index) => {
+    state['Thoughts ' + index] = thought;
+  });
+  agent.actions.forEach((action, index) => {
+    state['Action ' + index] = action;
+  });
   state['Your Position'] = agent.position;
   state['Your Health'] = agent.life;
   state['Friends'] = agent.sight.filter(o => o.kind === 'agents' && o.team === agent.team).map(
@@ -164,8 +170,9 @@ const getAgentState = (agent, turn) => {
     o => ({ position: o.position, health: o.life })
   )
   state['Obstacles'] = agent.sight.filter(o => o.kind === 'obstacles').map(o => o.position);
-  state['Actions Left'] = NB_ACTIONS_PER_TURN - turn.actions;
+  state['Actions Left'] = `${NB_ACTIONS_PER_TURN - turn.actions}/${NB_ACTIONS_PER_TURN}`;
   state['Possible Actions'] = [...possibleMoves, ...possibleAttacks];
+  console.log(state)
   return state;
 }
 

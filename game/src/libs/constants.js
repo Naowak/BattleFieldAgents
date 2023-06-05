@@ -19,7 +19,7 @@ const TARGET_RADIUS = 0.3;
 const TARGET_BUBBLE_TRANSLATE_Y = 1;
 
 // Board
-const BOARD_SIZE = 5;
+const BOARD_SIZE = 6;
 const BOARD_TRANSLATE_Y = -1;
 
 // Obstacles

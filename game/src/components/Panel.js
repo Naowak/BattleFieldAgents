@@ -31,7 +31,7 @@ export default function Panel () {
     },
     header: {
       marginTop: '40px',
-      marginBottom: '60px',
+      marginBottom: '40px',
       textAlign: 'center',
     },
     item: {
@@ -62,6 +62,7 @@ export default function Panel () {
       width: '90%',
       margin: 3,
       padding: 0,
+      fontSize: 16,
       whiteSpace: "pre-line"
     }
   }
@@ -81,7 +82,7 @@ export default function Panel () {
           <h2 style={styles.itemTitle}>Agent Details</h2>
           <h4 style={styles.itemField}>Life: {currentAgent.life}</h4>
           <h4 style={styles.itemField}>Position: ({currentAgent.position[0]}, {currentAgent.position[1]})</h4>
-          <h4 style={styles.itemField}>Thoughts:</h4>
+          <h4 style={styles.itemField}>Thoughts & Actions:</h4>
           <p style={styles.sightLine}>{currentAgent.thoughts.map((t, i) => `${i}. ${t}\n${currentAgent.actions[i]}\n\n`)}</p>
         </div>
       )}

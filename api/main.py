@@ -51,7 +51,6 @@ def play():
     # Get the state from the request
     if not (request.json and 'state' in request.json):
         abort(400, 'Missing state parameter')
-    
 
     # Get the response from the model
     message = HumanMessage(content=str(request.json['state']))
