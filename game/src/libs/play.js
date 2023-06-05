@@ -58,6 +58,7 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
       return {
         ...agent,
         thinking: true,
+        thoughts: turn.actions === 0 ? [] : agent.thoughts, // reset thoughts at the begin of the turn
       }
     }
     return agent;
@@ -74,20 +75,21 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
     })
   });
   
+  // Parse the response JSON
+  const { thoughts, action } = await response.json();
+
   // Update agent thinking 
   setAgents(agents.map(agent => {
     if (agent.id === currentAgent.id) {
       return {
         ...agent,
         thinking: false,
+        thoughts: [...agent.thoughts, thoughts]
       }
     }
     return agent;
   }));
 
-  // Parse the response JSON
-  const { thoughts, action } = await response.json();
-  console.log(thoughts, action);
 
   try {
     // Read action
