@@ -53,16 +53,18 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
   const currentAgent = agents.find(agent => agent.id === turn.agentId);
 
   // Update agent thinking 
-  setAgents(agents.map(agent => {
+  const newCurrentAgent = {
+    ...currentAgent,
+    thinking: true,
+    thoughts: turn.actions === 0 ? [] : currentAgent.thoughts, // reset thoughts at the begin of the turn
+  };
+  const newAgents = agents.map(agent => {
     if (agent.id === currentAgent.id) {
-      return {
-        ...agent,
-        thinking: true,
-        thoughts: turn.actions === 0 ? [] : agent.thoughts, // reset thoughts at the begin of the turn
-      }
+      return newCurrentAgent;
     }
     return agent;
-  }));
+  });
+  setAgents(newAgents);
   
   // Send a POST request to the API with the current game state
   const response = await fetch('http://localhost:5000/play_one_turn', {
@@ -71,7 +73,7 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({ 
-      state: getAgentState(currentAgent, turn),
+      state: getAgentState(newCurrentAgent, turn),
     })
   });
   
@@ -79,19 +81,21 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
   const { thoughts, action } = await response.json();
 
   // Update agent thinking 
-  setAgents(agents.map(agent => {
-    if (agent.id === currentAgent.id) {
-      return {
-        ...agent,
-        thinking: false,
-        thoughts: [...agent.thoughts, thoughts],
-        actions: [...agent.actions, action],
-      }
+  const finalAgent = {
+    ...newCurrentAgent,
+    thinking: false,
+    thoughts: [...newCurrentAgent.thoughts, thoughts],
+    actions: [...newCurrentAgent.actions, action],
+  };
+  const finalAgents = agents.map(agent => {
+    if (agent.id === newCurrentAgent.id) {
+      return finalAgent;
     }
     return agent;
-  }));
+  });
+  setAgents(finalAgents);
 
-
+  // Add action to animation queue and start animation
   try {
     // Read action
     const animation = readAIAction(action, turn, agents, targets, obstacles, setAgents, setBullets);
