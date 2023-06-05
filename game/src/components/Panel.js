@@ -15,7 +15,7 @@ export default function Panel () {
   // Retrieve context
   const { turn, agents } = useContext(GameContext);
   const currentAgent = agents.find(agent => agent.id === turn.agentId);
-  const currentSight = sightToText(currentAgent);
+  //const currentSight = sightToText(currentAgent);
   
   // Define styles in a JavaScript object
   const styles = {
@@ -47,6 +47,8 @@ export default function Panel () {
     itemTitle: {
       width: '100%',
       padding: '10px',
+      marginTop: 15,
+      marginBottom: 10,
       backgroundColor: currentAgent.team === 'red' ? COLOR_RED : COLOR_BLUE,
       borderRadius: '5px',
       textAlign: 'center',
@@ -54,9 +56,10 @@ export default function Panel () {
     itemField: {
       width: '100%',
       textAlign: 'center',
-      margin: 20,
+      margin: 10,
     },
     sightLine: {
+      width: '90%',
       margin: 3,
       padding: 0,
       whiteSpace: "pre-line"
@@ -76,11 +79,10 @@ export default function Panel () {
       {currentAgent && (
         <div style={styles.item}>
           <h2 style={styles.itemTitle}>Agent Details</h2>
-          <h4 style={styles.itemField}>ID: {currentAgent.id}</h4>
           <h4 style={styles.itemField}>Life: {currentAgent.life}</h4>
           <h4 style={styles.itemField}>Position: ({currentAgent.position[0]}, {currentAgent.position[1]})</h4>
-          <h4 style={styles.itemField}>Sight:</h4>
-          <p style={styles.sightLine}>{currentSight}</p>
+          <h4 style={styles.itemField}>Thoughts:</h4>
+          <p style={styles.sightLine}>{currentAgent.thoughts.map((t, i) => `${i}. ${t}\n\n`)}</p>
         </div>
       )}
     </div>
