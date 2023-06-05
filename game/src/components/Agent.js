@@ -1,4 +1,4 @@
-import React, { useRef, useContext } from 'react';
+import React, { useRef, useContext, useEffect, useState } from 'react';
 import { GameContext } from '../contexts/GameContext';
 import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
@@ -20,10 +20,12 @@ import {
 
 const Agent = ({ agent, isCurrent }) => {
 
-  const { team, position, initialPosition, thinking, shaking } = agent;
+  const { team, position, initialPosition, thinking, thoughts, actions, shaking } = agent;
   
   const ref = useRef();  
   const { setAnimationRunning, updateSight } = useContext(GameContext);
+  const [showThoughts, setShowThoughts] = useState(false); 
+  const closeThoughtsTimeout = useRef(null);
   let upDown = 1;  // Used to animate the agent up and down
 
   useFrame(() => {
@@ -49,18 +51,68 @@ const Agent = ({ agent, isCurrent }) => {
     }
   });
 
-  const bubbleStyles = {
-    display: 'flex', 
-    flexDirection: 'row', 
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: thinking ? 110 : 25,
-    height: 25,
-    fontSize: 16, 
-    borderRadius: 15,
-    border: `1px solid ${COLOR_BUBBLE_BORDER}`,
-    backgroundColor: COLOR_BUBBLE_AGENT,
-    color: COLOR_FONT, 
+  // Remove agent thought when he starts thinking, and clear the timeout
+  useEffect(() => {
+    if (thinking) {
+      clearTimeout(closeThoughtsTimeout.current);
+      setShowThoughts(false);
+    }
+  }, [thinking]);
+
+  // Show agent thought when he stops thinking
+  useEffect(() => {
+    if (thoughts.length > 0) {
+      setShowThoughts(true);
+      closeThoughtsTimeout.current = setTimeout(() => {
+        setShowThoughts(false);
+      }, 7000);
+    }
+  }, [thoughts]);
+
+  const styles = {
+    thinking: {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: 110,
+      height: 25,
+      fontSize: 16,
+      borderRadius: 15,
+      border: `1px solid ${COLOR_BUBBLE_BORDER}`,
+      backgroundColor: COLOR_BUBBLE_AGENT,
+      color: COLOR_FONT,
+    },
+    waiting: {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: 25,
+      height: 25,
+      fontSize: 16,
+      borderRadius: 15,
+      border: `1px solid ${COLOR_BUBBLE_BORDER}`,
+      backgroundColor: COLOR_BUBBLE_AGENT,
+      color: COLOR_FONT,
+    },
+    showThoughts: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 10,
+      textAlign: 'center',
+      width: 250,
+      padding: 5,
+      marginBottom: '50%',
+      fontSize: 16,
+      fontStyle: 'italic',
+      borderRadius: 15,
+      border: `1px solid ${COLOR_BUBBLE_BORDER}`,
+      backgroundColor: COLOR_BUBBLE_AGENT,
+      color: COLOR_FONT,
+    },
   }
 
   return (
@@ -68,16 +120,24 @@ const Agent = ({ agent, isCurrent }) => {
       <capsuleBufferGeometry attach='geometry' args={[AGENT_RADIUS, AGENT_RADIUS, 32, 32]} />
       <meshStandardMaterial attach='material' color={team === 'red' ? COLOR_RED : COLOR_BLUE} />
 
-      {isCurrent && !thinking && (
+      {showThoughts && !thinking && (
         <Html position={[0, AGENT_BUBBLE_TRANSLATE_Y, 0]} center>
-          <div style={bubbleStyles}>
+          <div style={styles.showThoughts}>
+            <p style={{margin: 0, padding: 0}}>{thoughts[thoughts.length - 1]}</p>
+            <p style={{margin: 0, padding: 0}}>{actions[actions.length - 1]}</p>
+          </div>
+        </Html>
+      )}
+      {isCurrent && !thinking && !showThoughts && (
+        <Html position={[0, AGENT_BUBBLE_TRANSLATE_Y, 0]} center>
+          <div style={styles.waiting}>
             <p style={{margin: 0, padding: 0, fontWeight: 'bold'}}>!</p>
           </div>
         </Html>
       )}
-      {isCurrent && thinking && (
+      {isCurrent && thinking && !showThoughts && (
         <Html position={[0, AGENT_BUBBLE_TRANSLATE_Y, 0]} center>
-          <div style={bubbleStyles}>
+          <div style={styles.thinking}>
             <div className="spinner"/>
             <p style={{margin: 0, padding: 0, marginLeft: 5}}>Thinking...</p>
           </div>

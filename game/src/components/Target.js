@@ -4,6 +4,8 @@ import { Html } from '@react-three/drei';
 import { shake as ShakeTarget } from '../libs/animations';
 import { 
   COLOR_BUBBLE_BORDER,
+  COLOR_BUBBLE_RED,
+  COLOR_BUBBLE_BLUE,
   COLOR_BLUE, 
   COLOR_RED, 
   TARGET_RADIUS, 
@@ -49,7 +51,7 @@ const Target = ({ target }) => {
     fontSize: 16, 
     borderRadius: 10,
     border: `1px solid ${COLOR_BUBBLE_BORDER}`,
-    backgroundColor: team === "red" ? COLOR_RED : COLOR_BLUE,
+    backgroundColor: team === "red" ? COLOR_BUBBLE_RED : COLOR_BUBBLE_BLUE,
     color: COLOR_FONT, 
   }
 

@@ -24,7 +24,7 @@ const BOARD_TRANSLATE_Y = -1;
 
 // Obstacles
 const OBSTACLE_TRANSLATE_Y = 0;
-const NB_OBSTACLES = 22;
+const NB_OBSTACLES = 15;
 
 // Others
 const NB_AGENTS_PER_TEAM = 3;
@@ -46,7 +46,9 @@ const COLOR_OBSTACLE = '#6a6a6a';
 const COLOR_OBSTACLE_BORDER = '#686868';
 const COLOR_BG_GAME = '#111111';
 const COLOR_BG_PANEL = '#222222';
-const COLOR_BUBBLE_AGENT = '#3a3a3a';
+const COLOR_BUBBLE_AGENT = 'rgba(58, 58, 58, 0.7)';
+const COLOR_BUBBLE_BLUE = 'rgba(68, 68, 153, 0.7)';
+const COLOR_BUBBLE_RED = 'rgba(170, 68, 68, 0.7)';
 const COLOR_BUBBLE_BORDER = '#bbbbbb';
 const COLOR_FONT = '#ffffff';
 
@@ -93,6 +95,8 @@ export {
   COLOR_BG_GAME,
   COLOR_BG_PANEL,
   COLOR_BUBBLE_AGENT,
+  COLOR_BUBBLE_BLUE,
+  COLOR_BUBBLE_RED,
   COLOR_BUBBLE_BORDER,
   COLOR_FONT,
 }
