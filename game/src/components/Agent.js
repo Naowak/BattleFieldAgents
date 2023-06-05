@@ -120,6 +120,7 @@ const Agent = ({ agent, isCurrent }) => {
       <capsuleBufferGeometry attach='geometry' args={[AGENT_RADIUS, AGENT_RADIUS, 32, 32]} />
       <meshStandardMaterial attach='material' color={team === 'red' ? COLOR_RED : COLOR_BLUE} />
 
+      {/* Thoughts */}
       {showThoughts && !thinking && (
         <Html position={[0, AGENT_BUBBLE_TRANSLATE_Y, 0]} center>
           <div style={styles.showThoughts}>
@@ -128,6 +129,7 @@ const Agent = ({ agent, isCurrent }) => {
           </div>
         </Html>
       )}
+      {/* Alert current player */}
       {isCurrent && !thinking && !showThoughts && (
         <Html position={[0, AGENT_BUBBLE_TRANSLATE_Y, 0]} center>
           <div style={styles.waiting}>
@@ -135,6 +137,7 @@ const Agent = ({ agent, isCurrent }) => {
           </div>
         </Html>
       )}
+      {/* Thinking */}
       {isCurrent && thinking && !showThoughts && (
         <Html position={[0, AGENT_BUBBLE_TRANSLATE_Y, 0]} center>
           <div style={styles.thinking}>
@@ -143,6 +146,7 @@ const Agent = ({ agent, isCurrent }) => {
           </div>
         </Html>
       )}
+      {/* DEBUG Coords */}
       {DEBUG &&
         <Html position={[0, 0, 0]} center>
           <div>

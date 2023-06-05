@@ -45,7 +45,7 @@ const initGameState = () => {
   for (let i = 0; i < 2; i++) {
     // Select only a subset of the available positions (range of SPAWN_RANGE cells around the target)
     const availablePositions = positions.filter((position) => {
-      return Math.abs(position[0] - targets[i].position[0]) <= SPAWN_RANGE && Math.abs(position[1] - targets[i].position[1]) <= SPAWN_RANGE;
+      return Math.abs(position[0] - targets[i].position[0]) + Math.abs(position[1] - targets[i].position[1]) <= SPAWN_RANGE;
     });
     // List of selected positions
     const selectedPositions = [];

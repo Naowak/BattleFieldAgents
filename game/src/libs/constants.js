@@ -30,7 +30,7 @@ const NB_OBSTACLES = 15;
 const NB_AGENTS_PER_TEAM = 3;
 const NB_ACTIONS_PER_TURN = 3;
 const PRECISION = 3;  // Number of decimal places for position coordinates
-const SPAWN_RANGE = 1;  // Range of cells around the target where the agents can spawn
+const SPAWN_RANGE = 3;  // Range of cells around the target where the agents can spawn
 const SIGHT_RANGE = 99;  // Range of cells around the agent where it can see
 const DEBUG = false;
 

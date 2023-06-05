@@ -172,7 +172,6 @@ const getAgentState = (agent, turn) => {
   state['Obstacles'] = agent.sight.filter(o => o.kind === 'obstacles').map(o => o.position);
   state['Actions Left'] = `${NB_ACTIONS_PER_TURN - turn.actions}/${NB_ACTIONS_PER_TURN}`;
   state['Possible Actions'] = [...possibleMoves, ...possibleAttacks];
-  console.log(state)
   return state;
 }
 
