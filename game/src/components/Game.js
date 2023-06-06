@@ -49,7 +49,7 @@ const Game = () => {
     return () => {
       window.removeEventListener('keydown', func);
     }
-  }, [turn, animationRunning, animationQueue, nextTurn, agents, targets, obstacles, setAgents, setBullets, setAnimationQueue, setAnimationRunning, nextAction, win]);
+  }, [turn, animationRunning, animationQueue, nextTurn, agents, targets, obstacles, setAgents, setBullets, setConnection, setAnimationQueue, setAnimationRunning, nextAction, win]);
 
   // Game loop logic, handle turns
   useEffect(() => {

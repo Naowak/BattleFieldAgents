@@ -19,7 +19,7 @@ export default function Panel () {
   
   // Define styles in a JavaScript object
   const styles = {
-    panel: {
+    container: {
       display: 'flex',
       flex: 1,
       height: '100vh',
@@ -34,7 +34,7 @@ export default function Panel () {
       marginBottom: '40px',
       textAlign: 'center',
     },
-    item: {
+    panel: {
       width: '80%',
       display: 'flex',
       flexDirection: 'column',
@@ -43,8 +43,10 @@ export default function Panel () {
       backgroundColor: COLOR_BUBBLE_AGENT,
       borderRadius: '5px',
       marginBottom: '20px',
+      paddingBottom: 20,
+      gap: 10,
     },
-    itemTitle: {
+    panelTitle: {
       width: '100%',
       padding: '10px',
       marginTop: 15,
@@ -53,10 +55,30 @@ export default function Panel () {
       borderRadius: '5px',
       textAlign: 'center',
     },
-    itemField: {
-      width: '100%',
-      textAlign: 'center',
-      margin: 10,
+    line: {
+      width: '90%',
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      margin: 0,
+      gap: 12,
+    },
+    itemTitle: {
+      fontWeight: 'bold',
+      margin: 0,
+    },
+    itemValue: {
+      fontWeight: 400,
+      margin: 0,
+    },
+    messages: {
+      width: '90%',
+      margin: 3,
+      padding: 0,
+      fontSize: 16,
+      whiteSpace: "pre-line",
+      textAlign: currentAgent.messages.length > 0 ? 'left' : 'center',
     },
     thoughts: {
       width: '90%',
@@ -69,25 +91,52 @@ export default function Panel () {
   }
 
   return (
-    <div style={styles.panel}>
+    <div style={styles.container}>
       <h1 style={styles.header}>Game Details</h1>
       
-      <div style={styles.item}>
-        <h2 style={styles.itemTitle}>Turn Details</h2>
-        <h4 style={styles.itemField}>Current Turn: {turn.current + 1}</h4>
-        <h4 style={styles.itemField}>Actions Done: {turn.actions}/{NB_ACTIONS_PER_TURN}</h4>
+      {/* Turn Details */}
+      <div style={styles.panel}>
+        <h2 style={styles.panelTitle}>Turn Details</h2>
+        <div style={styles.line}>
+          <h4 style={styles.itemTitle}>Current Turn: </h4>
+          <h4 style={styles.itemValue}>{turn.current + 1}</h4>
+        </div>
+        <div style={styles.line}>
+          <h4 style={styles.itemTitle}>Actions Done: </h4>
+          <h4 style={styles.itemValue}>{turn.actions}/{NB_ACTIONS_PER_TURN}</h4>
+        </div>
       </div>
       
+      {/* Agent Details */}
       {currentAgent && (
-        <div style={styles.item}>
-          <h2 style={styles.itemTitle}>Agent Details</h2>
-          <h4 style={styles.itemField}>Life: {currentAgent.life}</h4>
-          <h4 style={styles.itemField}>Position: ({currentAgent.position[0]}, {currentAgent.position[1]})</h4>
-          <h4 style={styles.itemField}>Thoughts & Actions:</h4>
+        <div style={styles.panel}>
+
+          {/* Basic infos */}
+          <h2 style={styles.panelTitle}>Agent Details</h2>
+          <div style={styles.line}>
+            <h4 style={styles.itemTitle}>Life: </h4>
+            <h4 style={styles.itemValue}>{currentAgent.life}</h4>
+          </div>
+          <div style={styles.line}>
+            <h4 style={styles.itemTitle}>Position: </h4>
+            <h4 style={styles.itemValue}>({currentAgent.position[0]}, {currentAgent.position[1]})</h4>
+          </div>
+
+          <div style={{height: 12}}/>
+          
+          {/* Messages, thoughts and actions */}
+          <h4 style={styles.itemTitle}>Messages:</h4>
+          <p style={styles.thoughts}>
+            {currentAgent.messages.length > 0 ?
+              currentAgent.messages.map(m => `- ${m}\n`)
+              : 'No message received.\n\n'
+            }
+          </p>
+          <h4 style={styles.itemTitle}>Thoughts & Actions:</h4>
           <p style={styles.thoughts}>
             {currentAgent.thoughts.length > 0 ?
               currentAgent.thoughts.map((t, i) => `${i+1}. ${t}\n\n${currentAgent.actions[i]}\n\n`)
-              : 'No thoughts & actions yet\n\n'
+              : 'No thoughts & actions yet.\n\n'
             }
           </p>
         </div>
