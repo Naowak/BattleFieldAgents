@@ -1,7 +1,7 @@
 import React, { useState, createContext } from 'react'
 import { initGameState } from '../libs/initialization';
 import { computeSight, computeVisibleCells } from '../libs/sight';
-import { NB_ACTIONS_PER_TURN, CONNECTION_DURATION, THOUGHT_BUBBLE_DURATION } from '../libs/constants';
+import { NB_ACTIONS_PER_TURN, CONNECTION_DURATION } from '../libs/constants';
 
 export const GameContext = createContext()
 

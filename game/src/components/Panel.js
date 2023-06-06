@@ -25,16 +25,20 @@ export default function Panel () {
       height: '100vh',
       flexDirection: 'column',
       justifyContent: 'flex-start',
+      gap: 20,
       alignItems: 'center',
       backgroundColor: COLOR_BG_PANEL,
       color: COLOR_FONT,
     },
     header: {
-      marginTop: '40px',
-      marginBottom: '40px',
+      height: '5vh',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
       textAlign: 'center',
     },
-    panel: {
+    panelTurn: {
+      height: '20vh',
       width: '80%',
       display: 'flex',
       flexDirection: 'column',
@@ -42,9 +46,29 @@ export default function Panel () {
       alignItems: 'center',
       backgroundColor: COLOR_BUBBLE_AGENT,
       borderRadius: '5px',
-      marginBottom: '20px',
       paddingBottom: 20,
       gap: 10,
+    },
+    // scrollable y panel
+    panelAgent: {
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'flex-start',
+      alignItems: 'center',
+      width: '80%',
+      height: '60vh',
+      backgroundColor: COLOR_BUBBLE_AGENT,
+      borderRadius: 5,
+      paddingBottom: 20,
+    },
+    panelAgentContent: {
+      width: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'flex-start',
+      alignItems: 'center',
+      gap: 10,
+      overflowY: 'scroll',
     },
     panelTitle: {
       width: '100%',
@@ -52,7 +76,7 @@ export default function Panel () {
       marginTop: 15,
       marginBottom: 10,
       backgroundColor: currentAgent.team === 'red' ? COLOR_RED : COLOR_BLUE,
-      borderRadius: '5px',
+      borderRadius: 5,
       textAlign: 'center',
     },
     line: {
@@ -92,10 +116,10 @@ export default function Panel () {
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.header}>Game Details</h1>
+      <h1 style={styles.header}>BattleFieldAgents</h1>
       
       {/* Turn Details */}
-      <div style={styles.panel}>
+      <div style={styles.panelTurn}>
         <h2 style={styles.panelTitle}>Turn Details</h2>
         <div style={styles.line}>
           <h4 style={styles.itemTitle}>Current Turn: </h4>
@@ -109,36 +133,40 @@ export default function Panel () {
       
       {/* Agent Details */}
       {currentAgent && (
-        <div style={styles.panel}>
+        <div style={styles.panelAgent}>
 
           {/* Basic infos */}
-          <h2 style={styles.panelTitle}>Agent Details</h2>
-          <div style={styles.line}>
-            <h4 style={styles.itemTitle}>Life: </h4>
-            <h4 style={styles.itemValue}>{currentAgent.life}</h4>
-          </div>
-          <div style={styles.line}>
-            <h4 style={styles.itemTitle}>Position: </h4>
-            <h4 style={styles.itemValue}>({currentAgent.position[0]}, {currentAgent.position[1]})</h4>
-          </div>
+          <h2 style={{...styles.panelTitle, marginBottom: 23}}>Agent Details</h2>
 
-          <div style={{height: 12}}/>
-          
-          {/* Messages, thoughts and actions */}
-          <h4 style={styles.itemTitle}>Messages:</h4>
-          <p style={styles.messages}>
-            {currentAgent.messages.length > 0 ?
-              currentAgent.messages.map(m => `- ${m}\n`)
-              : 'No message received.\n\n'
-            }
-          </p>
-          <h4 style={styles.itemTitle}>Thoughts & Actions:</h4>
-          <p style={styles.thoughts}>
-            {currentAgent.thoughts.length > 0 ?
-              currentAgent.thoughts.map((t, i) => `${i+1}. ${t}\n\n${currentAgent.actions[i]}\n\n`)
-              : 'No thoughts & actions yet.\n\n'
-            }
-          </p>
+          <div style={styles.panelAgentContent}>
+            <div style={styles.line}>
+              <h4 style={styles.itemTitle}>Life: </h4>
+              <h4 style={styles.itemValue}>{currentAgent.life}</h4>
+            </div>
+            <div style={styles.line}>
+              <h4 style={styles.itemTitle}>Position: </h4>
+              <h4 style={styles.itemValue}>({currentAgent.position[0]}, {currentAgent.position[1]})</h4>
+            </div>
+
+            <div style={{height: 12}}/>
+            
+            {/* Messages, thoughts and actions */}
+            <h4 style={styles.itemTitle}>Messages:</h4>
+            <p style={styles.messages}>
+              {currentAgent.messages.length > 0 ?
+                currentAgent.messages.map(m => `- ${m}\n`)
+                : 'No message received.\n\n'
+              }
+            </p>
+            <h4 style={styles.itemTitle}>Thoughts & Actions:</h4>
+            <p style={styles.thoughts}>
+              {currentAgent.thoughts.length > 0 ?
+                currentAgent.thoughts.map((t, i) => `${i+1}. ${t}\n\n${currentAgent.actions[i]}\n\n`)
+                : 'No thoughts & actions yet.\n\n'
+              }
+            </p>
+
+          </div>
         </div>
       )}
     </div>
