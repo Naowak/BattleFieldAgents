@@ -79,7 +79,7 @@ const Game = () => {
       <ambientLight intensity={1.2} />
       <spotLight position={[0, 10, 0]} angle={1} />
       <Board />
-      <Connection cellFrom={[-2, -2]} cellTo={[5, 5]}/>
+      <Connection cellFrom={[-2, -2]} cellTo={[10, -5]}/>
       {/* Here you can add your agents, targets, and obstacles. */}
       {agents.map(agent => (
         agent.life > 0 && (

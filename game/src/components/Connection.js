@@ -1,25 +1,32 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { 
   CONNECTION_SPHERE_RADIUS,
-  NB_SPEHERES_PER_DIST_UNIT 
+  NB_SPEHERES_PER_DIST_UNIT,
+  COLOR_CONNECTION_SPHERE,
 } from '../libs/constants';
 
-export default function Connection({ cellFrom, cellTo }) {
-  
-  // ref 
+function ConnectionSphere({ position, timeOffset }) {
   const ref = useRef();
 
-  // Animate the connection
   useFrame(({ clock }) => {
     if (ref.current) {
-      const time = clock.elapsedTime;
-      const scale = 1 + Math.sin(time * 5) * 0.1;  // Scale the spheres based on time
+      const time = clock.elapsedTime + timeOffset;
+      const scale = 1 + Math.sin(time * 5) * 0.3;  // Scale the sphere based on time
       ref.current.scale.set(scale, scale, scale);
     }
   });
 
+  return (
+    <mesh ref={ref} position={[position.x, 0, position.z]}>
+      <sphereBufferGeometry attach='geometry' args={[CONNECTION_SPHERE_RADIUS, 32, 32]} />
+      <meshStandardMaterial attach='material' color={COLOR_CONNECTION_SPHERE} />
+    </mesh>
+  );
+}
+
+export default function Connection({ cellFrom, cellTo }) {
   // If there is no cellFrom or cellTo, return null
   if (!cellFrom || !cellTo) return null;
 
@@ -38,16 +45,14 @@ export default function Connection({ cellFrom, cellTo }) {
   const spherePositions = [];
   for (let i = 0; i < numSpheres+1; i++) {
     const position = start.clone().add(direction.clone().multiplyScalar(i * distance / numSpheres));
-    spherePositions.push(position);
+    const timeOffset = i / numSpheres;  // Calculate the time offset based on the sphere index
+    spherePositions.push({ position, timeOffset });
   }
 
   return (
     <>
-      {spherePositions.map((position, index) => (
-        <mesh key={index} ref={ref} position={[position.x, 0, position.z]}>
-          <sphereBufferGeometry attach='geometry' args={[CONNECTION_SPHERE_RADIUS, 32, 32]} />
-          <meshStandardMaterial attach='material' color='#00ff00' />
-        </mesh>
+      {spherePositions.map(({ position, timeOffset }, index) => (
+        <ConnectionSphere key={index} position={position} timeOffset={timeOffset}/>
       ))}
     </>
   );
