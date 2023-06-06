@@ -79,6 +79,8 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
   // Parse the response JSON
   const { thoughts, action } = await response.json();
 
+  console.log(getAgentState(newCurrentAgent, turn), thoughts, action)
+
   // Update agent thinking 
   const finalAgent = {
     ...newCurrentAgent,

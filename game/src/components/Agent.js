@@ -15,6 +15,7 @@ import {
   COLOR_BUBBLE_BORDER,
   COLOR_FONT,
   DEBUG,
+  THOUGHT_BUBBLE_DURATION
 } from '../libs/constants';
 
 
@@ -65,7 +66,7 @@ const Agent = ({ agent, isCurrent }) => {
       setShowThoughts(true);
       closeThoughtsTimeout.current = setTimeout(() => {
         setShowThoughts(false);
-      }, 7000);
+      }, THOUGHT_BUBBLE_DURATION);
     }
   }, [thoughts]);
 

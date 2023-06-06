@@ -1,7 +1,7 @@
 import React, { useState, createContext } from 'react'
 import { initGameState } from '../libs/initialization';
 import { computeSight, computeVisibleCells } from '../libs/sight';
-import { NB_ACTIONS_PER_TURN, CONNECTION_DURATION } from '../libs/constants';
+import { NB_ACTIONS_PER_TURN, CONNECTION_DURATION, THOUGHT_BUBBLE_DURATION } from '../libs/constants';
 
 export const GameContext = createContext()
 
@@ -64,21 +64,24 @@ const updateSight = (newTurn) => {
     newTurn.current += 1;
     newTurn.agentId = newTurn.order[newTurn.current % newTurn.order.length]
 
-    // Remove actions, thoughts and messages of previous agent
-    setAgents(prev => {
-      const newAgents = prev.map(agent => {
-        if (agent.id === turn.agentId) {
-          return {
-            ...agent,
-            actions: [],
-            thoughts: [],
-            messages: [],
+    // Timeout Remove actions, thoughts and messages of previous agent
+    // Timeout cause we want to see the last action of the agent
+    setTimeout(() => {
+      setAgents(prev => {
+        const newAgents = prev.map(agent => {
+          if (agent.id === turn.agentId) {
+            return {
+              ...agent,
+              actions: [],
+              thoughts: [],
+              messages: [],
+            }
           }
-        }
-        return agent;
-      });
-      return newAgents;
-    })
+          return agent;
+        });
+        return newAgents;
+      })
+    }, THOUGHT_BUBBLE_DURATION);
 
     // Update sight of new agent
     updateSight(newTurn);
