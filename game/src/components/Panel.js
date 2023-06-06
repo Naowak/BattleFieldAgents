@@ -126,7 +126,7 @@ export default function Panel () {
           
           {/* Messages, thoughts and actions */}
           <h4 style={styles.itemTitle}>Messages:</h4>
-          <p style={styles.thoughts}>
+          <p style={styles.messages}>
             {currentAgent.messages.length > 0 ?
               currentAgent.messages.map(m => `- ${m}\n`)
               : 'No message received.\n\n'

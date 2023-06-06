@@ -24,7 +24,7 @@ const BOARD_TRANSLATE_Y = -1;
 
 // Obstacles
 const OBSTACLE_TRANSLATE_Y = 0;
-const NB_OBSTACLES = 15;
+const NB_OBSTACLES = 18;
 
 // Connection
 const CONNECTION_SPHERE_RADIUS = 0.15;
