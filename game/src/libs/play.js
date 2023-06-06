@@ -142,6 +142,12 @@ const getPossibleAttacks = (agent) => {
   );
 }
 
+const getPossibleSpeaks = (agent) => {
+  return agent.sight.filter(o => o.kind === 'agents' && o.team === agent.team).map(
+    o => `SPEAK [${o.position[0]}, ${o.position[1]}]`
+  );
+}
+
 // Function that converts an agent's sight and infos to a state
 const getAgentState = (agent, turn) => {
 
@@ -150,6 +156,9 @@ const getAgentState = (agent, turn) => {
 
   // Compute which cell he can attack
   const possibleAttacks = getPossibleAttacks(agent);
+
+  // Compute which cell he can speak
+  const possibleSpeaks = getPossibleSpeaks(agent);
 
   // Create state
   const state = {}
@@ -175,7 +184,7 @@ const getAgentState = (agent, turn) => {
   )
   state['Obstacles'] = agent.sight.filter(o => o.kind === 'obstacles').map(o => o.position);
   state['Actions Left'] = `${NB_ACTIONS_PER_TURN - turn.actions}/${NB_ACTIONS_PER_TURN}`;
-  state['Possible Actions'] = [...possibleMoves, ...possibleAttacks];
+  state['Possible Actions'] = [...possibleMoves, ...possibleAttacks, ...possibleSpeaks];
   return state;
 }
 
@@ -187,10 +196,11 @@ const readAIAction = (action, turn, agents, targets, obstacles, setAgents, setBu
 
     // Check if move is possible
     const possibleMoves = getPossibleMoves(currAgent);
-    const cell = action.slice(6, -1).split(',').map(o => parseInt(o));
+    const match = action.match(/MOVE \[(\-*\d+), (\-*\d+)\]/);
+    const cell = match ? [parseInt(match[1]), parseInt(match[2])] : null;
     const possible = possibleMoves.find(o => o === action) !== undefined;
 
-    if (possible) {
+    if (possible && cell) {
       const adjacantCells = {      
         up: [currAgent.position[0], currAgent.position[1] - 1],
         down: [currAgent.position[0], currAgent.position[1] + 1],
@@ -206,12 +216,26 @@ const readAIAction = (action, turn, agents, targets, obstacles, setAgents, setBu
 
     // Check if attack is possible
     const possibleAttacks = getPossibleAttacks(currAgent);
-    const cell = action.slice(8, -1).split(',').map(o => parseInt(o));
+    const match = action.match(/ATTACK \[(\-*\d+), (\-*\d+)\]/);
+    const cell = match ? [parseInt(match[1]), parseInt(match[2])] : null;
     const possible = possibleAttacks.find(o => o === action) !== undefined;
 
-    if (possible) {
+    if (possible && cell) {
       const attackArgs = [turn, agents, setBullets];
       return () => handleAttack(cell, ...attackArgs)
+    }
+  } else if (action.slice(0, 5) === 'SPEAK') {
+
+    // Check if speak is possible
+    const possibleSpeaks = getPossibleSpeaks(currAgent);
+    const match = action.match(/SPEAK \[(\-*\d+), (\-*\d+)\] (.+)/);
+    const cell = match ? [parseInt(match[1]), parseInt(match[2])] : null;
+    const message = match ? match[3] : null;
+    const possible = possibleSpeaks.find(o => o === action) !== undefined;
+
+    if (possible && cell && message) {
+      const speakArgs = [turn, agents, setAgents];
+      //return () => handleSpeak(cell, message, ...speakArgs)
     }
   }
 

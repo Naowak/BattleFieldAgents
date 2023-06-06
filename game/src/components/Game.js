@@ -6,6 +6,7 @@ import Agent from './Agent';
 import Target from './Target';
 import Obstacle from './Obstacle';
 import Bullet from './Bullet';
+import Connection from './Connection';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
 import { COLOR_BG_GAME, COLOR_FONT, NB_ACTIONS_PER_TURN } from '../libs/constants';
@@ -78,6 +79,7 @@ const Game = () => {
       <ambientLight intensity={1.2} />
       <spotLight position={[0, 10, 0]} angle={1} />
       <Board />
+      <Connection cellFrom={[-2, -2]} cellTo={[5, 5]}/>
       {/* Here you can add your agents, targets, and obstacles. */}
       {agents.map(agent => (
         agent.life > 0 && (
