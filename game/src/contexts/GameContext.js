@@ -1,7 +1,7 @@
 import React, { useState, createContext } from 'react'
 import { initGameState } from '../libs/initialization';
 import { computeSight, computeVisibleCells } from '../libs/sight';
-import { NB_ACTIONS_PER_TURN } from '../libs/constants';
+import { NB_ACTIONS_PER_TURN, CONNECTION_DURATION } from '../libs/constants';
 
 export const GameContext = createContext()
 
@@ -18,6 +18,7 @@ export default function GameContextProvider (props) {
   const [bullets, setBullets] = useState(init.bullets);
   const [obstacles, setObstacles] = useState(init.obstacles);
   const [visibleCells, setVisibleCells] = useState(init.visibleCells); // only for debug
+  const [connection, setConnection] = useState(init.connection);
   const [animationQueue, setAnimationQueue] = useState(init.animationQueue);
   const [animationRunning, setAnimationRunning] = useState(init.animationRunning);
 
@@ -102,6 +103,20 @@ export default function GameContextProvider (props) {
     setTargets(newTargets);
   };
 
+  // Update Connection (active animation) and timeout the end of animation
+  const updateConnection = (newConnection) => {
+    setConnection({
+      cellFrom: newConnection.cellFrom,
+      cellTo: newConnection.cellTo,
+    });
+    setTimeout(() => {
+      setConnection({
+        cellFrom: null,
+        cellTo: null,
+      });
+    }, CONNECTION_DURATION)
+  };
+
   return (
     <GameContext.Provider value={{ 
       win, setWin,
@@ -111,6 +126,7 @@ export default function GameContextProvider (props) {
       bullets, setBullets,
       obstacles, setObstacles,
       visibleCells, setVisibleCells,
+      connection, setConnection: updateConnection,
       animationQueue, setAnimationQueue,
       animationRunning, setAnimationRunning,
       nextAction,

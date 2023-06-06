@@ -1,5 +1,5 @@
 import { NB_ACTIONS_PER_TURN, BOARD_SIZE } from './constants';
-import { handleMove, handleAttack } from './actions';
+import { handleMove, handleAttack, handleSpeak } from './actions';
 
 // EXPORTS
 
@@ -42,7 +42,7 @@ const playKeyboard = (event, waitingInput, turn, win, agents, targets, obstacles
 
 
 // Function called when key "A" is pressed, to play the AI
-const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBullets, animationRunning, animationQueue, setAnimationQueue, nextAction) => {
+const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBullets, setConnection, animationRunning, animationQueue, setAnimationQueue, nextAction) => {
 
   // Prevent more than NB_ACTIONS_PER_TURN actions per turn
   if (turn.actions === NB_ACTIONS_PER_TURN || animationRunning || animationQueue.length !== 0 || win) {
@@ -98,7 +98,7 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
   // Add action to animation queue and start animation
   try {
     // Read action
-    const animation = readAIAction(action, turn, agents, targets, obstacles, setAgents, setBullets);
+    const animation = readAIAction(action, turn, agents, targets, obstacles, setAgents, setBullets, setConnection);
     if (animation) {
       setAnimationQueue([...animationQueue, animation]);
       nextAction();
@@ -188,7 +188,7 @@ const getAgentState = (agent, turn) => {
   return state;
 }
 
-const readAIAction = (action, turn, agents, targets, obstacles, setAgents, setBullets) => {
+const readAIAction = (action, turn, agents, targets, obstacles, setAgents, setBullets, setConnection) => {
 
   const currAgent = agents.find(o => o.id === turn.agentId);
 
@@ -234,8 +234,8 @@ const readAIAction = (action, turn, agents, targets, obstacles, setAgents, setBu
     const possible = possibleSpeaks.find(o => o === action) !== undefined;
 
     if (possible && cell && message) {
-      const speakArgs = [turn, agents, setAgents];
-      //  return () => handleSpeak(cell, message, ...speakArgs)
+      const speakArgs = [turn, agents, setAgents, setConnection];
+      return () => handleSpeak(cell, message, ...speakArgs)
     }
   }
 

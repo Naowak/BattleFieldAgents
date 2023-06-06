@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { 
   CONNECTION_SPHERE_RADIUS,
-  NB_SPEHERES_PER_DIST_UNIT,
+  CONNECTION_NB_SPEHERES_PER_DIST_UNIT,
   COLOR_CONNECTION_SPHERE,
 } from '../libs/constants';
 
@@ -39,7 +39,7 @@ export default function Connection({ cellFrom, cellTo }) {
   const direction = end.clone().sub(start).normalize();
 
   // Calculate the number of spheres to create
-  const numSpheres = Math.floor(distance * NB_SPEHERES_PER_DIST_UNIT);
+  const numSpheres = Math.floor(distance * CONNECTION_NB_SPEHERES_PER_DIST_UNIT);
 
   // Create an array of sphere positions
   const spherePositions = [];

@@ -22,6 +22,7 @@ const Game = () => {
     targets,
     bullets, setBullets, 
     obstacles,
+    connection, setConnection,
     animationQueue, setAnimationQueue,
     animationRunning, setAnimationRunning,
     newGame,
@@ -43,7 +44,7 @@ const Game = () => {
 
   // Play with AI, each turn at once
   useEffect(() => {
-    const func = (event) => event.key === 'a' && playAI(turn, win, agents, targets, obstacles, setAgents, setBullets, animationRunning, animationQueue, setAnimationQueue, nextAction);
+    const func = (event) => event.key === 'a' && playAI(turn, win, agents, targets, obstacles, setAgents, setBullets, setConnection, animationRunning, animationQueue, setAnimationQueue, nextAction);
     window.addEventListener('keydown', func);
     return () => {
       window.removeEventListener('keydown', func);
@@ -79,8 +80,11 @@ const Game = () => {
       <ambientLight intensity={1.2} />
       <spotLight position={[0, 10, 0]} angle={1} />
       <Board />
-      <Connection cellFrom={[-2, -2]} cellTo={[10, -5]}/>
-      {/* Here you can add your agents, targets, and obstacles. */}
+      {/*  Custom components  */}
+      <Connection 
+        cellFrom={connection.cellFrom} 
+        cellTo={connection.cellTo}
+      />
       {agents.map(agent => (
         agent.life > 0 && (
           <Agent 

@@ -111,6 +111,10 @@ const initGameState = () => {
     agents,
     obstacles,
     visibleCells,
+    connection: {
+      cellFrom: null,
+      cellTo: null,
+    },
     bullets: [],
     animationQueue: [],
     animationRunning: false,

@@ -102,8 +102,52 @@ const handleAttack = (position, turn, agents, setBullets) => {
   return true;
 };
 
+const handleSpeak = (cell, message, turn, agents, setAgents, setConnection) => {
+
+  // Find the agent in the gameState
+  const currentAgent = agents.find((agent) => agent.id === turn.agentId);
+
+  // If the agent is not found, return
+  if (!currentAgent) {
+    return false;
+  }
+
+  // Find target agent
+  const targetAgent = agents.find((agent) => {
+    return JSON.stringify(agent.position) === JSON.stringify(cell);
+  });
+
+  // If the target agent is not found, return
+  if (!targetAgent) {
+    return false;
+  }
+
+  // Launch animation
+  setConnection({
+    cellFrom: currentAgent.position,
+    cellTo: targetAgent.position,
+  });
+
+  // Update agent : add message to its messages
+  setAgents(prev => {
+    const newAgents = prev.map((agent) => {
+      if (agent.id === currentAgent.id) {
+        return {
+          ...agent,
+          messages: [...agent.messages, message],
+        }
+      }
+      return agent;
+    });
+    return newAgents;
+  })
+
+
+};
+
 
 export {
   handleMove,
-  handleAttack
+  handleAttack,
+  handleSpeak,
 };
