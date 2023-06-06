@@ -64,25 +64,21 @@ const updateSight = (newTurn) => {
     newTurn.current += 1;
     newTurn.agentId = newTurn.order[newTurn.current % newTurn.order.length]
 
-    // Timeout Remove actions, thoughts and messages of previous agent
-    // Timeout cause we want to see the last action of the agent
-    setTimeout(() => {
-      console.log(turn, 'timeout')
-      setAgents(prev => {
-        const newAgents = prev.map(agent => {
-          if (agent.id === turn.agentId) {
-            return {
-              ...agent,
-              actions: [],
-              thoughts: [],
-              messages: [],
-            }
+    // Remove actions, thoughts and messages of previous agent
+    setAgents(prev => {
+      const newAgents = prev.map(agent => {
+        if (agent.id === turn.agentId) {
+          return {
+            ...agent,
+            actions: [],
+            thoughts: [],
+            messages: [],
           }
-          return agent;
-        });
-        return newAgents;
-      })
-    }, THOUGHT_BUBBLE_DURATION);
+        }
+        return agent;
+      });
+      return newAgents;
+    })
 
     // Update sight of new agent
     updateSight(newTurn);

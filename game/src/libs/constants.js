@@ -33,7 +33,7 @@ const CONNECTION_DURATION = 3000;
 
 // Others
 const NB_AGENTS_PER_TEAM = 3;
-const NB_ACTIONS_PER_TURN = 3;
+const NB_ACTIONS_PER_TURN = 1;
 const THOUGHT_BUBBLE_DURATION = 7000;
 const PRECISION = 3;  // Number of decimal places for position coordinates
 const SPAWN_RANGE = 3;  // Range of cells around the target where the agents can spawn

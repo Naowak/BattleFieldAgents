@@ -25,7 +25,8 @@ const Agent = ({ agent, isCurrent }) => {
   
   const ref = useRef();  
   const { setAnimationRunning, updateSight } = useContext(GameContext);
-  const [showThoughts, setShowThoughts] = useState(false); 
+  const [currentThoughts, setCurrentThoughts] = useState(''); 
+  const [currentAction, setCurrentAction] = useState('');
   const closeThoughtsTimeout = useRef(null);
   let upDown = 1;  // Used to animate the agent up and down
 
@@ -56,19 +57,21 @@ const Agent = ({ agent, isCurrent }) => {
   useEffect(() => {
     if (thinking) {
       clearTimeout(closeThoughtsTimeout.current);
-      setShowThoughts(false);
+      setCurrentThoughts('');
+      setCurrentAction('');
     }
   }, [thinking]);
 
   // Show agent thought when he stops thinking
   useEffect(() => {
     if (thoughts.length > 0) {
-      setShowThoughts(true);
+      setCurrentThoughts(`${thoughts[thoughts.length - 1]}`);
+      setCurrentAction(`${actions[actions.length - 1]}`);
       closeThoughtsTimeout.current = setTimeout(() => {
-        setShowThoughts(false);
+        setCurrentThoughts('');
       }, THOUGHT_BUBBLE_DURATION);
     }
-  }, [thoughts]);
+  }, [thoughts, actions]);
 
   const styles = {
     thinking: {
@@ -97,7 +100,7 @@ const Agent = ({ agent, isCurrent }) => {
       backgroundColor: COLOR_BUBBLE_AGENT,
       color: COLOR_FONT,
     },
-    showThoughts: {
+    currentThoughts: {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -122,16 +125,16 @@ const Agent = ({ agent, isCurrent }) => {
       <meshStandardMaterial attach='material' color={team === 'red' ? COLOR_RED : COLOR_BLUE} />
 
       {/* Thoughts */}
-      {showThoughts && !thinking && (
+      {currentThoughts && !thinking && (
         <Html position={[0, AGENT_BUBBLE_TRANSLATE_Y, 0]} center>
-          <div style={styles.showThoughts}>
-            <p style={{margin: 0, padding: 0}}>{thoughts[thoughts.length - 1]}</p>
-            <p style={{margin: 0, padding: 0}}>{actions[actions.length - 1]}</p>
+          <div style={styles.currentThoughts}>
+            <p style={{margin: 0, padding: 0}}>{currentThoughts}</p>
+            <p style={{margin: 0, padding: 0}}>{currentAction}</p>
           </div>
         </Html>
       )}
       {/* Alert current player */}
-      {isCurrent && !thinking && !showThoughts && (
+      {isCurrent && !thinking && !currentThoughts && (
         <Html position={[0, AGENT_BUBBLE_TRANSLATE_Y, 0]} center>
           <div style={styles.waiting}>
             <p style={{margin: 0, padding: 0, fontWeight: 'bold'}}>!</p>
@@ -139,7 +142,7 @@ const Agent = ({ agent, isCurrent }) => {
         </Html>
       )}
       {/* Thinking */}
-      {isCurrent && thinking && !showThoughts && (
+      {isCurrent && thinking && !currentThoughts && (
         <Html position={[0, AGENT_BUBBLE_TRANSLATE_Y, 0]} center>
           <div style={styles.thinking}>
             <div className="spinner"/>
