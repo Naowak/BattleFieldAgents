@@ -45,7 +45,7 @@ export default function Connection({ cellFrom, cellTo }) {
   const spherePositions = [];
   for (let i = 0; i < numSpheres+1; i++) {
     const position = start.clone().add(direction.clone().multiplyScalar(i * distance / numSpheres));
-    const timeOffset = i / numSpheres;  // Calculate the time offset based on the sphere index
+    const timeOffset = (numSpheres + 1 - i) / numSpheres;  // Calculate the time offset based on the sphere index
     spherePositions.push({ position, timeOffset });
   }
 
