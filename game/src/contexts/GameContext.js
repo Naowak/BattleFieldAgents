@@ -67,6 +67,7 @@ const updateSight = (newTurn) => {
     // Timeout Remove actions, thoughts and messages of previous agent
     // Timeout cause we want to see the last action of the agent
     setTimeout(() => {
+      console.log(turn, 'timeout')
       setAgents(prev => {
         const newAgents = prev.map(agent => {
           if (agent.id === turn.agentId) {

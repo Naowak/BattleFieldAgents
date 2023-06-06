@@ -233,7 +233,8 @@ const readAIAction = (action, turn, agents, targets, obstacles, setAgents, setBu
     const match = action.match(/SPEAK \[(-*\d+), (-*\d+)\] (.+)/);
     const cell = match ? [parseInt(match[1]), parseInt(match[2])] : null;
     const message = match ? match[3] : null;
-    const possible = possibleSpeaks.find(o => o === action) !== undefined;
+    const actionToTest = match ? `SPEAK [${cell[0]}, ${cell[1]}]` : null;
+    const possible = possibleSpeaks.find(o => o === actionToTest) !== undefined;
 
     if (possible && cell && message) {
       const speakArgs = [turn, agents, setAgents, setConnection];

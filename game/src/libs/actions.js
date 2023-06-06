@@ -131,7 +131,7 @@ const handleSpeak = (cell, message, turn, agents, setAgents, setConnection) => {
   // Update agent : add message to its messages
   setAgents(prev => {
     const newAgents = prev.map((agent) => {
-      if (agent.id === currentAgent.id) {
+      if (agent.id === targetAgent.id) {
         return {
           ...agent,
           messages: [...agent.messages, message],
