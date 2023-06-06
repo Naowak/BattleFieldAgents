@@ -161,6 +161,7 @@ const getAgentState = (agent, turn) => {
 
   // Create state
   const state = {}
+  state['Messages'] = [...agent.messages];
   agent.thoughts.forEach((thought, index) => {
     state['Thoughts ' + index] = thought;
   });
