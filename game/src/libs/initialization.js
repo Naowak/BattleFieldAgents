@@ -64,6 +64,7 @@ const initGameState = () => {
         thinking: false,
         thoughts: [],
         actions: [],
+        messages: [],
       });
       selectedPositions.push(position);
     }

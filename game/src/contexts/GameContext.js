@@ -39,14 +39,16 @@ export default function GameContextProvider (props) {
   };
 
   // Update Current Agent Sight
-  const updateSight = (newTurn) => {
+const updateSight = (newTurn) => {
+  setAgents(prevAgents => {
     const curTurn = newTurn ? newTurn : turn;
-    let newAgents = [...agents];
-    const currentAgent = newAgents.find(agent => agent.id === curTurn.agentId);
-    currentAgent.sight = computeSight(currentAgent, agents, obstacles, targets);
-    setVisibleCells(computeVisibleCells(currentAgent, agents, obstacles, targets));
-    setAgents(newAgents);
-  };
+    const currentAgent = prevAgents.find(agent => agent.id === curTurn.agentId);
+    const newAgents = [...prevAgents];
+    currentAgent.sight = computeSight(currentAgent, prevAgents, obstacles, targets);
+    setVisibleCells(computeVisibleCells(currentAgent, prevAgents, obstacles, targets));
+    return newAgents;
+  });
+};
 
   // Next action
   const nextAction = () => {
@@ -56,12 +58,33 @@ export default function GameContextProvider (props) {
 
   // Return the next turn
   const nextTurn = () => {
+    // Create new turn
     let newTurn = { ...turn };
     newTurn.actions = 0;
     newTurn.current += 1;
     newTurn.agentId = newTurn.order[newTurn.current % newTurn.order.length]
-    setTurn(newTurn);
+
+    // Remove actions, thoughts and messages of previous agent
+    setAgents(prev => {
+      const newAgents = prev.map(agent => {
+        if (agent.id === turn.agentId) {
+          return {
+            ...agent,
+            actions: [],
+            thoughts: [],
+            messages: [],
+          }
+        }
+        return agent;
+      });
+      return newAgents;
+    })
+
+    // Update sight of new agent
     updateSight(newTurn);
+
+    // Set new turn
+    setTurn(newTurn);
   };
 
   // check win

@@ -56,7 +56,6 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
   const newCurrentAgent = {
     ...currentAgent,
     thinking: true,
-    thoughts: turn.actions === 0 ? [] : currentAgent.thoughts, // reset thoughts at the begin of the turn
   };
   const newAgents = agents.map(agent => {
     if (agent.id === currentAgent.id) {
