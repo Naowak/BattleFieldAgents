@@ -19,12 +19,12 @@ const TARGET_RADIUS = 0.3;
 const TARGET_BUBBLE_TRANSLATE_Y = 1;
 
 // Board
-const BOARD_SIZE = 5;
+const BOARD_SIZE = 6;
 const BOARD_TRANSLATE_Y = -1;
 
 // Obstacles
 const OBSTACLE_TRANSLATE_Y = 0;
-const NB_OBSTACLES = 18;
+const NB_OBSTACLES = 22;
 
 // Connection
 const CONNECTION_SPHERE_RADIUS = 0.15;
@@ -32,7 +32,7 @@ const CONNECTION_NB_SPEHERES_PER_DIST_UNIT = 2.5;
 const CONNECTION_DURATION = 7000;
 
 // Others
-const NB_AGENTS_PER_TEAM = 3;
+const NB_AGENTS_PER_TEAM = 4;
 const NB_ACTIONS_PER_TURN = 2;
 const THOUGHT_BUBBLE_DURATION = 7000;
 const PRECISION = 3;  // Number of decimal places for position coordinates

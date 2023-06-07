@@ -68,9 +68,7 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
   // Set a timeout of X second for the fetch request
   let response;
   const controller = new AbortController();
-  const timeout = setTimeout(() => {
-    controller.abort();
-  }, FETCH_TIMEOUT);
+  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
 
   
   try {
