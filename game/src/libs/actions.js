@@ -134,7 +134,7 @@ const handleSpeak = (cell, message, turn, agents, setAgents, setConnection) => {
       if (agent.id === targetAgent.id) {
         return {
           ...agent,
-          messages: [...agent.messages, message],
+          messages: [...agent.messages, { turn: turn.current, sender: agent.id, position: agent.position, message }],
         }
       }
       return agent;

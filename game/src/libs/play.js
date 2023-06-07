@@ -66,28 +66,26 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
   setAgents(newAgents);
 
   // Set a timeout of X second for the fetch request
+  let response;
   const controller = new AbortController();
   const timeout = setTimeout(() => {
     controller.abort();
   }, FETCH_TIMEOUT);
+
   
-  // Send a POST request to the API with the current game state
-  const response = await fetch('http://localhost:5000/play_one_turn', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ 
-      state: getAgentState(newCurrentAgent, turn),
-    }),
-    signal: controller.signal // Pass the AbortController's signal to the fetch request
-  });
-
-  // Clear the timeout
-  clearTimeout(timeout);
-
-  // Check if the signal has been aborted
-  if (controller.signal.aborted) {
+  try {
+    // Send a POST request to the API with the current game state
+    response = await fetch('http://localhost:5000/play_one_turn', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ 
+        state: getAgentState(newCurrentAgent, turn),
+      }),
+      signal: controller.signal // Pass the AbortController's signal to the fetch request
+    });
+  } catch (error) {
     // Update agent thinking
     const finalAgent = {
       ...newCurrentAgent,
@@ -100,9 +98,13 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
       return agent;
     });
     setAgents(finalAgents);
-    return;
+    console.log('Error', error);
+    return null;
   }
-  
+
+  // Clear the timeout
+  clearTimeout(timeout);
+
   // Parse the response JSON
   const { thoughts, action } = await response.json();
 
@@ -188,6 +190,7 @@ const getAgentState = (agent, turn) => {
 
   // Create state
   const state = {}
+  state['Turn'] = turn.current;
   state['Messages'] = [...agent.messages];
   agent.thoughts.forEach((thought, index) => {
     state['Thoughts ' + index] = thought;
@@ -198,10 +201,10 @@ const getAgentState = (agent, turn) => {
   state['Your Position'] = agent.position;
   state['Your Health'] = agent.life;
   state['Friends'] = agent.sight.filter(o => o.kind === 'agents' && o.team === agent.team).map(
-    o => ({ position: o.position, health: o.life })
+    o => ({ id: o.id, position: o.position, health: o.life })
   );
   state['Enemies'] = agent.sight.filter(o => o.kind === 'agents' && o.team !== agent.team).map(
-    o => ({ position: o.position, health: o.life })
+    o => ({ id: o.id, position: o.position, health: o.life })
   );
   state['Friend Target'] = agent.sight.filter(o => o.kind === 'targets' && o.team === agent.team).map(
     o => ({ position: o.position, health: o.life })

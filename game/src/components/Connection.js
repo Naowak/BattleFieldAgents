@@ -8,6 +8,7 @@ import {
 } from '../libs/constants';
 
 function ConnectionSphere({ position, timeOffset }) {
+
   const ref = useRef();
 
   useFrame(({ clock }) => {
@@ -27,6 +28,7 @@ function ConnectionSphere({ position, timeOffset }) {
 }
 
 export default function Connection({ cellFrom, cellTo }) {
+  
   // If there is no cellFrom or cellTo, return null
   if (!cellFrom || !cellTo) return null;
 
