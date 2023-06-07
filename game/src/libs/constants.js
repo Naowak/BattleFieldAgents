@@ -33,7 +33,7 @@ const CONNECTION_DURATION = 7000;
 
 // Others
 const NB_AGENTS_PER_TEAM = 3;
-const NB_ACTIONS_PER_TURN = 1;
+const NB_ACTIONS_PER_TURN = 2;
 const THOUGHT_BUBBLE_DURATION = 7000;
 const PRECISION = 3;  // Number of decimal places for position coordinates
 const SPAWN_RANGE = 3;  // Range of cells around the target where the agents can spawn
@@ -51,7 +51,7 @@ const COLOR_RED = '#aa4444';
 const COLOR_BLUE = '#444499';
 const COLOR_OBSTACLE = '#6a6a6a';
 const COLOR_OBSTACLE_BORDER = '#686868';
-const COLOR_CONNECTION_SPHERE = '#ffcc44';
+const COLOR_CONNECTION_SPHERE = '#ffaa44';
 const COLOR_BG_GAME = '#111111';
 const COLOR_BG_PANEL = '#222222';
 const COLOR_BUBBLE_AGENT = 'rgba(58, 58, 58, 0.7)';
