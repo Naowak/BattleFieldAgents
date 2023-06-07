@@ -62,8 +62,7 @@ const initGameState = () => {
         life: AGENT_LIFE,
         shaking: false,
         thinking: false,
-        thoughts: [],
-        actions: [],
+        historic: [],
         messages: [],
       });
       selectedPositions.push(position);

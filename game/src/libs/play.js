@@ -114,8 +114,7 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
   const finalAgent = {
     ...newCurrentAgent,
     thinking: false,
-    thoughts: [...newCurrentAgent.thoughts, thoughts],
-    actions: [...newCurrentAgent.actions, action],
+    historic: [...newCurrentAgent.historic, { turn: turn.current, actionNumber: turn.actions, thoughts, action }],
   };
   const finalAgents = agents.map(agent => {
     if (agent.id === newCurrentAgent.id) {
@@ -194,12 +193,7 @@ const getAgentState = (agent, turn) => {
   const state = {}
   state['Turn'] = turn.current;
   state['Messages'] = [...agent.messages];
-  agent.thoughts.forEach((thought, index) => {
-    state['Thoughts ' + index] = thought;
-  });
-  agent.actions.forEach((action, index) => {
-    state['Action ' + index] = action;
-  });
+  state['Historic'] = [...agent.historic];
   state['Your Position'] = agent.position;
   state['Your Health'] = agent.life;
   state['Friends'] = agent.sight.filter(o => o.kind === 'agents' && o.team === agent.team).map(

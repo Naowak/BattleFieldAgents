@@ -104,13 +104,13 @@ export default function Panel () {
       whiteSpace: "pre-line",
       textAlign: currentAgent.messages.length > 0 ? 'left' : 'center',
     },
-    thoughts: {
+    historic: {
       width: '90%',
       margin: 3,
       padding: 0,
       fontSize: 16,
       whiteSpace: "pre-line",
-      textAlign: currentAgent.thoughts.length > 0 ? 'left' : 'center',
+      textAlign: currentAgent.historic.length > 0 ? 'left' : 'center',
     }
   }
 
@@ -159,9 +159,11 @@ export default function Panel () {
               }
             </p>
             <h4 style={styles.itemTitle}>Thoughts & Actions:</h4>
-            <p style={styles.thoughts}>
-              {currentAgent.thoughts.length > 0 ?
-                currentAgent.thoughts.map((t, i) => `${i+1}. ${t}\n\n${currentAgent.actions[i]}\n\n`)
+            <p style={styles.historic}>
+              {currentAgent.historic.length > 0 ?
+                currentAgent.historic.map(({ turn, actionNumber, thoughts, action }) => 
+                  `${turn+1}.${actionNumber+1}. ${thoughts}\n\n${action}\n\n`
+                )
                 : 'No thoughts & actions yet.\n\n'
               }
             </p>

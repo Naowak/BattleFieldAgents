@@ -62,22 +62,7 @@ const updateSight = (newTurn) => {
     let newTurn = { ...turn };
     newTurn.actions = 0;
     newTurn.current += 1;
-    newTurn.agentId = newTurn.order[newTurn.current % newTurn.order.length]
-
-    // Remove actions, thoughts and messages of previous agent
-    setAgents(prev => {
-      const newAgents = prev.map(agent => {
-        if (agent.id === turn.agentId) {
-          return {
-            ...agent,
-            actions: [],
-            thoughts: [],
-          }
-        }
-        return agent;
-      });
-      return newAgents;
-    })
+    newTurn.agentId = newTurn.order[newTurn.current % newTurn.order.length];
 
     // Update sight of new agent
     updateSight(newTurn);

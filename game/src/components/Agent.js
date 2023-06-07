@@ -21,7 +21,7 @@ import {
 
 const Agent = ({ agent, isCurrent }) => {
 
-  const { team, position, initialPosition, thinking, thoughts, actions, shaking } = agent;
+  const { team, position, initialPosition, thinking, historic, shaking } = agent;
   
   const ref = useRef();  
   const { setAnimationRunning, updateSight } = useContext(GameContext);
@@ -64,14 +64,15 @@ const Agent = ({ agent, isCurrent }) => {
 
   // Show agent thought when he stops thinking
   useEffect(() => {
-    if (thoughts.length > 0) {
-      setCurrentThoughts(`${thoughts[thoughts.length - 1]}`);
-      setCurrentAction(`${actions[actions.length - 1]}`);
+
+    if (historic.length > 0) {
+      setCurrentThoughts(`${historic[historic.length - 1].thoughts}`);
+      setCurrentAction(`${historic[historic.length - 1].action}`);
       closeThoughtsTimeout.current = setTimeout(() => {
         setCurrentThoughts('');
       }, THOUGHT_BUBBLE_DURATION);
     }
-  }, [thoughts, actions]);
+  }, [historic]);
 
   const styles = {
     thinking: {
