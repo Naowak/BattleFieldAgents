@@ -6,7 +6,7 @@ import {
   NB_OBSTACLES,
   SPAWN_RANGE
 } from './constants';
-import { computeSight, computeVisibleCells } from './sight';
+import { computeSight, computeVisibleCells, computeLastPosSeen } from './sight';
 
 // Pick a random position on the board and remove it from the list of available positions
 const pickRandomPosition = (positions) => {
@@ -64,6 +64,7 @@ const initGameState = () => {
         thinking: false,
         historic: [],
         messages: [],
+        lastPosSeen: {},
       });
       selectedPositions.push(position);
     }
@@ -85,28 +86,33 @@ const initGameState = () => {
     });
   }
 
-  // Compute sight for each agent
-  agents.forEach((agent) => {
-    agent.sight = computeSight(agent, agents, obstacles, targets); 
-  });
-
   // Create the order of the turns
   const order = []
   for (let i = 0; i < NB_AGENTS_PER_TEAM; i++) {
     order.push(`agent_red_${i}`);
     order.push(`agent_blue_${i}`);
   }
-
+  
   // Init visibleCells (usefull for the first turn: in debug mode to see fov)
   const visibleCells = computeVisibleCells(agents.find(a => a.id === order[0]), agents, obstacles, targets);
+  
+  // Create a random order of agents
+  const turn = {
+    current: 0,
+    actions: 0,
+    order: order,
+    agentId: order[0],
+  };
+  
+  // Compute sight and lastPosSeen for each agent
+  agents.forEach((agent) => {
+    agent.sight = computeSight(agent, agents, obstacles, targets); 
+    agent.lastPosSeen = computeLastPosSeen(agent, turn);
+  });
+
 
   return {
-    turn: {
-      current: 0,
-      actions: 0,
-      order: order,
-      agentId: order[0],
-    },
+    turn,
     targets,
     agents,
     obstacles,

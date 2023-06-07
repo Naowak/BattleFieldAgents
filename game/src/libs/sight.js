@@ -77,6 +77,14 @@ const computeSight = (agent, agents, obstacles, targets) => {
   return sight;
 };
 
+// Find new position of an agent or a target in sight, update the agent's prevPosSeen
+const computeLastPosSeen = (agent, turn) => {
+  const lastPosSeen = { ...agent.lastPosSeen };
+  agent.sight.filter(o => o.kind === 'agents' || o.kind === 'targets')
+    .forEach(o => lastPosSeen[o.id] = { position: o.position, turn: turn.current });
+  return lastPosSeen;
+}
+
 const sightToText = (agent) => {
   let text = '';
   const friends = agent.sight.filter(o => o.kind === 'agents' && o.team === agent.team);
@@ -97,4 +105,5 @@ export {
   computeVisibleCells,
   computeSight,
   sightToText,
+  computeLastPosSeen,
 }

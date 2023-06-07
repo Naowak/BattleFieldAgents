@@ -1,6 +1,6 @@
 import React, { useState, createContext } from 'react'
 import { initGameState } from '../libs/initialization';
-import { computeSight, computeVisibleCells } from '../libs/sight';
+import { computeSight, computeVisibleCells, computeLastPosSeen } from '../libs/sight';
 import { NB_ACTIONS_PER_TURN, CONNECTION_DURATION } from '../libs/constants';
 
 export const GameContext = createContext()
@@ -39,16 +39,17 @@ export default function GameContextProvider (props) {
   };
 
   // Update Current Agent Sight
-const updateSight = (newTurn) => {
-  setAgents(prevAgents => {
-    const curTurn = newTurn ? newTurn : turn;
-    const currentAgent = prevAgents.find(agent => agent.id === curTurn.agentId);
-    const newAgents = [...prevAgents];
-    currentAgent.sight = computeSight(currentAgent, prevAgents, obstacles, targets);
-    setVisibleCells(computeVisibleCells(currentAgent, prevAgents, obstacles, targets));
-    return newAgents;
-  });
-};
+  const updateSight = (newTurn) => {
+    setAgents(prevAgents => {
+      const curTurn = newTurn ? newTurn : turn;
+      const currentAgent = prevAgents.find(agent => agent.id === curTurn.agentId);
+      const newAgents = [...prevAgents];
+      currentAgent.sight = computeSight(currentAgent, prevAgents, obstacles, targets);
+      currentAgent.lastPosSeen = computeLastPosSeen(currentAgent, curTurn);
+      setVisibleCells(computeVisibleCells(currentAgent, prevAgents, obstacles, targets));
+      return newAgents;
+    });
+  };
 
   // Next action
   const nextAction = () => {
