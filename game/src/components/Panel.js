@@ -154,7 +154,7 @@ export default function Panel () {
             <h4 style={styles.itemTitle}>Messages:</h4>
             <p style={styles.messages}>
               {currentAgent.messages.length > 0 ?
-                currentAgent.messages.map(({ turn, sender, position, message }) => `${turn} - ${sender} - ${position}:\n${message}\n\n`)
+                currentAgent.messages.map(({ turn, sender, position, message }) => `${sender}: ${message}\nPosition: [${position[0]}, ${position[1]}]\nTurn: ${turn}\n\n`)
                 : 'No message received.\n\n'
               }
             </p>

@@ -72,7 +72,6 @@ const updateSight = (newTurn) => {
             ...agent,
             actions: [],
             thoughts: [],
-            messages: [],
           }
         }
         return agent;
