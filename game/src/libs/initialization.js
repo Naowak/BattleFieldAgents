@@ -32,7 +32,7 @@ const initGameState = () => {
     const position = pickRandomPosition(positions);
     targets.push({
       kind: 'targets',
-      id: i,
+      id: ['target_red', 'target_blue'][i],
       position,
       team: ['red', 'blue'][i],
       life: TARGET_LIFE,
@@ -54,7 +54,7 @@ const initGameState = () => {
       const position = pickRandomPosition(availablePositions);
       agents.push({
         kind: 'agents',
-        id: `${['red', 'blue'][i]}_${j}`,
+        id: `${['agent_red', 'agent_blue'][i]}_${j}`,
         initialPosition: position,
         position,
         sight: [],
@@ -80,7 +80,7 @@ const initGameState = () => {
     const position = pickRandomPosition(positions);
     obstacles.push({
       kind: 'obstacles',
-      id: i,
+      id: `obstacle_${i}`,
       position,
     });
   }
@@ -93,8 +93,8 @@ const initGameState = () => {
   // Create the order of the turns
   const order = []
   for (let i = 0; i < NB_AGENTS_PER_TEAM; i++) {
-    order.push(`red_${i}`);
-    order.push(`blue_${i}`);
+    order.push(`agent_red_${i}`);
+    order.push(`agent_blue_${i}`);
   }
 
   // Init visibleCells (usefull for the first turn: in debug mode to see fov)
