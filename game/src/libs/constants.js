@@ -38,6 +38,7 @@ const THOUGHT_BUBBLE_DURATION = 7000;
 const PRECISION = 3;  // Number of decimal places for position coordinates
 const SPAWN_RANGE = 3;  // Range of cells around the target where the agents can spawn
 const SIGHT_RANGE = 99;  // Range of cells around the agent where it can see
+const FETCH_TIMEOUT = 15000;  // Timeout for fetch requests
 const DEBUG = false;
 
 // Colors
@@ -93,6 +94,7 @@ export {
   PRECISION,
   SPAWN_RANGE,
   SIGHT_RANGE,
+  FETCH_TIMEOUT,
   DEBUG,
 
   COLOR_CELL_1,

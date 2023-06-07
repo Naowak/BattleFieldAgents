@@ -1,4 +1,4 @@
-import { NB_ACTIONS_PER_TURN, BOARD_SIZE } from './constants';
+import { NB_ACTIONS_PER_TURN, BOARD_SIZE, FETCH_TIMEOUT } from './constants';
 import { handleMove, handleAttack, handleSpeak } from './actions';
 
 // EXPORTS
@@ -64,6 +64,12 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
     return agent;
   });
   setAgents(newAgents);
+
+  // Set a timeout of X second for the fetch request
+  const controller = new AbortController();
+  const timeout = setTimeout(() => {
+    controller.abort();
+  }, FETCH_TIMEOUT);
   
   // Send a POST request to the API with the current game state
   const response = await fetch('http://localhost:5000/play_one_turn', {
@@ -73,13 +79,32 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
     },
     body: JSON.stringify({ 
       state: getAgentState(newCurrentAgent, turn),
-    })
+    }),
+    signal: controller.signal // Pass the AbortController's signal to the fetch request
   });
+
+  // Clear the timeout
+  clearTimeout(timeout);
+
+  // Check if the signal has been aborted
+  if (controller.signal.aborted) {
+    // Update agent thinking
+    const finalAgent = {
+      ...newCurrentAgent,
+      thinking: false,
+    };
+    const finalAgents = agents.map(agent => {
+      if (agent.id === newCurrentAgent.id) {
+        return finalAgent;
+      }
+      return agent;
+    });
+    setAgents(finalAgents);
+    return;
+  }
   
   // Parse the response JSON
   const { thoughts, action } = await response.json();
-
-  console.log(getAgentState(newCurrentAgent, turn), thoughts, action)
 
   // Update agent thinking 
   const finalAgent = {
