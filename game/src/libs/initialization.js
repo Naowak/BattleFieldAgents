@@ -30,8 +30,8 @@ const initGameState = () => {
   const targets = [];
   const targetsPosition = [[3, 3], [-3, -3]];
   for (let i = 0; i < 2; i++) {
-    //const position = pickRandomPosition(positions);
-    const position = targetsPosition[i];
+    const position = pickRandomPosition(positions);
+    //const position = targetsPosition[i];
     const index = positions.findIndex((pos) => JSON.stringify(pos) === JSON.stringify(position));
     positions.splice(index, 1);
     targets.push({
