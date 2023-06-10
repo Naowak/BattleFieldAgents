@@ -1,7 +1,7 @@
-import React, { useRef, useContext, useEffect, useState, Suspense, useMemo } from 'react';
+import React, { useRef, useContext, useEffect, useState } from 'react';
 import { GameContext } from '../contexts/GameContext';
-import { useFrame, useGraph } from '@react-three/fiber';
-import { Html, useGLTF, useAnimations } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
+import { Html } from '@react-three/drei';
 import { agentMovement } from '../libs/movements';
 import { shake as shakeAgent } from '../libs/animations';
 import { 
@@ -17,7 +17,7 @@ import {
   DEBUG,
   THOUGHT_BUBBLE_DURATION
 } from '../libs/constants';
-import { SkeletonUtils } from "three-stdlib"
+
 
 const Agent = ({ agent, isCurrent }) => {
 
@@ -29,22 +29,6 @@ const Agent = ({ agent, isCurrent }) => {
   const [currentAction, setCurrentAction] = useState('');
   const closeThoughtsTimeout = useRef(null);
   let upDown = 1;  // Used to animate the agent up and down
-
-  // Load the agent model and copy it
-  const { scene, materials, animations } = useGLTF('/agent.glb')
-  const clone = useMemo(() => SkeletonUtils.clone(scene), [scene])
-  const { nodes } = useGraph(clone)
-  const { actions } = useAnimations(animations, ref)
-
-  // const { nodes, materials, animations } = useMemo( () => {
-  //   return scene.clone(true)
-  // }, [scene])
-  // const { actions } = useAnimations(animations, ref)
-
-  useEffect(() => {
-    console.log(actions)
-    actions.run.play()
-  }, [])
 
   useFrame(() => {
 
@@ -137,52 +121,45 @@ const Agent = ({ agent, isCurrent }) => {
   }
 
   return (
-    <Suspense fallback={null}>
-      <group ref={ref} scale={0.75} position={[initialPosition[0], AGENT_TRANSLATE_Y, initialPosition[1]]} dispose={null}>
-        <group name="Scene">
-          <group name="Armature" rotation={[Math.PI / 2, 0, 0]} scale={0.01}>
-            <primitive object={nodes.mixamorigHips} />
-            <skinnedMesh name="Beta_Joints" geometry={nodes.Beta_Joints.geometry} material={materials.Beta_Joints_MAT1} skeleton={nodes.Beta_Joints.skeleton} />
-            <skinnedMesh name="Beta_Surface" geometry={nodes.Beta_Surface.geometry} material={materials.Beta_HighLimbsGeoSG3} skeleton={nodes.Beta_Surface.skeleton} />
-          </group>
-        </group>
+    <mesh ref={ref} position={[initialPosition[0], AGENT_TRANSLATE_Y, initialPosition[1]]}>
+      <capsuleBufferGeometry attach='geometry' args={[AGENT_RADIUS, AGENT_RADIUS, 32, 32]} />
+      <meshStandardMaterial attach='material' color={team === 'red' ? COLOR_RED : COLOR_BLUE} />
 
-        {/* Thoughts */}
-        {currentThoughts && !thinking && (
-          <Html position={[0, AGENT_BUBBLE_TRANSLATE_Y, 0]} center>
-            <div style={styles.currentThoughts}>
-              <p style={{margin: 0, padding: 0}}>{currentThoughts}</p>
-              <p style={{margin: 0, padding: 0}}>{currentAction}</p>
-            </div>
-          </Html>
-        )}
-        {/* Alert current player */}
-        {isCurrent && !thinking && !currentThoughts && (
-          <Html position={[0, AGENT_BUBBLE_TRANSLATE_Y, 0]} center>
-            <div style={styles.waiting}>
-              <p style={{margin: 0, padding: 0, fontWeight: 'bold'}}>!</p>
-            </div>
-          </Html>
-        )}
-        {/* Thinking */}
-        {isCurrent && thinking && !currentThoughts && (
-          <Html position={[0, AGENT_BUBBLE_TRANSLATE_Y, 0]} center>
-            <div style={styles.thinking}>
-              <div className="spinner"/>
-              <p style={{margin: 0, padding: 0, marginLeft: 5}}>Thinking...</p>
-            </div>
-          </Html>
-        )}
-        {/* DEBUG Coords */}
-        {DEBUG &&
-          <Html position={[0, 0, 0]} center>
-            <div>
-              <p style={{margin: 0, padding: 0, fontWeight: 'bold'}}>{position[0]},{position[1]}</p>
-            </div>
-          </Html>
-        }
-      </group>
-    </Suspense>
+      {/* Thoughts */}
+      {currentThoughts && !thinking && (
+        <Html position={[0, AGENT_BUBBLE_TRANSLATE_Y, 0]} center>
+          <div style={styles.currentThoughts}>
+            <p style={{margin: 0, padding: 0}}>{currentThoughts}</p>
+            <p style={{margin: 0, padding: 0}}>{currentAction}</p>
+          </div>
+        </Html>
+      )}
+      {/* Alert current player */}
+      {isCurrent && !thinking && !currentThoughts && (
+        <Html position={[0, AGENT_BUBBLE_TRANSLATE_Y, 0]} center>
+          <div style={styles.waiting}>
+            <p style={{margin: 0, padding: 0, fontWeight: 'bold'}}>!</p>
+          </div>
+        </Html>
+      )}
+      {/* Thinking */}
+      {isCurrent && thinking && !currentThoughts && (
+        <Html position={[0, AGENT_BUBBLE_TRANSLATE_Y, 0]} center>
+          <div style={styles.thinking}>
+            <div className="spinner"/>
+            <p style={{margin: 0, padding: 0, marginLeft: 5}}>Thinking...</p>
+          </div>
+        </Html>
+      )}
+      {/* DEBUG Coords */}
+      {DEBUG &&
+        <Html position={[0, 0, 0]} center>
+          <div>
+            <p style={{margin: 0, padding: 0, fontWeight: 'bold'}}>{position[0]},{position[1]}</p>
+          </div>
+        </Html>
+      }
+    </mesh>
   );
 };
 
