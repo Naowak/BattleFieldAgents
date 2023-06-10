@@ -102,7 +102,7 @@ const initGameState = () => {
   
   // Create a random order of agents
   const turn = {
-    current: 0,
+    current: 1,
     actions: 0,
     order: order,
     agentId: order[0],

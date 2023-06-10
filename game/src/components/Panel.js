@@ -123,7 +123,7 @@ export default function Panel () {
         <h2 style={styles.panelTitle}>Turn Details</h2>
         <div style={styles.line}>
           <h4 style={styles.itemTitle}>Current Turn: </h4>
-          <h4 style={styles.itemValue}>{turn.current + 1}</h4>
+          <h4 style={styles.itemValue}>{turn.current}</h4>
         </div>
         <div style={styles.line}>
           <h4 style={styles.itemTitle}>Actions Done: </h4>
