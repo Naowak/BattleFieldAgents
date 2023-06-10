@@ -30,20 +30,25 @@ const Agent = ({ agent, isCurrent }) => {
   const closeThoughtsTimeout = useRef(null);
   let upDown = 1;  // Used to animate the agent up and down
 
-  // Load the agent model and copy it
+  // Load the agent model, copy it, change its color 
   const { scene, materials, animations } = useGLTF('/agent.glb')
   const clone = useMemo(() => SkeletonUtils.clone(scene), [scene])
+  const clonedMaterials = useMemo(() => {
+    const newMat = {
+      main: materials['Beta_HighLimbsGeoSG3.001'].clone(true),
+      joints: materials['Beta_Joints_MAT1.001'].clone(true),
+    }
+    newMat.main.color.set(team === "red" ? COLOR_RED : COLOR_BLUE)
+    newMat.joints.color.set(team === "red" ? COLOR_RED : COLOR_BLUE)
+    return newMat
+  }, [materials])
+
   const { nodes } = useGraph(clone)
   const { actions } = useAnimations(animations, ref)
 
-  // const { nodes, materials, animations } = useMemo( () => {
-  //   return scene.clone(true)
-  // }, [scene])
-  // const { actions } = useAnimations(animations, ref)
-
   useEffect(() => {
     console.log(actions)
-    actions.run.play()
+    actions.die.play()
   }, [])
 
   useFrame(() => {
@@ -142,8 +147,8 @@ const Agent = ({ agent, isCurrent }) => {
         <group name="Scene">
           <group name="Armature" rotation={[Math.PI / 2, 0, 0]} scale={0.01}>
             <primitive object={nodes.mixamorigHips} />
-            <skinnedMesh name="Beta_Joints" geometry={nodes.Beta_Joints.geometry} material={materials.Beta_Joints_MAT1} skeleton={nodes.Beta_Joints.skeleton} />
-            <skinnedMesh name="Beta_Surface" geometry={nodes.Beta_Surface.geometry} material={materials.Beta_HighLimbsGeoSG3} skeleton={nodes.Beta_Surface.skeleton} />
+            <skinnedMesh name="Beta_Joints" geometry={nodes.Beta_Joints.geometry} material={clonedMaterials?.main} skeleton={nodes.Beta_Joints.skeleton} />
+            <skinnedMesh name="Beta_Surface" geometry={nodes.Beta_Surface.geometry} material={clonedMaterials?.joints} skeleton={nodes.Beta_Surface.skeleton} />
           </group>
         </group>
 
