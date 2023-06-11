@@ -16,16 +16,18 @@ const playKeyboard = (event, waitingInput, turn, win, agents, targets, obstacles
   // Prevent actions if animation is running
   waitingInput.current = true;
 
+  
   // Define arguments
+  const currAgent = agents.find(agent => agent.id === turn.agentId);
   const moveArgs = [turn, agents, targets, obstacles, setAgents];
   const attackArgs = [turn, agents, setBullets];
 
   // Define actions
   const actions = {
-    'ArrowUp': () => handleMove('up', ...moveArgs),
-    'ArrowDown': () => handleMove('down', ...moveArgs),
-    'ArrowLeft': () => handleMove('left', ...moveArgs),
-    'ArrowRight': () => handleMove('right', ...moveArgs),
+    'ArrowUp': () => handleMove([currAgent.position[0], currAgent.position[1] - 1], ...moveArgs),
+    'ArrowDown': () => handleMove([currAgent.position[0], currAgent.position[1] + 1], ...moveArgs),
+    'ArrowLeft': () => handleMove([currAgent.position[0] - 1, currAgent.position[1]], ...moveArgs),
+    'ArrowRight': () => handleMove([currAgent.position[0] + 1, currAgent.position[1]], ...moveArgs),
     ' ': () => handleAttack(null, ...attackArgs),
     'Enter': () => newGame(),
   }

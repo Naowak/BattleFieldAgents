@@ -33,7 +33,7 @@ const CONNECTION_DURATION = 7000;
 
 // Others
 const NB_AGENTS_PER_TEAM = 4;
-const NB_ACTIONS_PER_TURN = 2;
+const NB_ACTIONS_PER_TURN = 3;
 const NB_CELLS_MAX_PER_MOVE = 3;
 const THOUGHT_BUBBLE_DURATION = 7000;
 const PRECISION = 3;  // Number of decimal places for position coordinates
