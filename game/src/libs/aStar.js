@@ -1,4 +1,4 @@
-import { BOARD_SIZE } from './constants';
+import { BOARD_SIZE, NB_CELLS_MAX_PER_MOVE } from './constants';
 
 // Manhattan distance heuristic
 function heuristic(nodeA, nodeB) {
@@ -27,6 +27,10 @@ function reconstructPath(cameFrom, current) {
   while (cameFrom.has(current.toString())) {
     current = cameFrom.get(current.toString());
     totalPath.unshift(current);
+  }
+  // Limit the path to NB_MAX_CELLS_PER_MOVE
+  if (totalPath.length > NB_CELLS_MAX_PER_MOVE) {
+    return [];
   }
   return totalPath;
 }

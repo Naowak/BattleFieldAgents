@@ -11,7 +11,6 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
 import { COLOR_BG_GAME, COLOR_FONT, NB_ACTIONS_PER_TURN } from '../libs/constants';
 import { playAI, playKeyboard } from '../libs/play';
-import { aStar } from '../libs/aStar';
 
 const Game = () => {
 
@@ -30,8 +29,6 @@ const Game = () => {
     nextAction,
     nextTurn,
   } = useContext(GameContext);
-
-  // console.log(aStar([0, 0], [4, 4], [...obstacles, ...targets, ...agents].map(o => o.position)))
 
   // Refs
   const waitingInput = useRef(false);

@@ -1,5 +1,6 @@
-import { NB_ACTIONS_PER_TURN, BOARD_SIZE, FETCH_TIMEOUT } from './constants';
+import { NB_ACTIONS_PER_TURN, BOARD_SIZE, FETCH_TIMEOUT, NB_CELLS_MAX_PER_MOVE } from './constants';
 import { handleMove, handleAttack, handleSpeak } from './actions';
+import { aStar } from './aStar';
 
 // EXPORTS
 
@@ -79,7 +80,7 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ 
-        state: getAgentState(newCurrentAgent, turn),
+        state: getAgentState(newCurrentAgent, turn, agents, targets, obstacles),
       }),
       signal: controller.signal // Pass the AbortController's signal to the fetch request
     });
@@ -106,7 +107,7 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
   // Parse the response JSON
   const { thoughts, action } = await response.json();
 
-  console.log(getAgentState(newCurrentAgent, turn), thoughts, action);
+  console.log(getAgentState(newCurrentAgent, turn, agents, targets, obstacles), thoughts, action);
 
   // Update agent thinking 
   const finalAgent = {
@@ -147,21 +148,25 @@ export {
 
 
 // FUNCTIONS
-const getPossibleMoves = (agent) => {
-  const adjacantCells = [
-    [agent.position[0], agent.position[1] - 1],
-    [agent.position[0], agent.position[1] + 1],
-    [agent.position[0] - 1, agent.position[1]],
-    [agent.position[0] + 1, agent.position[1]],
-  ];
-  const possibleMoves = []
-  adjacantCells.forEach(cell => {
-    const free = agent.sight.find(o => o.position[0] === cell[0] && o.position[1] === cell[1]) === undefined;
-    const inBoard = cell[0] >= -BOARD_SIZE && cell[0] <= BOARD_SIZE && cell[1] >= -BOARD_SIZE && cell[1] <= BOARD_SIZE;
-    if (free && inBoard) possibleMoves.push(`MOVE [${cell[0]}, ${cell[1]}]`)
-  });
-  return possibleMoves;
+
+// Return all cells that are reachable by the agent
+const getPossibleMoves = (agent, forbidden_cells) => {
+  
+  // Compute all cells that are in range NB_CELLS_MAX_PER_MOVE in manhattan distance
+  const cellsInRange = [];
+  for (let i = -NB_CELLS_MAX_PER_MOVE; i <= NB_CELLS_MAX_PER_MOVE; i++) {
+    for (let j = -NB_CELLS_MAX_PER_MOVE; j <= NB_CELLS_MAX_PER_MOVE; j++) {
+      if (Math.abs(i) + Math.abs(j) <= NB_CELLS_MAX_PER_MOVE) {
+        cellsInRange.push([agent.position[0] + i, agent.position[1] + j]);
+      }
+    }
+  }
+
+  // Filter out cells that have no path to them
+  const possibleMoves = cellsInRange.filter(c => aStar(agent.position, c, forbidden_cells) !== null)
+  return possibleMoves.map(c => `MOVE [${c[0]}, ${c[1]}]`);
 }
+
 
 const getPossibleAttacks = (agent) => {
   return agent.sight.filter(o => ((o.kind === 'agents' || o.kind === 'targets') && o.team !== agent.team)).map(
@@ -176,10 +181,10 @@ const getPossibleSpeaks = (agent) => {
 }
 
 // Function that converts an agent's sight and infos to a state
-const getAgentState = (agent, turn) => {
+const getAgentState = (agent, turn, agents, targets, obstacles) => {
 
   // Compute which movement are possible
-  const possibleMoves = getPossibleMoves(agent);
+  const possibleMoves = getPossibleMoves(agent, [...agents, ...targets, ...obstacles].map(o => o.position));
 
   // Compute which cell he can attack
   const possibleAttacks = getPossibleAttacks(agent);
@@ -226,15 +231,8 @@ const readAIAction = (action, turn, agents, targets, obstacles, setAgents, setBu
     const possible = possibleMoves.find(o => o === action) !== undefined;
 
     if (possible && cell) {
-      const adjacantCells = {      
-        up: [currAgent.position[0], currAgent.position[1] - 1],
-        down: [currAgent.position[0], currAgent.position[1] + 1],
-        left: [currAgent.position[0] - 1, currAgent.position[1]],
-        right: [currAgent.position[0] + 1, currAgent.position[1]],
-      };
-      const direction = Object.keys(adjacantCells).find(o => adjacantCells[o][0] === cell[0] && adjacantCells[o][1] === cell[1]);
       const moveArgs = [turn, agents, targets, obstacles, setAgents];
-      return () => handleMove(direction, ...moveArgs)
+      return () => handleMove(cell, ...moveArgs)
     }
 
   } else if (action.slice(0, 6) === 'ATTACK') {
