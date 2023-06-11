@@ -63,7 +63,7 @@ export default function GameContextProvider (props) {
     let newTurn = { ...turn };
     newTurn.actions = 0;
     newTurn.current += 1;
-    newTurn.agentId = newTurn.order[newTurn.current % newTurn.order.length];
+    newTurn.agentId = newTurn.order[(newTurn.current-1) % newTurn.order.length];
 
     // Update sight of new agent
     updateSight(newTurn);

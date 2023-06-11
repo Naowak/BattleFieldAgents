@@ -14,10 +14,11 @@ const handleMove = (targetCell, turn, agents, targets, obstacles, setAgents) => 
   const currentPosition = agents[agentIndex].position;
 
   // Calculate the path to the target cell
-  const path = aStar(currentPosition, targetCell, obstacles, agents, targets);
+  const path = aStar(currentPosition, targetCell, [...targets, ...obstacles, ...agents].map(o => o.position));
 
   // Check if a path was found
   if (path.length === 0) {
+    console.log('No path found')
     return false;
   }
 

@@ -162,8 +162,8 @@ const getPossibleMoves = (agent, forbidden_cells) => {
     }
   }
 
-  // Filter out cells that have no path to them
-  const possibleMoves = cellsInRange.filter(c => aStar(agent.position, c, forbidden_cells) !== null)
+  // Filter out cells that have no path to them (and the ones that are occupied or out of bounds)
+  const possibleMoves = cellsInRange.filter(c => aStar(agent.position, c, forbidden_cells).length > 0);
   return possibleMoves.map(c => `MOVE [${c[0]}, ${c[1]}]`);
 }
 
