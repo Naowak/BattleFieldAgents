@@ -28,7 +28,7 @@ const initGameState = () => {
 
   // Create one target per team
   const targets = [];
-  const targetsPosition = [[3, 3], [-3, -3]];
+  //const targetsPosition = [[3, 3], [-3, -3]];
   for (let i = 0; i < 2; i++) {
     const position = pickRandomPosition(positions);
     //const position = targetsPosition[i];

@@ -1,4 +1,4 @@
-import { NB_ACTIONS_PER_TURN, BOARD_SIZE, FETCH_TIMEOUT, NB_CELLS_MAX_PER_MOVE } from './constants';
+import { NB_ACTIONS_PER_TURN, FETCH_TIMEOUT, NB_CELLS_MAX_PER_MOVE } from './constants';
 import { handleMove, handleAttack, handleSpeak } from './actions';
 import { aStar } from './aStar';
 
