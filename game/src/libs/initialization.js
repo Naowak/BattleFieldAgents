@@ -61,6 +61,7 @@ const initGameState = () => {
         id: `${['agent_red', 'agent_blue'][i]}_${j}`,
         initialPosition: position,
         position,
+        path: [],
         sight: [],
         team: ['red', 'blue'][i],
         life: AGENT_LIFE,

@@ -1,13 +1,8 @@
 import { BOARD_SIZE } from './constants';
+import { aStar } from '../libs/aStar';
 
-const handleMove = (direction, turn, agents, targets, obstacles, setAgents) => {
 
-  // Create vector in the direction of the move
-  let directionVector = [0, 0];
-  if (direction === 'right') { directionVector[0] = 1; } 
-  else if (direction === 'left') { directionVector[0] = -1; } 
-  else if (direction === 'up') { directionVector[1] = -1; } 
-  else if (direction === 'down') { directionVector[1] = 1; }
+const handleMove = (targetCell, turn, agents, targets, obstacles, setAgents) => {
     
   // Find the agent in the gameState
   const agentIndex = agents.findIndex((agent) => agent.id === turn.agentId);
@@ -15,55 +10,33 @@ const handleMove = (direction, turn, agents, targets, obstacles, setAgents) => {
     return false;
   }
 
-  // Calculate new position based on direction
-  let newPosition = [...agents[agentIndex].position];
-  newPosition[0] += directionVector[0];
-  newPosition[1] += directionVector[1];
+  // Get the current position of the agent
+  const currentPosition = agents[agentIndex].position;
 
-  // Check if new position is valid (not colliding with obstacles)
-  const obstacleCollision = obstacles.some((obstacle) => {
-    return JSON.stringify(obstacle.position) === JSON.stringify(newPosition);
-  });
+  // Calculate the path to the target cell
+  const path = aStar(currentPosition, targetCell, obstacles, agents, targets);
 
-  // Check if new position is valid (not colliding with other agents)
-  const agentCollision = agents.some((agent) => {
-    // Check if agent is dead
-    if (!turn.order.includes(agent.id)) {
-      return false;
-    }
-    return JSON.stringify(agent.position) === JSON.stringify(newPosition);
-  });
-
-  // Check if new position is valid (not colliding with targets)
-  const targetCollision = targets.some((target) => {
-    return JSON.stringify(target.position) === JSON.stringify(newPosition);
-  });
-
-  // Check if new position is valid (not out of bounds)
-  const outOfBounds = newPosition.some((coord) => {
-    return Math.abs(coord) > BOARD_SIZE;
-  });
-
-  if (!obstacleCollision && !agentCollision && !targetCollision && !outOfBounds) {
-
-    // Update agent
-    setAgents(prev => {
-      const newAgents = prev.map((agent, index) => {
-        if (index === agentIndex) {
-          return {
-            ...agent,
-            position: newPosition,
-          }
-        }
-        return agent;
-      });
-      return newAgents;
-    });
-    
-    return true;
+  // Check if a path was found
+  if (path.length === 0) {
+    return false;
   }
-  
-  return false;
+
+  // Move the agent to the next cell in the path
+  setAgents(prev => {
+    const newAgents = prev.map((agent, index) => {
+      if (index === agentIndex) {
+        return {
+          ...agent,
+          position: path[0],  // Move to the next cell in the path
+          path: path.slice(1),  // Store the remaining path
+        }
+      }
+      return agent;
+    });
+    return newAgents;
+  });
+
+  return true;
 };
 
 const handleAttack = (position, turn, agents, setBullets) => {

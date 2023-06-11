@@ -21,15 +21,16 @@ import {
 
 const Agent = ({ agent, isCurrent }) => {
 
-  const { team, position, initialPosition, thinking, historic, shaking } = agent;
+  const { team, position, initialPosition, path, thinking, historic, shaking } = agent;
   
   const ref = useRef();  
-  const { setAnimationRunning, updateSight } = useContext(GameContext);
+  const { setAnimationRunning, updateSight, setAgents } = useContext(GameContext);
   const [currentThoughts, setCurrentThoughts] = useState(''); 
   const [currentAction, setCurrentAction] = useState('');
   const closeThoughtsTimeout = useRef(null);
   let upDown = 1;  // Used to animate the agent up and down
 
+  // Update agent position
   useFrame(() => {
 
     if (ref.current) {
@@ -38,11 +39,24 @@ const Agent = ({ agent, isCurrent }) => {
       if (ref.current.position.y >= AGENT_TOP_HEIGHT) { upDown = -1; }
       if (ref.current.position.y <= AGENT_TRANSLATE_Y) { upDown = 1; }
 
-      if (ref.current.position.x !== position[0] || ref.current.position.z !== position[1]) {
-        // Move the agent
-        const arrived = agentMovement(ref, position, upDown);
+      // Move the agent if he has a path
+      if (path && path.length > 0) {
+        const arrived = agentMovement(ref, path[0], upDown);
         arrived && setAnimationRunning(false);
         arrived && updateSight()
+        arrived && setAgents(prev => {
+          const newAgents = prev.map((a) => {
+            if (a.id === agent.id) {
+              return {
+                ...a,
+                position: path[0],
+                path: path.slice(1),  // Remove the first cell from the path
+              }
+            }
+            return a;
+          });
+          return newAgents;
+        });
       }
 
       // Shake the agent when it gets hit
