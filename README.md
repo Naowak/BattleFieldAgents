@@ -1,7 +1,5 @@
 # BattleFieldAgents
 
-![BattleFieldAgents Logo](https://placehold.co/700x90/ffffff/000000?text=BattleFieldAgents)
-
 BattleFieldAgents is a strategic video game project that utilizes OpenAI's GPT-4, a large language model (LLM), to control agents within the game. The agents are designed to make strategic decisions based on their surroundings, and can even explain their reasoning behind their actions. The ultimate goal of the project is to have these LLM Agents communicate and coordinate strategies with each other.
 
 ![BattleFieldAgents Screenshot](illustration.png)
