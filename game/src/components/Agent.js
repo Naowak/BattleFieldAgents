@@ -32,19 +32,25 @@ const Agent = ({ agent, isCurrent }) => {
 
   // Update agent position
   useFrame(() => {
-
     if (ref.current) {
 
       // Apply up and down animation to the agent
       if (ref.current.position.y >= AGENT_TOP_HEIGHT) { upDown = -1; }
       if (ref.current.position.y <= AGENT_TRANSLATE_Y) { upDown = 1; }
 
-      // Move the agent if he has a path
-      if (path && path.length > 0) {
-        const arrived = agentMovement(ref, path[0], upDown);
+      // Move the agent to position
+      if (ref.current.position.x !== position[0] || ref.current.position.z !== position[1]) {
+        const arrived = agentMovement(ref, position, upDown);
         arrived && setAnimationRunning(false);
         arrived && updateSight()
-        arrived && setAgents(prev => {
+      }
+
+      // Update position to follow the path
+      if ( path && path.length > 0 
+        && position[0] === ref.current.position.x 
+        && position[1] === ref.current.position.z 
+      ) {
+        setAgents(prev => {
           const newAgents = prev.map((a) => {
             if (a.id === agent.id) {
               return {
@@ -63,7 +69,6 @@ const Agent = ({ agent, isCurrent }) => {
       if (shaking) {
         shakeAgent(ref);
       }
-      
     }
   });
 
@@ -78,7 +83,6 @@ const Agent = ({ agent, isCurrent }) => {
 
   // Show agent thought when he stops thinking
   useEffect(() => {
-
     if (historic.length > 0) {
       setCurrentThoughts(`${historic[historic.length - 1].thoughts}`);
       setCurrentAction(`${historic[historic.length - 1].action}`);
