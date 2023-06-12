@@ -9,6 +9,7 @@ import {
   AGENT_TRANSLATE_Y,
   AGENT_TOP_HEIGHT,
   AGENT_BUBBLE_TRANSLATE_Y,
+  AGENT_LIFE,
   COLOR_BLUE, 
   COLOR_BLUE_LIGHT,
   COLOR_RED,
@@ -121,6 +122,20 @@ const Agent = ({ agent, isCurrent }) => {
       backgroundColor: COLOR_BUBBLE_AGENT,
       color: COLOR_FONT,
     },
+    hover: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: 120,
+      height: 45,
+      fontSize: 16,
+      gap: 3,
+      borderRadius: 15,
+      border: `1px solid ${COLOR_BUBBLE_BORDER}`,
+      backgroundColor: COLOR_BUBBLE_AGENT,
+      color: COLOR_FONT,
+    },
     currentThoughts: {
       display: 'flex',
       flexDirection: 'column',
@@ -183,8 +198,9 @@ const Agent = ({ agent, isCurrent }) => {
       {/* Hover */}
       {hover?.id === agent.id && (
         <Html position={[0, AGENT_BUBBLE_TRANSLATE_Y, 0]} center>
-          <div style={styles.thinking}>
+          <div style={styles.hover}>
             <p style={{margin: 0, padding: 0, marginLeft: 5}}>{agent.id}</p>
+            <p style={{margin: 0, padding: 0, marginLeft: 5}}>{agent.life} / {AGENT_LIFE}</p>
           </div>
         </Html>
       )}

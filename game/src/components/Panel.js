@@ -38,7 +38,7 @@ export default function Panel () {
       textAlign: 'center',
     },
     panelTurn: {
-      height: '20vh',
+      height: '15vh',
       width: '80%',
       display: 'flex',
       flexDirection: 'column',
@@ -56,7 +56,7 @@ export default function Panel () {
       justifyContent: 'flex-start',
       alignItems: 'center',
       width: '80%',
-      height: '60vh',
+      height: '64vh',
       backgroundColor: COLOR_BUBBLE_AGENT,
       borderRadius: 5,
       paddingBottom: 20,
