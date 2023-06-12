@@ -10,7 +10,9 @@ import {
   AGENT_TOP_HEIGHT,
   AGENT_BUBBLE_TRANSLATE_Y,
   COLOR_BLUE, 
+  COLOR_BLUE_LIGHT,
   COLOR_RED,
+  COLOR_RED_LIGHT,
   COLOR_BUBBLE_AGENT,
   COLOR_BUBBLE_BORDER,
   COLOR_FONT,
@@ -24,7 +26,7 @@ const Agent = ({ agent, isCurrent }) => {
   const { team, position, initialPosition, path, thinking, historic, shaking } = agent;
   
   const ref = useRef();  
-  const { setAnimationRunning, updateSight, setAgents } = useContext(GameContext);
+  const { hover, setAnimationRunning, updateSight, setAgents, setHover } = useContext(GameContext);
   const [currentThoughts, setCurrentThoughts] = useState(''); 
   const [currentAction, setCurrentAction] = useState('');
   const closeThoughtsTimeout = useRef(null);
@@ -139,9 +141,18 @@ const Agent = ({ agent, isCurrent }) => {
   }
 
   return (
-    <mesh ref={ref} position={[initialPosition[0], AGENT_TRANSLATE_Y, initialPosition[1]]}>
+    <mesh 
+      ref={ref} 
+      position={[initialPosition[0], AGENT_TRANSLATE_Y, initialPosition[1]]}
+      onPointerOver={() => setHover(agent)}
+      onPointerOut={() => setHover(null)}
+    >
       <capsuleBufferGeometry attach='geometry' args={[AGENT_RADIUS, AGENT_RADIUS, 32, 32]} />
-      <meshStandardMaterial attach='material' color={team === 'red' ? COLOR_RED : COLOR_BLUE} />
+      <meshStandardMaterial attach='material' color={
+        hover?.id === agent.id ?
+        (team === 'red' ? COLOR_RED_LIGHT : COLOR_BLUE_LIGHT) :
+        (team === 'red' ? COLOR_RED : COLOR_BLUE)
+      } />
 
       {/* Thoughts */}
       {currentThoughts && !thinking && (
@@ -166,6 +177,14 @@ const Agent = ({ agent, isCurrent }) => {
           <div style={styles.thinking}>
             <div className="spinner"/>
             <p style={{margin: 0, padding: 0, marginLeft: 5}}>Thinking...</p>
+          </div>
+        </Html>
+      )}
+      {/* Hover */}
+      {hover?.id === agent.id && (
+        <Html position={[0, AGENT_BUBBLE_TRANSLATE_Y, 0]} center>
+          <div style={styles.thinking}>
+            <p style={{margin: 0, padding: 0, marginLeft: 5}}>{agent.id}</p>
           </div>
         </Html>
       )}

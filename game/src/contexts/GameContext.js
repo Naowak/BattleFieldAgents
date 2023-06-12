@@ -21,6 +21,7 @@ export default function GameContextProvider (props) {
   const [connection, setConnection] = useState(init.connection);
   const [animationQueue, setAnimationQueue] = useState(init.animationQueue);
   const [animationRunning, setAnimationRunning] = useState(init.animationRunning);
+  const [hover, setHover] = useState(null);
 
   // Set up functions
   const removeBullet = (bulletId) => {
@@ -137,6 +138,7 @@ export default function GameContextProvider (props) {
       connection, setConnection: updateConnection,
       animationQueue, setAnimationQueue,
       animationRunning, setAnimationRunning,
+      hover, setHover,
       nextAction,
       nextTurn,
       removeBullet,

@@ -13,8 +13,8 @@ import {
 export default function Panel () {
 
   // Retrieve context
-  const { turn, agents } = useContext(GameContext);
-  const currentAgent = agents.find(agent => agent.id === turn.agentId);
+  const { turn, agents, hover } = useContext(GameContext);
+  const currentAgent = agents.find(agent => hover ? agent.id === hover.id : agent.id === turn.agentId);
   //const currentSight = sightToText(currentAgent);
   
   // Define styles in a JavaScript object
