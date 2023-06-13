@@ -29,14 +29,19 @@ function reconstructPath(cameFrom, current) {
     totalPath.unshift(current);
   }
   // Limit the path to NB_MAX_CELLS_PER_MOVE
-  if (totalPath.length > NB_CELLS_MAX_PER_MOVE) {
+  if (totalPath.length > NB_CELLS_MAX_PER_MOVE + 1) {
     return [];
   }
-  return totalPath;
+  return totalPath.slice(1);
 }
 
 // A* search algorithm
 function aStar(start, goal, forbidden_nodes = []) {
+
+  if (start.toString() === goal.toString()) {
+    return [];
+  }
+
   const openSet = new Set([start]);
   const cameFrom = new Map();
   const gScore = new Map();
