@@ -76,7 +76,7 @@ const playAI = async (turn, win, agents, targets, obstacles, setAgents, setBulle
   
   try {
     // Send a POST request to the API with the current game state
-    response = await fetch('http://localhost:5000/play_one_turn', {
+    response = await fetch('http://127.0.0.1:5000/play_one_turn', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

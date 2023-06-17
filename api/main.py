@@ -63,6 +63,10 @@ def play():
         'action': action
     })
 
+@app.route('/hello', methods=['GET'])
+def hello():
+    return "Hello World!"
+
 
 
 
