@@ -6,8 +6,8 @@ BattleFieldAgents is a strategic video game project that utilizes OpenAI's GPT-4
 
 ## Requirements
 
-* [Python 3.10+](https://www.python.org/downloads/)
-* [Node.js 16+](https://nodejs.org/en/download/)
+* [Python 3.11+](https://www.python.org/downloads/)
+* [Node.js 18+](https://nodejs.org/en/download/)
 * [An OpenAI API Key](https://beta.openai.com/)
 
 Be carefull, the OpenAI API costs money to use. Each action taken by the agents will cost you money (about 0.01$).

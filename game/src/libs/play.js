@@ -199,7 +199,7 @@ const getAgentState = (agent, turn, agents, targets, obstacles) => {
   state['Turn'] = turn.current;
   state['Messages'] = [...agent.messages];
   state['Historic'] = [...agent.historic];
-  state['Last Positions Seen'] = {...agent.lastPosSeen};
+  //state['Last Positions Seen'] = {...agent.lastPosSeen};
   state['Your Position'] = agent.position;
   state['Your Health'] = agent.life;
   state['Friends'] = agent.sight.filter(o => o.kind === 'agents' && o.team === agent.team).map(

@@ -14,7 +14,7 @@ const bulletCollision = (ref, initialPosition, turn, agents, targets, obstacles)
   // Check for collision with agents
   for (let agent of agents) {
     // Check if the agent is dead
-    if (!turn.order.includes(agent.id)) {
+    if (agent.life <= 0) {
       continue;
     }
     // Get agent position

@@ -42,13 +42,6 @@ export default function Bullet ({ bullet }) {
       setAgents(newAgents)
       // Make him shake
       handleShakeItem(collision.agent.id, 'agents', agents, targets, setAgents, setTargets);
-      // Remove agent if dead
-      if (collision.agent.life <= 0) {
-        setTurn(prev => ({  
-          ...prev,
-          order: [...prev.order].filter((id) => id !== collision.agent.id),
-        }));
-      }
     }
 
     else if (collision.kind === 'targets') {

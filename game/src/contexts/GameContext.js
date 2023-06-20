@@ -64,7 +64,11 @@ export default function GameContextProvider (props) {
     let newTurn = { ...turn };
     newTurn.actions = 0;
     newTurn.current += 1;
-    newTurn.agentId = newTurn.order[(newTurn.current-1) % newTurn.order.length];
+
+    // Find next agent
+    const index = (newTurn.order.findIndex(a => a === newTurn.agentId) + 1) % newTurn.order.length;
+    const tempOrder = [...newTurn.order.slice(index), ...newTurn.order.slice(0, index)];
+    newTurn.agentId = tempOrder.find(agentId => agents.find(agent => agent.id === agentId).life > 0);
 
     // Update sight of new agent
     updateSight(newTurn);
