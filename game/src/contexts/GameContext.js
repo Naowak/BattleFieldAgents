@@ -60,15 +60,19 @@ export default function GameContextProvider (props) {
 
   // Return the next turn
   const nextTurn = () => {
-    // Create new turn
+
+    // Reset Actions
     let newTurn = { ...turn };
     newTurn.actions = 0;
-    newTurn.current += 1;
 
-    // Find next agent
-    const index = (newTurn.order.findIndex(a => a === newTurn.agentId) + 1) % newTurn.order.length;
-    const tempOrder = [...newTurn.order.slice(index), ...newTurn.order.slice(0, index)];
-    newTurn.agentId = tempOrder.find(agentId => agents.find(agent => agent.id === agentId).life > 0);
+    // Find next agent and update turn count
+    const index = (newTurn.order.findIndex(a => a === newTurn.agentId) + 1);
+    const tempOrder1 = newTurn.order.slice(index);
+    const tempOrder2 = newTurn.order.slice(0, index);
+    const find1 = tempOrder1.find(agentId => agents.find(a => a.id === agentId).life > 0);
+    const find2 = tempOrder2.find(agentId => agents.find(agent => agent.id === agentId).life > 0);
+    newTurn.agentId = find1 ? find1 : find2;
+    newTurn.current = find1 ? newTurn.current : newTurn.current + 1;
 
     // Update sight of new agent
     updateSight(newTurn);
