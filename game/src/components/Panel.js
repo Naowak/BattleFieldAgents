@@ -13,7 +13,7 @@ import {
 export default function Panel () {
 
   // Retrieve context
-  const { turn, agents, hover } = useContext(GameContext);
+  const { turn, agents, hover, debug, setDebug } = useContext(GameContext);
   const currentAgent = agents.find(agent => hover ? agent.id === hover.id : agent.id === turn.agentId);
   //const currentSight = sightToText(currentAgent);
   
@@ -31,11 +31,13 @@ export default function Panel () {
       color: COLOR_FONT,
     },
     header: {
-      height: '5vh',
+      height: '3vh',
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
       textAlign: 'center',
+      marginTop: 20,
+      marginBottom: 0,
     },
     panelTurn: {
       height: '15vh',
@@ -111,12 +113,29 @@ export default function Panel () {
       fontSize: 16,
       whiteSpace: "pre-line",
       textAlign: currentAgent.historic.length > 0 ? 'left' : 'center',
+    },
+    buttonDebug: {
+      height: '4vh',
+      margin: 0,
+      borderRadius: 5,
+      backgroundColor: COLOR_BUBBLE_AGENT,
+      border: 'none',
+      color: COLOR_FONT,
+      fontSize: 14,
+      padding: 10,
     }
   }
 
   return (
     <div style={styles.container}>
       <h1 style={styles.header}>BattleFieldAgents</h1>
+
+      <button 
+        onClick={() => setDebug(!debug)}
+        style={styles.buttonDebug}
+      >
+        Debug mode: {debug ? 'ON' : 'OFF'}
+      </button>
       
       {/* Turn Details */}
       <div style={styles.panelTurn}>

@@ -1,7 +1,7 @@
 import React, { useState, createContext } from 'react'
 import { initGameState } from '../libs/initialization';
 import { computeSight, computeVisibleCells, computeLastPosSeen } from '../libs/sight';
-import { NB_ACTIONS_PER_TURN, CONNECTION_DURATION } from '../libs/constants';
+import { NB_ACTIONS_PER_TURN, CONNECTION_DURATION, DEBUG } from '../libs/constants';
 
 export const GameContext = createContext()
 
@@ -22,7 +22,8 @@ export default function GameContextProvider (props) {
   const [animationQueue, setAnimationQueue] = useState(init.animationQueue);
   const [animationRunning, setAnimationRunning] = useState(init.animationRunning);
   const [hover, setHover] = useState(null);
-
+  const [debug, setDebug] = useState(DEBUG);
+ 
   // Set up functions
   const removeBullet = (bulletId) => {
     setBullets(prev => [...prev].filter((bullet) => bullet.id !== bulletId));
@@ -147,6 +148,7 @@ export default function GameContextProvider (props) {
       animationQueue, setAnimationQueue,
       animationRunning, setAnimationRunning,
       hover, setHover,
+      debug, setDebug,
       nextAction,
       nextTurn,
       removeBullet,

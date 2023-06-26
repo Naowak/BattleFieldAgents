@@ -17,7 +17,6 @@ import {
   COLOR_BUBBLE_AGENT,
   COLOR_BUBBLE_BORDER,
   COLOR_FONT,
-  DEBUG,
   THOUGHT_BUBBLE_DURATION
 } from '../libs/constants';
 
@@ -27,13 +26,14 @@ const Agent = ({ agent, isCurrent }) => {
   const { team, position, initialPosition, path, thinking, historic, shaking } = agent;
   
   const ref = useRef();  
-  const { hover, setAnimationRunning, updateSight, setAgents, setHover } = useContext(GameContext);
+  const { hover, setAnimationRunning, updateSight, setAgents, setHover, debug } = useContext(GameContext);
   const [currentThoughts, setCurrentThoughts] = useState(''); 
   const [currentAction, setCurrentAction] = useState('');
   const closeThoughtsTimeout = useRef(null);
   let upDown = 1;  // Used to animate the agent up and down
 
   // Update agent position
+
   useFrame(() => {
     if (ref.current) {
 
@@ -179,7 +179,7 @@ const Agent = ({ agent, isCurrent }) => {
         </Html>
       )}
       {/* Alert current player */}
-      {isCurrent && !thinking && !currentThoughts && (
+      {isCurrent && !thinking && !currentThoughts && !hover && (
         <Html position={[0, AGENT_BUBBLE_TRANSLATE_Y, 0]} center>
           <div style={styles.waiting}>
             <p style={{margin: 0, padding: 0, fontWeight: 'bold'}}>!</p>
@@ -205,7 +205,7 @@ const Agent = ({ agent, isCurrent }) => {
         </Html>
       )}
       {/* DEBUG Coords */}
-      {DEBUG &&
+      {debug &&
         <Html position={[0, 0, 0]} center>
           <div>
             <p style={{margin: 0, padding: 0, fontWeight: 'bold'}}>{position[0]},{position[1]}</p>

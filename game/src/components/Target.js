@@ -1,6 +1,7 @@
-import React, { useRef } from 'react';
+import React, { useRef, useContext } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
+import { GameContext } from '../contexts/GameContext';
 import { shake as ShakeTarget } from '../libs/animations';
 import { 
   COLOR_BUBBLE_BORDER,
@@ -17,7 +18,9 @@ import {
 
 const Target = ({ target }) => {
 
+
   const { team, position, life, shaking } = target;
+  const { debug } = useContext(GameContext);
   const ref = useRef();  
 
   useFrame(() => {
@@ -76,6 +79,14 @@ const Target = ({ target }) => {
           <p style={{margin: 0, padding: 0}}>{life} / {TARGET_LIFE}</p>
         </div>
       </Html>
+      {/* DEBUG Coords */}
+      {debug &&
+        <Html position={[position[0], 0, position[1]]} center>
+          <div>
+            <p style={{margin: 0, padding: 0, fontWeight: 'bold'}}>{position[0]},{position[1]}</p>
+          </div>
+        </Html>
+      }
     </>
   );
 };

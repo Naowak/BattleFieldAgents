@@ -69,6 +69,7 @@ const Game = () => {
     }
   }, [animationQueue, animationRunning, setAnimationQueue, setAnimationRunning]);
   
+  
 
   return (
     <Canvas 
