@@ -32,6 +32,12 @@ const Agent = ({ agent, isCurrent }) => {
   const closeThoughtsTimeout = useRef(null);
   let upDown = 1;  // Used to animate the agent up and down
 
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.position.y = AGENT_TRANSLATE_Y;
+    }
+  }, [ref]);
+
   // Update agent position
 
   useFrame(() => {
@@ -46,6 +52,9 @@ const Agent = ({ agent, isCurrent }) => {
         const arrived = agentMovement(ref, position, upDown);
         arrived && setAnimationRunning(false);
         arrived && updateSight()
+      }
+      else {
+        ref.current.position.y = AGENT_TRANSLATE_Y; // attempt to debug the agent staying up
       }
 
       // Update position to follow the path

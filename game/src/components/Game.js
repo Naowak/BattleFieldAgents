@@ -69,11 +69,11 @@ const Game = () => {
     }
   }, [animationQueue, animationRunning, setAnimationQueue, setAnimationRunning]);
   
-  
+
 
   return (
     <Canvas 
-      camera={{ position: [0, 10, 9] }} 
+      camera={{ position: [0, 8, 6] }} 
       style={{ background: COLOR_BG_GAME, flex: 3}}
     >
       <OrbitControls target={[0, 0, 0]} />

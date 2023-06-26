@@ -5,10 +5,16 @@ import {
 
 
 const isInBox = (position, boxPosition, boxRange) => {
-  return position[0] <= boxPosition[0] + boxRange
-  && position[0] >= boxPosition[0] - boxRange
-  && position[1] <= boxPosition[1] + boxRange
-  && position[1] >= boxPosition[1] - boxRange
+  try {
+    return position[0] <= boxPosition[0] + boxRange
+    && position[0] >= boxPosition[0] - boxRange
+    && position[1] <= boxPosition[1] + boxRange
+    && position[1] >= boxPosition[1] - boxRange
+  }
+  catch (e) {
+    console.log(e, boxPosition);
+    return 5/0
+  }
 };
 
 // Check if a ray intersects a cell (position)

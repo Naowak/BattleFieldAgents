@@ -7,8 +7,8 @@ import {
   COLOR_CELL_1,
   COLOR_CELL_2,
   COLOR_CELL_BORDER,
-  COLOR_CELL_VISIBLE_1,
-  COLOR_CELL_VISIBLE_2,
+  //COLOR_CELL_VISIBLE_1,
+  //COLOR_CELL_VISIBLE_2,
 } from '../libs/constants';
 
 const BoardTile = ({ position, color }) => {
@@ -32,7 +32,10 @@ const BoardTile = ({ position, color }) => {
 export default function Board() {
 
   // Retrieve context
-  const { visibleCells, agents, turn, debug } = useContext(GameContext);
+  const { 
+    //visibleCells, 
+    agents, turn, debug 
+  } = useContext(GameContext);
 
   // Compute highlighted cells (visible cells + agent sight)
   const hightlightedCells = [

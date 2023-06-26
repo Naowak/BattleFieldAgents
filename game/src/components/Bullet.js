@@ -19,7 +19,6 @@ export default function Bullet ({ bullet }) {
     agents, 
     targets,
     obstacles,
-    setTurn,
     setAgents,
     setTargets, 
     removeBullet,
