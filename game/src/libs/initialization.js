@@ -17,6 +17,8 @@ const pickRandomPosition = (positions) => {
 };
 
 const initGameState = () => {
+
+  console.log('HELLLOOOOOO')
   
   // Create a list of all the available positions on the board
   const positions = [];

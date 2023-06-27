@@ -4,21 +4,15 @@ import {
 } from './constants.js';
 
 
-const isInBox = (position, boxPosition, boxRange) => {
-  try {
-    return position[0] <= boxPosition[0] + boxRange
+const isInBox = (position, boxPosition, boxRange, h) => {
+  return position[0] <= boxPosition[0] + boxRange
     && position[0] >= boxPosition[0] - boxRange
     && position[1] <= boxPosition[1] + boxRange
     && position[1] >= boxPosition[1] - boxRange
-  }
-  catch (e) {
-    console.log(e, boxPosition);
-    return 5/0
-  }
 };
 
 // Check if a ray intersects a cell (position)
-const intersection = (start, end, position) => {
+const intersection = (start, end, position, h) => {
 
   // Compute the direction of the ray
   const STEP_SIZE = 0.1;
@@ -33,7 +27,7 @@ const intersection = (start, end, position) => {
     pos[0] += stepDirection[0];
     pos[1] += stepDirection[1];
   }
-  if (isInBox(pos, position, 0.5)) {
+  if (isInBox(pos, position, 0.5, h)) {
     return true;
   }
   return false;
@@ -52,7 +46,7 @@ const computeVisibleCells = (agent, agents, obstacles, targets) => {
       }
 
       // Check if the cell is hidden by another object
-      const intersects = hidders.some(h => intersection(agent.position, [i, j], h.position));
+      const intersects = hidders.some(h => intersection(agent.position, [i, j], h.position, h));
       if (!intersects) {
         visibleCells.push([i, j]);
       }

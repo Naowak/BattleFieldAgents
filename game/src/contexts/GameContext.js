@@ -5,10 +5,10 @@ import { NB_ACTIONS_PER_TURN, CONNECTION_DURATION, DEBUG } from '../libs/constan
 
 export const GameContext = createContext()
 
-export default function GameContextProvider (props) {
+// Initialize game state
+const init = initGameState();
 
-  // Initialize game state
-  const init = initGameState();
+export default function GameContextProvider (props) {
 
   // Set up state
   const [win, setWin] = useState('');
