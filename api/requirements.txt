@@ -4,3 +4,6 @@ langchain
 python-dotenv
 openai
 transformers
+torch
+einops
+accelerate
