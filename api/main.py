@@ -27,6 +27,8 @@ with open('./prompts/system_message.txt', 'r') as f:
     system_txt = f.read()
 system_message = SystemMessage(content=(system_txt))
 
+print(system_txt)
+
 
 
 # Parse the response into thoughts and action

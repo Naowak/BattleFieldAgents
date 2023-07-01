@@ -18,8 +18,6 @@ const pickRandomPosition = (positions) => {
 
 const initGameState = () => {
 
-  console.log('HELLLOOOOOO')
-  
   // Create a list of all the available positions on the board
   const positions = [];
   for (let x = -BOARD_SIZE; x <= BOARD_SIZE; x++) {
@@ -30,10 +28,10 @@ const initGameState = () => {
 
   // Create one target per team
   const targets = [];
-  //const targetsPosition = [[3, 3], [-3, -3]];
+  const targetsPosition = [[4, 1], [-4, -1]];
   for (let i = 0; i < 2; i++) {
-    const position = pickRandomPosition(positions);
-    //const position = targetsPosition[i];
+    //const position = pickRandomPosition(positions);
+    const position = targetsPosition[i];
     const index = positions.findIndex((pos) => JSON.stringify(pos) === JSON.stringify(position));
     positions.splice(index, 1);
     targets.push({
