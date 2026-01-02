@@ -152,7 +152,7 @@ class MockAIInterface(AIInterface):
         """
         self.is_thinking = True
         
-        # Get visible entities from agent's sight
+        # Get visible entities from agent's sight (which is a list)
         sight = agent.sight
         
         # Priority logic:
@@ -160,13 +160,13 @@ class MockAIInterface(AIInterface):
         # 2. Move towards enemy target
         # 3. Random move
         
-        # Check for visible enemies
+        # Check for visible enemies in sight list
         visible_enemies = []
-        for entity_type, entities in sight.items():
-            if entity_type == 'agents':
-                for visible_agent in entities:
-                    if visible_agent['team'] != agent.team:
-                        visible_enemies.append(visible_agent)
+        if sight:
+            for visible_entity in sight:
+                # Check if it's an enemy agent
+                if visible_entity.get('kind') == 'agents' and visible_entity.get('team') != agent.team:
+                    visible_enemies.append(visible_entity)
         
         # If we can see enemies, try to attack
         if visible_enemies:
