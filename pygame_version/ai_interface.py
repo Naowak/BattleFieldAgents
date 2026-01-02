@@ -1,55 +1,297 @@
 """
-AI Interface for BattleField Agents Game
-
-This module provides the interface for AI agents to interact with the game.
+AI Interface module for BattleFieldAgents game.
+Handles communication with the AI API to get agent decisions.
 """
 
-from typing import Tuple
+from constants import *
+from utils import format_agent_state
+import requests
+import json
+import random
 
 
 class AIInterface:
-    """Interface for AI agents to make decisions in the game."""
+    """
+    Interface for communicating with the AI API.
+    Sends game state and receives agent decisions (thoughts + actions).
+    """
     
-    def __init__(self, api_handler=None):
+    def __init__(self, api_url=API_URL, timeout=API_TIMEOUT):
         """
         Initialize the AI interface.
         
         Args:
-            api_handler: Optional API handler for LLM calls
+            api_url (str): URL of the AI API endpoint
+            timeout (float): Request timeout in seconds
         """
-        self.api_handler = api_handler
+        self.api_url = api_url
+        self.timeout = timeout
+        self.last_response = None
+        self.is_thinking = False
     
-    def get_agent_decision(self, agent, turn: int, game_state: dict) -> Tuple[str, str]:
+    def get_agent_decision(self, agent, turn, game_state):
         """
-        Get the decision from an AI agent.
+        Request a decision from the AI for a specific agent.
         
         Args:
-            agent: The agent object making the decision
-            turn: The current turn number
-            game_state: Dictionary containing the current game state
+            agent (Agent): The agent that needs to make a decision
+            turn (dict): Current turn information
+            game_state: The game state object
         
         Returns:
-            Tuple[str, str]: A tuple containing (thoughts, action)
-                - thoughts: The agent's reasoning as a string
-                - action: The action to take as a string (e.g., "MOVE [3, 5]")
+            tuple: (thoughts, action) where:
+                - thoughts (str): The agent's reasoning
+                - action (str): The action string (e.g., "MOVE [3, 5]")
+            Returns (None, None) if the request fails.
         """
-        if self.api_handler is None:
-            # Default behavior when no API handler is provided
-            thoughts = "No AI handler configured, using default action"
-            action = "WAIT"
-            return (thoughts, action)
+        self.is_thinking = True
         
-        # Call the API handler to get the agent's decision
         try:
-            response = self.api_handler.get_agent_action(agent, turn, game_state)
+            # Format the agent's state for the API
+            state = format_agent_state(
+                agent,
+                turn,
+                game_state.agents,
+                game_state.targets,
+                game_state.obstacles
+            )
             
-            # Parse the response and extract thoughts and action
-            thoughts = response.get("thoughts", "No thoughts provided")
-            action = response.get("action", "WAIT")
+            # Prepare the request payload
+            payload = {
+                'state': state
+            }
             
-            return (thoughts, action)
+            # Send POST request to the AI API
+            response = requests.post(
+                self.api_url,
+                json=payload,
+                timeout=self.timeout,
+                headers={'Content-Type': 'application/json'}
+            )
+            
+            # Check if request was successful
+            if response.status_code != 200:
+                print(f"AI API Error: Status code {response.status_code}")
+                self.is_thinking = False
+                return None, None
+            
+            # Parse the response
+            data = response.json()
+            thoughts = data.get('thoughts', '')
+            action = data.get('action', '')
+            
+            self.last_response = data
+            self.is_thinking = False
+            
+            return thoughts, action
+        
+        except requests.exceptions.Timeout:
+            print("AI API Error: Request timed out")
+            self.is_thinking = False
+            return None, None
+        
+        except requests.exceptions.ConnectionError:
+            print("AI API Error: Could not connect to server")
+            print(f"Make sure the API is running at {self.api_url}")
+            self.is_thinking = False
+            return None, None
+        
+        except requests.exceptions.RequestException as e:
+            print(f"AI API Error: {e}")
+            self.is_thinking = False
+            return None, None
+        
+        except json.JSONDecodeError:
+            print("AI API Error: Invalid JSON response")
+            self.is_thinking = False
+            return None, None
+        
         except Exception as e:
-            # Handle any errors gracefully
-            thoughts = f"Error getting AI decision: {str(e)}"
-            action = "WAIT"
-            return (thoughts, action)
+            print(f"AI API Error: Unexpected error - {e}")
+            self.is_thinking = False
+            return None, None
+    
+    def check_api_connection(self):
+        """
+        Check if the API is reachable.
+        
+        Returns:
+            bool: True if API is accessible, False otherwise
+        """
+        try:
+            # Try to connect to a hello endpoint or just check the base URL
+            test_url = self.api_url.replace('/play_one_turn', '/hello')
+            response = requests.get(test_url, timeout=5)
+            return response.status_code == 200
+        except:
+            return False
+
+
+class MockAIInterface(AIInterface):
+    """
+    Mock AI interface for testing without an actual API.
+    Provides simple rule-based decisions for agents.
+    """
+    
+    def __init__(self):
+        """Initialize the mock AI interface."""
+        super().__init__()
+        self.api_url = "MOCK"
+    
+    def get_agent_decision(self, agent, turn, game_state):
+        """
+        Generate a simple rule-based decision.
+        
+        Args:
+            agent (Agent): The agent that needs to make a decision
+            turn (dict): Current turn information
+            game_state: The game state object
+        
+        Returns:
+            tuple: (thoughts, action)
+        """
+        self.is_thinking = True
+        
+        # Get visible entities from agent's sight
+        sight = agent.sight
+        
+        # Priority logic:
+        # 1. Attack visible enemies
+        # 2. Move towards enemy target
+        # 3. Random move
+        
+        # Check for visible enemies
+        visible_enemies = []
+        for entity_type, entities in sight.items():
+            if entity_type == 'agents':
+                for visible_agent in entities:
+                    if visible_agent['team'] != agent.team:
+                        visible_enemies.append(visible_agent)
+        
+        # If we can see enemies, try to attack
+        if visible_enemies:
+            # Pick closest enemy
+            closest_enemy = min(visible_enemies, 
+                              key=lambda e: abs(e['position'][0] - agent.position[0]) + 
+                                          abs(e['position'][1] - agent.position[1]))
+            
+            enemy_pos = closest_enemy['position']
+            dx = enemy_pos[0] - agent.position[0]
+            dy = enemy_pos[1] - agent.position[1]
+            
+            # Check if aligned for attack (same row or column)
+            if dx == 0 or dy == 0:
+                thoughts = f"Enemy spotted at {enemy_pos}! Attacking!"
+                action = f"ATTACK {enemy_pos}"
+                self.is_thinking = False
+                return thoughts, action
+            else:
+                # Move towards enemy to get in line
+                if abs(dx) > abs(dy):
+                    new_pos = [agent.position[0] + (1 if dx > 0 else -1), agent.position[1]]
+                else:
+                    new_pos = [agent.position[0], agent.position[1] + (1 if dy > 0 else -1)]
+                
+                thoughts = f"Moving towards enemy at {enemy_pos}"
+                action = f"MOVE {new_pos}"
+                self.is_thinking = False
+                return thoughts, action
+        
+        # Find enemy target
+        enemy_target = None
+        for target in game_state.targets:
+            if target.team != agent.team and target.is_alive():
+                enemy_target = target
+                break
+        
+        # Move towards enemy target
+        if enemy_target:
+            target_pos = enemy_target.position
+            dx = target_pos[0] - agent.position[0]
+            dy = target_pos[1] - agent.position[1]
+            
+            # Move in the direction of the target
+            if abs(dx) > abs(dy):
+                new_pos = [agent.position[0] + (1 if dx > 0 else -1), agent.position[1]]
+            else:
+                new_pos = [agent.position[0], agent.position[1] + (1 if dy > 0 else -1)]
+            
+            # Check if position is valid (not obstacle, not occupied)
+            is_valid = True
+            
+            # Check obstacles
+            for obstacle in game_state.obstacles:
+                if obstacle.position == new_pos:
+                    is_valid = False
+                    break
+            
+            # Check other agents
+            if is_valid:
+                for other_agent in game_state.agents:
+                    if other_agent.position == new_pos and other_agent.is_alive():
+                        is_valid = False
+                        break
+            
+            # Check bounds
+            if abs(new_pos[0]) > BOARD_SIZE or abs(new_pos[1]) > BOARD_SIZE:
+                is_valid = False
+            
+            if is_valid:
+                thoughts = f"Moving towards enemy target at {target_pos}"
+                action = f"MOVE {new_pos}"
+                self.is_thinking = False
+                return thoughts, action
+        
+        # Random move as fallback
+        directions = [
+            [agent.position[0] + 1, agent.position[1]],  # right
+            [agent.position[0] - 1, agent.position[1]],  # left
+            [agent.position[0], agent.position[1] + 1],  # down
+            [agent.position[0], agent.position[1] - 1]   # up
+        ]
+        
+        random.shuffle(directions)
+        
+        for new_pos in directions:
+            # Check if position is valid
+            if abs(new_pos[0]) > BOARD_SIZE or abs(new_pos[1]) > BOARD_SIZE:
+                continue
+            
+            is_valid = True
+            
+            # Check obstacles
+            for obstacle in game_state.obstacles:
+                if obstacle.position == new_pos:
+                    is_valid = False
+                    break
+            
+            # Check other agents
+            if is_valid:
+                for other_agent in game_state.agents:
+                    if other_agent.position == new_pos and other_agent.is_alive():
+                        is_valid = False
+                        break
+            
+            if is_valid:
+                thoughts = "Exploring the battlefield"
+                action = f"MOVE {new_pos}"
+                self.is_thinking = False
+                return thoughts, action
+        
+        # Can't move anywhere, wait
+        thoughts = "No valid moves available, waiting"
+        action = "WAIT"
+        self.is_thinking = False
+        return thoughts, action
+    
+    def check_api_connection(self):
+        """Mock API is always 'connected'."""
+        return True
+
+
+# Example usage
+if __name__ == "__main__":
+    # Test mock interface
+    print("Testing mock interface...")
+    mock_ai = MockAIInterface()
+    print(f"✓ Mock AI created (always returns valid decisions)")
