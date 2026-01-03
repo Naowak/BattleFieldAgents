@@ -339,3 +339,73 @@ def format_agent_state(agent, turn, agents, targets, obstacles):
     }
     
     return state
+
+
+def get_line_cells(start, end):
+    """
+    Get all cells on a line from start to end using Bresenham's algorithm.
+    
+    Args:
+        start (list): Start position [x, y]
+        end (list): End position [x, y]
+        
+    Returns:
+        list: List of cells [[x, y], ...] on the line
+    """
+    x1, y1 = start
+    x2, y2 = end
+    points = []
+    
+    dx = abs(x2 - x1)
+    dy = abs(y2 - y1)
+    x, y = x1, y1
+    
+    sx = -1 if x1 > x2 else 1
+    sy = -1 if y1 > y2 else 1
+    
+    if dx > dy:
+        err = dx / 2.0
+        while x != x2:
+            points.append([x, y])
+            err -= dy
+            if err < 0:
+                y += sy
+                err += dx
+            x += sx
+    else:
+        err = dy / 2.0
+        while y != y2:
+            points.append([x, y])
+            err -= dx
+            if err < 0:
+                x += sx
+                err += dy
+            y += sy
+            
+    points.append([x, y])
+    return points
+
+
+def has_line_of_sight(start_pos, end_pos, agents, targets, obstacles):
+    """
+    Check for a clear line of sight between two points.
+    
+    Args:
+        start_pos (list): Start position [x, y]
+        end_pos (list): End position [x, y]
+        agents (list): List of all agents
+        targets (list): List of targets
+        obstacles (list): List of obstacles
+        
+    Returns:
+        bool: True if line of sight is clear, False otherwise
+    """
+    line = get_line_cells(start_pos, end_pos)
+    
+    # Check all cells on the line, excluding the start and end points
+    for i in range(1, len(line) - 1):
+        pos = line[i]
+        if is_position_occupied(pos, agents, targets, obstacles):
+            return False # Obstruction found
+            
+    return True
