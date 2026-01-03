@@ -481,3 +481,110 @@ class RightPanel(Panel):
             # Stop if we've reached the top
             if y_offset < PANEL_PADDING + 40:
                 break
+
+
+class BottomPanel(Panel):
+    """
+    Bottom panel showing debug toggles and legend.
+    """
+    
+    def __init__(self, x, y, width, height, renderer):
+        """
+        Initialize the bottom panel.
+        
+        Args:
+            x, y, width, height: Panel dimensions
+            renderer: The GameRenderer object to control debug flags
+        """
+        super().__init__(x, y, width, height)
+        self.renderer = renderer
+        self.font_small = pygame.font.Font(None, FONT_SIZE_SMALL)
+        
+        self.buttons = []
+        self._setup_buttons()
+
+    def _setup_buttons(self):
+        """Create the toggle buttons."""
+        button_texts = ["Show Possible Moves", "Show Agent Position", "Show Agent Vision"]
+        button_width = 180
+        button_height = 30
+        padding = 15
+        
+        start_x = self.rect.centerx - (len(button_texts) * (button_width + padding) - padding) / 2
+        
+        for i, text in enumerate(button_texts):
+            rect = pygame.Rect(
+                start_x + i * (button_width + padding),
+                self.rect.y + padding,
+                button_width,
+                button_height
+            )
+            self.buttons.append({'rect': rect, 'text': text, 'id': i})
+
+    def handle_mouse_click(self, pos):
+        """
+        Check if a button was clicked and toggle the corresponding flag.
+        
+        Args:
+            pos (tuple): Mouse click position (x, y)
+        """
+        for button in self.buttons:
+            if button['rect'].collidepoint(pos):
+                if button['id'] == 0:
+                    self.renderer.show_possible_moves = not self.renderer.show_possible_moves
+                elif button['id'] == 1:
+                    self.renderer.show_agent_position = not self.renderer.show_agent_position
+                elif button['id'] == 2:
+                    self.renderer.show_agent_vision = not self.renderer.show_agent_vision
+
+    def draw(self, surface):
+        """
+        Draw the bottom panel with buttons and legend.
+        
+        Args:
+            surface (pygame.Surface): The surface to draw on
+        """
+        super().draw(surface)
+        
+        # Draw buttons
+        for button in self.buttons:
+            is_active = False
+            if button['id'] == 0 and self.renderer.show_possible_moves:
+                is_active = True
+            elif button['id'] == 1 and self.renderer.show_agent_position:
+                is_active = True
+            elif button['id'] == 2 and self.renderer.show_agent_vision:
+                is_active = True
+
+            # Draw button background
+            color = COLOR_TEAM_BLUE if is_active else COLOR_HP_BAR_BG
+            pygame.draw.rect(surface, color, button['rect'], border_radius=5)
+            
+            # Draw button border
+            pygame.draw.rect(surface, COLOR_TEXT, button['rect'], 1, border_radius=5)
+
+            # Draw button text
+            text_surf = self.font_small.render(button['text'], True, COLOR_TEXT)
+            text_rect = text_surf.get_rect(center=button['rect'].center)
+            surface.blit(text_surf, text_rect)
+        
+        # Draw Legend
+        legend_items = [
+            ("Possible Moves", COLOR_DEBUG_POSSIBLE_MOVES),
+            ("Agent Position", COLOR_DEBUG_AGENT_POSITION),
+            ("Agent Vision", COLOR_DEBUG_AGENT_VISION),
+        ]
+        
+        legend_y = self.rect.y + 60
+        legend_x = self.rect.x + 20
+        
+        for text, color in legend_items:
+            # Draw color swatch
+            swatch_rect = pygame.Rect(legend_x, legend_y, 20, 20)
+            pygame.draw.rect(surface, color, swatch_rect)
+            
+            # Draw text
+            text_surf = self.font_small.render(text, True, COLOR_TEXT)
+            surface.blit(text_surf, (legend_x + 30, legend_y + 2))
+            
+            legend_x += 180

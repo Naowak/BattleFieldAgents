@@ -75,7 +75,7 @@ SIGHT_RANGE = 99  # Vision range (currently unlimited)
 SPAWN_RANGE = 3  # Range around target where agents spawn
 
 # Obstacles
-NB_OBSTACLES = 10
+NB_OBSTACLES = 35
 OBSTACLE_SIZE = 1  # Size in cells
 
 # ============================================================================
@@ -120,3 +120,8 @@ API_TIMEOUT = 15.0  # seconds
 DEBUG_MODE = False
 SHOW_COORDINATES = True
 SHOW_STATS = True
+
+# Debug colors for grid overlays
+COLOR_DEBUG_POSSIBLE_MOVES = (100, 150, 255, 150)  # Light blue, semi-transparent
+COLOR_DEBUG_AGENT_POSITION = (255, 220, 100, 150) # Yellow, semi-transparent
+COLOR_DEBUG_AGENT_VISION = (200, 100, 200, 100)  # Purple, semi-transparent

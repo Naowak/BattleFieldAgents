@@ -8,6 +8,7 @@ import math
 from constants import *
 from agents import Agent, Target, Obstacle
 from actions import MoveAction, AttackAction, SpeakAction
+from utils import get_possible_moves
 
 
 class GameRenderer:
@@ -24,6 +25,11 @@ class GameRenderer:
             game_state: The game state object
         """
         self.game_state = game_state
+        
+        # Debug display flags
+        self.show_possible_moves = False
+        self.show_agent_position = False
+        self.show_agent_vision = False
         
         # Calculate grid dimensions and position
         self.grid_width = (2 * BOARD_SIZE + 1) * CELL_SIZE
@@ -93,6 +99,45 @@ class GameRenderer:
                     text_y = screen_y + 2
                     surface.blit(coord_text, (text_x, text_y))
     
+    def _draw_debug_rect(self, surface, world_pos, color):
+        """Helper to draw a debug rectangle on the overlay surface."""
+        grid_x = world_pos[0] + BOARD_SIZE
+        grid_y = world_pos[1] + BOARD_SIZE
+        
+        rect = pygame.Rect(
+            grid_x * CELL_SIZE,
+            grid_y * CELL_SIZE,
+            CELL_SIZE,
+            CELL_SIZE
+        )
+        pygame.draw.rect(surface, color, rect)
+
+    def draw_debug_overlays(self, surface):
+        """Draw semi-transparent overlays for debugging."""
+        if not (self.show_possible_moves or self.show_agent_position or self.show_agent_vision):
+            return
+
+        overlay_surface = pygame.Surface((self.grid_width, self.grid_height), pygame.SRCALPHA)
+        current_agent = self.game_state.get_current_agent()
+
+        if current_agent:
+            # Agent Vision (drawn first)
+            if self.show_agent_vision:
+                for entity in current_agent.sight:
+                    self._draw_debug_rect(overlay_surface, entity['position'], COLOR_DEBUG_AGENT_VISION)
+            
+            # Possible Moves
+            if self.show_possible_moves:
+                moves = get_possible_moves(current_agent, self.game_state.agents, self.game_state.targets, self.game_state.obstacles)
+                for move in moves:
+                    self._draw_debug_rect(overlay_surface, move, COLOR_DEBUG_POSSIBLE_MOVES)
+            
+            # Current Agent Position (drawn last to be on top of other overlays)
+            if self.show_agent_position:
+                self._draw_debug_rect(overlay_surface, current_agent.position, COLOR_DEBUG_AGENT_POSITION)
+
+        surface.blit(overlay_surface, (self.grid_x, self.grid_y))
+
     def draw_obstacles(self, surface):
         """
         Draw obstacles with hatched pattern.
@@ -309,6 +354,9 @@ class GameRenderer:
         # Draw grid
         self.draw_grid(surface)
         
+        # Draw debug overlays on top of the grid
+        self.draw_debug_overlays(surface)
+
         # Draw obstacles
         self.draw_obstacles(surface)
         

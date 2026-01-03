@@ -12,7 +12,7 @@ import time
 from constants import *
 from game_state import GameState
 from renderer import GameRenderer
-from ui_components import LeftPanel, RightPanel
+from ui_components import LeftPanel, RightPanel, BottomPanel
 from actions import parse_action_string
 from ai_interface import AIInterface, MockAIInterface
 
@@ -23,12 +23,13 @@ class Game:
     Handles game loop, input, and coordination between components.
     """
     
-    def __init__(self, use_mock_ai=False):
+    def __init__(self, use_mock_ai=False, use_manual_mode=False):
         """
         Initialize the game.
         
         Args:
             use_mock_ai (bool): Use mock AI instead of real API
+            use_manual_mode (bool): Start in manual mode
         """
         # Initialize Pygame
         pygame.init()
@@ -41,6 +42,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = True
         self.paused = False
+        self.is_manual_mode = use_manual_mode
         
         # Game state
         self.game_state = GameState()
@@ -51,6 +53,13 @@ class Game:
         # UI Panels
         self.left_panel = LeftPanel(self.game_state)
         self.right_panel = RightPanel()
+        self.bottom_panel = BottomPanel(
+            LEFT_PANEL_WIDTH,
+            WINDOW_HEIGHT - 120,
+            GRID_AREA_WIDTH,
+            120,
+            self.renderer
+        )
         
         # AI Interface
         if use_mock_ai:
@@ -82,15 +91,24 @@ class Game:
                 elif event.key == pygame.K_SPACE:
                     self.paused = not self.paused
                 
+                # M - Toggle manual/auto mode
+                elif event.key == pygame.K_m:
+                    self.is_manual_mode = not self.is_manual_mode
+                    print(f"Game mode set to {'MANUAL' if self.is_manual_mode else 'AUTOMATIC'}")
+
                 # ESC - Quit
                 elif event.key == pygame.K_ESCAPE:
                     self.running = False
                 
                 # N - Next action (manual step)
                 elif event.key == pygame.K_n and not self.game_state.game_over:
-                    if not self.game_state.action_queue.is_busy():
+                    if self.is_manual_mode and not self.game_state.action_queue.is_busy():
                         self.request_next_action()
             
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1: # Left click
+                    self.bottom_panel.handle_mouse_click(event.pos)
+
             elif event.type == pygame.MOUSEMOTION:
                 # Handle mouse hover for agent cards
                 self.left_panel.handle_mouse_motion(event.pos)
@@ -186,7 +204,7 @@ class Game:
         self.game_state.action_queue.update(dt, self.game_state)
         
         # If no action is animating and not waiting for AI, request next action
-        if not self.game_state.action_queue.is_busy() and not self.waiting_for_ai:
+        if not self.is_manual_mode and not self.game_state.action_queue.is_busy() and not self.waiting_for_ai:
             if not self.game_state.action_queue.has_pending_actions():
                 # Small delay before next action to allow player to see the board
                 if not hasattr(self, 'action_delay_timer'):
@@ -209,19 +227,22 @@ class Game:
         # Render UI panels
         self.left_panel.draw(self.screen)
         self.right_panel.draw(self.screen)
+        self.bottom_panel.draw(self.screen)
         
-        # Draw pause indicator
-        if self.paused:
+        # Draw pause/manual indicators
+        if self.paused or self.is_manual_mode:
             font = pygame.font.Font(None, 48)
-            pause_text = font.render("PAUSED", True, COLOR_TEXT)
-            text_rect = pause_text.get_rect(center=(WINDOW_WIDTH // 2, 50))
+            mode_text = "PAUSED" if self.paused else "MANUAL MODE"
+            
+            text_surf = font.render(mode_text, True, COLOR_TEXT)
+            text_rect = text_surf.get_rect(center=(WINDOW_WIDTH // 2, 50))
             
             # Background
             bg_rect = text_rect.inflate(20, 10)
             pygame.draw.rect(self.screen, COLOR_PANEL_BG, bg_rect)
             pygame.draw.rect(self.screen, COLOR_TEXT, bg_rect, 2)
             
-            self.screen.blit(pause_text, text_rect)
+            self.screen.blit(text_surf, text_rect)
         
         # Update display
         pygame.display.flip()
@@ -233,8 +254,9 @@ class Game:
         print("=" * 60)
         print("\nControls:")
         print("  SPACE  - Pause/Unpause")
+        print("  M      - Toggle Manual/Auto mode")
+        print("  N      - Next action (in Manual mode)")
         print("  R      - Restart game")
-        print("  N      - Next action (manual)")
         print("  ESC    - Quit")
         print("\nStarting game...\n")
         
@@ -270,11 +292,13 @@ def main():
     parser = argparse.ArgumentParser(description="BattleField Agents - 2D Pygame Version")
     parser.add_argument('--mock-ai', action='store_true', 
                        help='Use mock AI instead of real API')
+    parser.add_argument('--manual', action='store_true',
+                       help='Start in manual mode (press N for next action)')
     
     args = parser.parse_args()
     
     try:
-        game = Game(use_mock_ai=args.mock_ai)
+        game = Game(use_mock_ai=args.mock_ai, use_manual_mode=args.manual)
         game.run()
     except KeyboardInterrupt:
         print("\n\nGame interrupted by user")
