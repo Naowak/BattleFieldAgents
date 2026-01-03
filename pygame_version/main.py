@@ -153,9 +153,6 @@ class Game:
                     # Add to action queue
                     self.game_state.action_queue.add_action(action_obj)
                     
-                    # Execute action effects immediately (damage, messages, etc.)
-                    action_obj.execute(self.game_state)
-                    
                     # Move to next action
                     self.game_state.next_action()
                     
@@ -186,7 +183,7 @@ class Game:
             return
         
         # Update action queue (animations)
-        self.game_state.action_queue.update(dt)
+        self.game_state.action_queue.update(dt, self.game_state)
         
         # If no action is animating and not waiting for AI, request next action
         if not self.game_state.action_queue.is_busy() and not self.waiting_for_ai:

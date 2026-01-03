@@ -335,6 +335,10 @@ def parse_action_string(action_string, agent_id, game_state):
         x, y = int(move_match.group(1)), int(move_match.group(2))
         target_position = [x, y]
         
+        # Check if target position is occupied
+        if game_state.get_entity_at_position(target_position):
+            return None
+        
         agent = game_state.get_agent_by_id(agent_id)
         if not agent:
             return None
@@ -392,12 +396,13 @@ class ActionQueue:
         """
         self.queue.append(action)
     
-    def update(self, dt):
+    def update(self, dt, game_state):
         """
         Update the current action.
         
         Args:
             dt (float): Delta time in seconds
+            game_state: The game state object
         """
         # Start next action if no current action
         if self.current_action is None:
@@ -411,6 +416,8 @@ class ActionQueue:
         
         # Check if current action is complete
         if self.current_action.is_complete:
+            # Execute the action's effect on the game state
+            self.current_action.execute(game_state)
             self.current_action = None
     
     def is_busy(self):

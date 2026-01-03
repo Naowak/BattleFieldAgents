@@ -64,7 +64,7 @@ GRID_PADDING = 0  # Padding around the grid
 # ============================================================================
 NB_AGENTS_PER_TEAM = 3
 NB_ACTIONS_PER_TURN = 3
-NB_CELLS_MAX_PER_MOVE = 3
+AGENT_MOVE_RANGE = 3
 
 # Combat
 AGENT_LIFE = 100

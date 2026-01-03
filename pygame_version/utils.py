@@ -173,7 +173,7 @@ def astar_pathfinding(start, goal, agents, targets, obstacles):
     return []
 
 
-def get_possible_moves(agent, agents, targets, obstacles, max_distance=NB_CELLS_MAX_PER_MOVE):
+def get_possible_moves(agent, agents, targets, obstacles, max_distance=AGENT_MOVE_RANGE):
     """
     Get all possible move positions for an agent within max_distance.
     
