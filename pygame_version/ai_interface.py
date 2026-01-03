@@ -141,17 +141,66 @@ class MockAIInterface(AIInterface):
     def get_agent_decision(self, agent, turn, game_state):
         """
         Generate a mock decision for an agent.
-        - Priority 1: Move towards the enemy target.
-        - Priority 2: Attack a visible enemy.
-        - Priority 3: Wait.
+        - Priority 1: Attack visible enemies.
+        - Priority 2: Move to align for an attack.
+        - Priority 3: Move towards the enemy main target.
+        - Priority 4: Wait.
         """
         self.is_thinking = True
         
-        # 1. Find the enemy target to move towards
+        # 1. Check for attack opportunities first
+        visible_enemies = [
+            e for e in agent.sight
+            if e.get('kind') in ['agents', 'targets'] and e.get('team') != agent.team
+        ]
+        
+        if visible_enemies:
+            # Find the closest enemy
+            closest_enemy = min(
+                visible_enemies,
+                key=lambda e: distance(agent.position, e['position'])
+            )
+            enemy_pos = closest_enemy['position']
+            
+            thoughts = f"Enemy '{closest_enemy.get('id', 'target')}' spotted at {enemy_pos}."
+            
+            # Check if aligned for an attack (same row or column)
+            if agent.position[0] == enemy_pos[0] or agent.position[1] == enemy_pos[1]:
+                action = f"ATTACK [{enemy_pos[0]}, {enemy_pos[1]}]"
+                thoughts += " Aligned for attack!"
+                self.is_thinking = False
+                return thoughts, action
+            
+            # 2. Not aligned, try to move into an attack position
+            possible_moves = get_possible_moves(
+                agent,
+                game_state.agents,
+                game_state.targets,
+                game_state.obstacles
+            )
+            
+            if possible_moves:
+                # Find a move that aligns with the enemy
+                alignment_moves = []
+                for move in possible_moves:
+                    if move[0] == enemy_pos[0] or move[1] == enemy_pos[1]:
+                        alignment_moves.append(move)
+                
+                if alignment_moves:
+                    # Choose the alignment move closest to the enemy
+                    best_alignment_move = min(
+                        alignment_moves,
+                        key=lambda move: distance(move, enemy_pos)
+                    )
+                    action = f"MOVE [{best_alignment_move[0]}, {best_alignment_move[1]}]"
+                    thoughts += " Moving to get in attack range."
+                    self.is_thinking = False
+                    return thoughts, action
+
+        # 3. No enemies visible or no alignment move possible, move towards the main enemy target
         enemy_target = next((t for t in game_state.targets if t.team != agent.team and t.is_alive()), None)
         
         if enemy_target:
-            # Get all possible moves
             possible_moves = get_possible_moves(
                 agent,
                 game_state.agents,
@@ -166,31 +215,14 @@ class MockAIInterface(AIInterface):
                     key=lambda move: distance(move, enemy_target.position)
                 )
                 
-                thoughts = f"Choosing best move to get closer to the enemy target at {enemy_target.position}."
+                thoughts = f"No enemy in sight. Moving towards the enemy target at {enemy_target.position}."
                 action = f"MOVE [{best_move[0]}, {best_move[1]}]"
                 self.is_thinking = False
                 return thoughts, action
 
-        # 2. If no move is chosen, check for attack opportunities
-        visible_enemies = [
-            e for e in agent.sight 
-            if e.get('kind') in ['agents', 'targets'] and e.get('team') != agent.team
-        ]
-        
-        if visible_enemies:
-            # Simple attack logic: attack the first visible enemy
-            # A better logic would be to check for alignment, etc.
-            target_to_attack = visible_enemies[0]
-            enemy_pos = target_to_attack['position']
-            
-            thoughts = f"No optimal move. Attacking visible enemy at {enemy_pos}."
-            action = f"ATTACK [{enemy_pos[0]}, {enemy_pos[1]}]"
-            self.is_thinking = False
-            return thoughts, action
-
-        # 3. If no other action, wait
-        thoughts = "No optimal move or attack available. Waiting."
-        action = "WAIT" # Note: WAIT is not a real action, it will result in an invalid action print
+        # 4. If no other action, wait
+        thoughts = "No valid moves or attacks available. Waiting."
+        action = "WAIT"
         self.is_thinking = False
         return thoughts, action
     

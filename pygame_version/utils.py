@@ -200,9 +200,9 @@ def get_possible_moves(agent, agents, targets, obstacles, max_distance=AGENT_MOV
             
             # Check if position is valid and not occupied
             if is_position_valid(new_pos) and not is_position_occupied(new_pos, agents, targets, obstacles):
-                # Check if there's a valid path (A*)
+                # Check if there's a valid path (A*) and if its length is within the allowed move range
                 path = astar_pathfinding(start_pos, new_pos, agents, targets, obstacles)
-                if path:
+                if path and len(path) <= max_distance:
                     possible_moves.append(new_pos)
     
     return possible_moves
