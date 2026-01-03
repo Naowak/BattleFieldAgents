@@ -6,8 +6,8 @@ All game parameters can be easily modified here.
 # ============================================================================
 # WINDOW & DISPLAY
 # ============================================================================
-WINDOW_WIDTH = 1600
-WINDOW_HEIGHT = 900
+WINDOW_WIDTH = 1300
+WINDOW_HEIGHT = 800
 FPS = 60
 
 # UI Layout
@@ -55,9 +55,9 @@ COLOR_BUBBLE_BORDER = (187, 187, 187)
 # ============================================================================
 # GAME BOARD
 # ============================================================================
-BOARD_SIZE = 15  # Grid is (2*BOARD_SIZE + 1) x (2*BOARD_SIZE + 1)
-CELL_SIZE = 30   # Size of each cell in pixels
-GRID_PADDING = 50  # Padding around the grid
+BOARD_SIZE = 7  # Grid is (2*BOARD_SIZE + 1) x (2*BOARD_SIZE + 1)
+CELL_SIZE = 40   # Size of each cell in pixels
+GRID_PADDING = 0  # Padding around the grid
 
 # ============================================================================
 # GAME MECHANICS
@@ -90,8 +90,8 @@ ANIMATION_SPEAK_DURATION = 2.0  # seconds
 # RENDERING
 # ============================================================================
 # Agent rendering
-AGENT_RADIUS = 10  # pixels
-TARGET_SIZE = 12   # pixels (diamond shape)
+AGENT_RADIUS = 16  # pixels
+TARGET_SIZE = 16   # pixels (diamond shape)
 
 # UI Elements
 PANEL_PADDING = 15

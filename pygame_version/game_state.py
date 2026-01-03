@@ -49,8 +49,8 @@ class GameState:
         self.game_over = False
         
         # Create targets at opposite sides of the board
-        red_target_pos = [-SPAWN_RANGE - 2, 0]
-        blue_target_pos = [SPAWN_RANGE + 2, 0]
+        red_target_pos = [-SPAWN_RANGE - 1, -SPAWN_RANGE -  1]
+        blue_target_pos = [SPAWN_RANGE + 1, SPAWN_RANGE + 1]
         
         self.targets.append(Target('red', red_target_pos))
         self.targets.append(Target('blue', blue_target_pos))
