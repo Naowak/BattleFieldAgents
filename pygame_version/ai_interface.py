@@ -4,7 +4,7 @@ Handles communication with the AI API to get agent decisions.
 """
 
 from constants import *
-from utils import format_agent_state
+from utils import format_agent_state, distance
 import requests
 import json
 import random
@@ -130,7 +130,7 @@ class AIInterface:
 class MockAIInterface(AIInterface):
     """
     Mock AI interface for testing without an actual API.
-    Provides simple rule-based decisions for agents.
+    Uses pre-calculated possible actions from format_agent_state.
     """
     
     def __init__(self):
@@ -140,7 +140,7 @@ class MockAIInterface(AIInterface):
     
     def get_agent_decision(self, agent, turn, game_state):
         """
-        Generate a simple rule-based decision.
+        Generate a simple rule-based decision using pre-calculated possible actions.
         
         Args:
             agent (Agent): The agent that needs to make a decision
@@ -152,137 +152,80 @@ class MockAIInterface(AIInterface):
         """
         self.is_thinking = True
         
-        # Get visible entities from agent's sight (which is a list)
-        sight = agent.sight
+        # Get the formatted agent state with possible actions
+        state = format_agent_state(
+            agent,
+            turn,
+            game_state.agents,
+            game_state.targets,
+            game_state.obstacles
+        )
         
-        # Priority logic:
-        # 1. Attack visible enemies
-        # 2. Move towards enemy target
-        # 3. Random move
+        possible_actions = state['possibleActions']
         
-        # Check for visible enemies in sight list
-        visible_enemies = []
-        if sight:
-            for visible_entity in sight:
-                # Check if it's an enemy agent
-                if visible_entity.get('kind') == 'agents' and visible_entity.get('team') != agent.team:
-                    visible_enemies.append(visible_entity)
+        if not possible_actions:
+            self.is_thinking = False
+            return "No valid actions available", "WAIT"
         
-        # If we can see enemies, try to attack
-        if visible_enemies:
-            # Pick closest enemy
-            closest_enemy = min(visible_enemies, 
-                              key=lambda e: abs(e['position'][0] - agent.position[0]) + 
-                                          abs(e['position'][1] - agent.position[1]))
+        # Separate actions by type
+        attack_actions = [a for a in possible_actions if a.startswith('ATTACK')]
+        move_actions = [a for a in possible_actions if a.startswith('MOVE')]
+        speak_actions = [a for a in possible_actions if a.startswith('SPEAK')]
+        
+        # Priority 1: Attack visible enemies
+        if attack_actions:
+            action = random.choice(attack_actions)
+            thoughts = "Enemy in sight! Attacking!"
+            self.is_thinking = False
+            return thoughts, action
+        
+        # Priority 2: Move towards enemy spawn (or closest enemy target)
+        if move_actions:
+            # Find enemy target position
+            enemy_target_pos = None
+            for target in game_state.targets:
+                if target.team != agent.team and target.is_alive():
+                    enemy_target_pos = target.position
+                    break
             
-            enemy_pos = closest_enemy['position']
-            dx = enemy_pos[0] - agent.position[0]
-            dy = enemy_pos[1] - agent.position[1]
-            
-            # Check if aligned for attack (same row or column)
-            if dx == 0 or dy == 0:
-                thoughts = f"Enemy spotted at {enemy_pos}! Attacking!"
-                action = f"ATTACK {enemy_pos}"
-                self.is_thinking = False
-                return thoughts, action
-            else:
-                # Move towards enemy to get in line
-                if abs(dx) > abs(dy):
-                    new_pos = [agent.position[0] + (1 if dx > 0 else -1), agent.position[1]]
-                else:
-                    new_pos = [agent.position[0], agent.position[1] + (1 if dy > 0 else -1)]
+            if enemy_target_pos:
+                # Parse move actions and find closest to enemy target
+                best_move = None
+                best_distance = float('inf')
                 
-                thoughts = f"Moving towards enemy at {enemy_pos}"
-                action = f"MOVE {new_pos}"
-                self.is_thinking = False
-                return thoughts, action
+                import re
+                for move_action in move_actions:
+                    match = re.match(r'MOVE\s*\[(-?\d+),\s*(-?\d+)\]', move_action)
+                    if match:
+                        x, y = int(match.group(1)), int(match.group(2))
+                        pos = [x, y]
+                        dist = distance(pos, enemy_target_pos)
+                        
+                        if dist < best_distance:
+                            best_distance = dist
+                            best_move = move_action
+                
+                if best_move:
+                    thoughts = f"Moving towards enemy target at {enemy_target_pos}"
+                    self.is_thinking = False
+                    return thoughts, best_move
+            
+            # Fallback: random move
+            action = random.choice(move_actions)
+            thoughts = "Exploring the battlefield"
+            self.is_thinking = False
+            return thoughts, action
         
-        # Find enemy target
-        enemy_target = None
-        for target in game_state.targets:
-            if target.team != agent.team and target.is_alive():
-                enemy_target = target
-                break
+        # Priority 3: Communicate with teammates
+        if speak_actions:
+            action = f"{speak_actions[0]} Need backup!"
+            thoughts = "Coordinating with team"
+            self.is_thinking = False
+            return thoughts, action
         
-        # Move towards enemy target
-        if enemy_target:
-            target_pos = enemy_target.position
-            dx = target_pos[0] - agent.position[0]
-            dy = target_pos[1] - agent.position[1]
-            
-            # Move in the direction of the target
-            if abs(dx) > abs(dy):
-                new_pos = [agent.position[0] + (1 if dx > 0 else -1), agent.position[1]]
-            else:
-                new_pos = [agent.position[0], agent.position[1] + (1 if dy > 0 else -1)]
-            
-            # Check if position is valid (not obstacle, not occupied)
-            is_valid = True
-            
-            # Check obstacles
-            for obstacle in game_state.obstacles:
-                if obstacle.position == new_pos:
-                    is_valid = False
-                    break
-            
-            # Check other agents
-            if is_valid:
-                for other_agent in game_state.agents:
-                    if other_agent.position == new_pos and other_agent.is_alive():
-                        is_valid = False
-                        break
-            
-            # Check bounds
-            if abs(new_pos[0]) > BOARD_SIZE or abs(new_pos[1]) > BOARD_SIZE:
-                is_valid = False
-            
-            if is_valid:
-                thoughts = f"Moving towards enemy target at {target_pos}"
-                action = f"MOVE {new_pos}"
-                self.is_thinking = False
-                return thoughts, action
-        
-        # Random move as fallback
-        directions = [
-            [agent.position[0] + 1, agent.position[1]],  # right
-            [agent.position[0] - 1, agent.position[1]],  # left
-            [agent.position[0], agent.position[1] + 1],  # down
-            [agent.position[0], agent.position[1] - 1]   # up
-        ]
-        
-        random.shuffle(directions)
-        
-        for new_pos in directions:
-            # Check if position is valid
-            if abs(new_pos[0]) > BOARD_SIZE or abs(new_pos[1]) > BOARD_SIZE:
-                continue
-            
-            is_valid = True
-            
-            # Check obstacles
-            for obstacle in game_state.obstacles:
-                if obstacle.position == new_pos:
-                    is_valid = False
-                    break
-            
-            # Check other agents
-            if is_valid:
-                for other_agent in game_state.agents:
-                    if other_agent.position == new_pos and other_agent.is_alive():
-                        is_valid = False
-                        break
-            
-            if is_valid:
-                thoughts = "Exploring the battlefield"
-                action = f"MOVE {new_pos}"
-                self.is_thinking = False
-                return thoughts, action
-        
-        # Can't move anywhere, wait
-        thoughts = "No valid moves available, waiting"
-        action = "WAIT"
+        # Fallback: wait
         self.is_thinking = False
-        return thoughts, action
+        return "Waiting for opportunities", "WAIT"
     
     def check_api_connection(self):
         """Mock API is always 'connected'."""
