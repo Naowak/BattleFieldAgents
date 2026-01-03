@@ -1,220 +1,240 @@
+"""
+AI Interface module for BattleFieldAgents game.
+Handles communication with the AI API to get agent decisions.
+"""
+
+from constants import *
+from utils import format_agent_state, distance
+import requests
+import json
 import random
-from typing import Dict, List, Tuple, Optional
 
 
-def get_ai_action(agent_state: Dict) -> str:
+class AIInterface:
     """
-    AI decision-making function that uses pre-calculated possible actions
-    from format_agent_state and prioritizes moves towards enemy target.
-    
-    Args:
-        agent_state: Formatted agent state containing:
-            - possible_actions: List of available actions
-            - enemy_positions: List of enemy positions
-            - position: Agent's current position
-            - Other state information
-    
-    Returns:
-        Action string (e.g., "move_up", "shoot_right", "idle")
+    Interface for communicating with the AI API.
+    Sends game state and receives agent decisions (thoughts + actions).
     """
-    possible_actions = agent_state.get("possible_actions", [])
     
-    if not possible_actions:
-        return "idle"
-    
-    # Separate actions by type
-    move_actions = [a for a in possible_actions if a.startswith("move_")]
-    shoot_actions = [a for a in possible_actions if a.startswith("shoot_")]
-    
-    # Prioritize shooting if available
-    if shoot_actions:
-        return random.choice(shoot_actions)
-    
-    # If we have move actions, prioritize moves towards enemy
-    if move_actions:
-        enemy_positions = agent_state.get("enemy_positions", [])
-        agent_pos = agent_state.get("position")
+    def __init__(self, api_url=API_URL, timeout=API_TIMEOUT):
+        """
+        Initialize the AI interface.
         
-        if enemy_positions and agent_pos:
-            # Find the closest enemy
-            closest_enemy = min(
-                enemy_positions,
-                key=lambda enemy: manhattan_distance(agent_pos, enemy)
+        Args:
+            api_url (str): URL of the AI API endpoint
+            timeout (float): Request timeout in seconds
+        """
+        self.api_url = api_url
+        self.timeout = timeout
+        self.last_response = None
+        self.is_thinking = False
+    
+    def get_agent_decision(self, agent, turn, game_state):
+        """
+        Request a decision from the AI for a specific agent.
+        
+        Args:
+            agent (Agent): The agent that needs to make a decision
+            turn (dict): Current turn information
+            game_state: The game state object
+        
+        Returns:
+            tuple: (thoughts, action) where:
+                - thoughts (str): The agent's reasoning
+                - action (str): The action string (e.g., "MOVE [3, 5]")
+            Returns (None, None) if the request fails.
+        """
+        self.is_thinking = True
+        
+        try:
+            # Format the agent's state for the API
+            state = format_agent_state(
+                agent,
+                turn,
+                game_state.agents,
+                game_state.targets,
+                game_state.obstacles
             )
             
-            # Get the best move towards the closest enemy
-            best_move = get_move_towards_target(
-                agent_pos, 
-                closest_enemy, 
-                move_actions
+            # Prepare the request payload
+            payload = {
+                'state': state
+            }
+            
+            # Send POST request to the AI API
+            response = requests.post(
+                self.api_url,
+                json=payload,
+                timeout=self.timeout,
+                headers={'Content-Type': 'application/json'}
             )
             
-            if best_move:
-                return best_move
-        
-        # If no enemy or no good move found, choose random move
-        return random.choice(move_actions)
-    
-    # If only idle or other actions available
-    return random.choice(possible_actions)
-
-
-def manhattan_distance(pos1: Tuple[int, int], pos2: Tuple[int, int]) -> int:
-    """Calculate Manhattan distance between two positions."""
-    return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
-
-
-def get_move_towards_target(
-    current_pos: Tuple[int, int],
-    target_pos: Tuple[int, int],
-    available_moves: List[str]
-) -> Optional[str]:
-    """
-    Determine the best move towards a target from available moves.
-    
-    Args:
-        current_pos: Current position (x, y)
-        target_pos: Target position (x, y)
-        available_moves: List of available move actions
-    
-    Returns:
-        Best move action string or None if no good move found
-    """
-    # Calculate direction to target
-    dx = target_pos[0] - current_pos[0]
-    dy = target_pos[1] - current_pos[1]
-    
-    # Priority list of moves based on distance to target
-    move_priorities = []
-    
-    # Prioritize moves that reduce distance
-    if dy < 0 and "move_up" in available_moves:
-        move_priorities.append(("move_up", abs(dy)))
-    if dy > 0 and "move_down" in available_moves:
-        move_priorities.append(("move_down", abs(dy)))
-    if dx < 0 and "move_left" in available_moves:
-        move_priorities.append(("move_left", abs(dx)))
-    if dx > 0 and "move_right" in available_moves:
-        move_priorities.append(("move_right", abs(dx)))
-    
-    # Sort by distance benefit (higher is better)
-    if move_priorities:
-        move_priorities.sort(key=lambda x: x[1], reverse=True)
-        return move_priorities[0][0]
-    
-    return None
-
-
-def get_advanced_ai_action(agent_state: Dict, strategy: str = "aggressive") -> str:
-    """
-    Advanced AI decision-making with different strategies.
-    
-    Args:
-        agent_state: Formatted agent state
-        strategy: AI strategy ("aggressive", "defensive", "balanced")
-    
-    Returns:
-        Action string
-    """
-    possible_actions = agent_state.get("possible_actions", [])
-    
-    if not possible_actions:
-        return "idle"
-    
-    move_actions = [a for a in possible_actions if a.startswith("move_")]
-    shoot_actions = [a for a in possible_actions if a.startswith("shoot_")]
-    
-    health = agent_state.get("health", 100)
-    enemy_positions = agent_state.get("enemy_positions", [])
-    agent_pos = agent_state.get("position")
-    
-    # Aggressive strategy: prioritize shooting, then move towards enemy
-    if strategy == "aggressive":
-        if shoot_actions:
-            return random.choice(shoot_actions)
-        if move_actions and enemy_positions and agent_pos:
-            closest_enemy = min(
-                enemy_positions,
-                key=lambda e: manhattan_distance(agent_pos, e)
-            )
-            best_move = get_move_towards_target(agent_pos, closest_enemy, move_actions)
-            if best_move:
-                return best_move
-        return random.choice(possible_actions)
-    
-    # Defensive strategy: retreat if low health, shoot from distance
-    elif strategy == "defensive":
-        if health < 30 and move_actions and enemy_positions and agent_pos:
-            # Retreat: move away from closest enemy
-            closest_enemy = min(
-                enemy_positions,
-                key=lambda e: manhattan_distance(agent_pos, e)
-            )
-            retreat_move = get_move_away_from_target(agent_pos, closest_enemy, move_actions)
-            if retreat_move:
-                return retreat_move
-        if shoot_actions:
-            return random.choice(shoot_actions)
-        return random.choice(possible_actions)
-    
-    # Balanced strategy: mix of aggressive and defensive
-    else:
-        if shoot_actions and random.random() < 0.7:
-            return random.choice(shoot_actions)
-        if move_actions and enemy_positions and agent_pos:
-            closest_enemy = min(
-                enemy_positions,
-                key=lambda e: manhattan_distance(agent_pos, e)
-            )
-            distance = manhattan_distance(agent_pos, closest_enemy)
+            # Check if request was successful
+            if response.status_code != 200:
+                print(f"AI API Error: Status code {response.status_code}")
+                self.is_thinking = False
+                return None, None
             
-            # Keep optimal distance
-            if distance < 3:
-                retreat_move = get_move_away_from_target(agent_pos, closest_enemy, move_actions)
-                if retreat_move:
-                    return retreat_move
-            elif distance > 5:
-                approach_move = get_move_towards_target(agent_pos, closest_enemy, move_actions)
-                if approach_move:
-                    return approach_move
+            # Parse the response
+            data = response.json()
+            thoughts = data.get('thoughts', '')
+            action = data.get('action', '')
+            
+            self.last_response = data
+            self.is_thinking = False
+            
+            return thoughts, action
         
-        return random.choice(possible_actions)
+        except requests.exceptions.Timeout:
+            print("AI API Error: Request timed out")
+            self.is_thinking = False
+            return None, None
+        
+        except requests.exceptions.ConnectionError:
+            print("AI API Error: Could not connect to server")
+            print(f"Make sure the API is running at {self.api_url}")
+            self.is_thinking = False
+            return None, None
+        
+        except requests.exceptions.RequestException as e:
+            print(f"AI API Error: {e}")
+            self.is_thinking = False
+            return None, None
+        
+        except json.JSONDecodeError:
+            print("AI API Error: Invalid JSON response")
+            self.is_thinking = False
+            return None, None
+        
+        except Exception as e:
+            print(f"AI API Error: Unexpected error - {e}")
+            self.is_thinking = False
+            return None, None
+    
+    def check_api_connection(self):
+        """
+        Check if the API is reachable.
+        
+        Returns:
+            bool: True if API is accessible, False otherwise
+        """
+        try:
+            # Try to connect to a hello endpoint or just check the base URL
+            test_url = self.api_url.replace('/play_one_turn', '/hello')
+            response = requests.get(test_url, timeout=5)
+            return response.status_code == 200
+        except:
+            return False
 
 
-def get_move_away_from_target(
-    current_pos: Tuple[int, int],
-    target_pos: Tuple[int, int],
-    available_moves: List[str]
-) -> Optional[str]:
+class MockAIInterface(AIInterface):
     """
-    Determine the best move away from a target.
-    
-    Args:
-        current_pos: Current position (x, y)
-        target_pos: Target position (x, y)
-        available_moves: List of available move actions
-    
-    Returns:
-        Best retreat move action string or None
+    Mock AI interface for testing without an actual API.
+    Uses pre-calculated possible actions from format_agent_state.
     """
-    # Calculate direction away from target
-    dx = current_pos[0] - target_pos[0]
-    dy = current_pos[1] - target_pos[1]
     
-    move_priorities = []
+    def __init__(self):
+        """Initialize the mock AI interface."""
+        super().__init__()
+        self.api_url = "MOCK"
     
-    # Prioritize moves that increase distance
-    if dy < 0 and "move_up" in available_moves:
-        move_priorities.append(("move_up", abs(dy)))
-    if dy > 0 and "move_down" in available_moves:
-        move_priorities.append(("move_down", abs(dy)))
-    if dx < 0 and "move_left" in available_moves:
-        move_priorities.append(("move_left", abs(dx)))
-    if dx > 0 and "move_right" in available_moves:
-        move_priorities.append(("move_right", abs(dx)))
+    def get_agent_decision(self, agent, turn, game_state):
+        """
+        Generate a simple rule-based decision using pre-calculated possible actions.
+        
+        Args:
+            agent (Agent): The agent that needs to make a decision
+            turn (dict): Current turn information
+            game_state: The game state object
+        
+        Returns:
+            tuple: (thoughts, action)
+        """
+        self.is_thinking = True
+        
+        # Get the formatted agent state with possible actions
+        state = format_agent_state(
+            agent,
+            turn,
+            game_state.agents,
+            game_state.targets,
+            game_state.obstacles
+        )
+        
+        possible_actions = state['possibleActions']
+        
+        if not possible_actions:
+            self.is_thinking = False
+            return "No valid actions available", "WAIT"
+        
+        # Separate actions by type
+        attack_actions = [a for a in possible_actions if a.startswith('ATTACK')]
+        move_actions = [a for a in possible_actions if a.startswith('MOVE')]
+        speak_actions = [a for a in possible_actions if a.startswith('SPEAK')]
+        
+        # Priority 1: Attack visible enemies
+        if attack_actions:
+            action = random.choice(attack_actions)
+            thoughts = "Enemy in sight! Attacking!"
+            self.is_thinking = False
+            return thoughts, action
+        
+        # Priority 2: Move towards enemy spawn (or closest enemy target)
+        if move_actions:
+            # Find enemy target position
+            enemy_target_pos = None
+            for target in game_state.targets:
+                if target.team != agent.team and target.is_alive():
+                    enemy_target_pos = target.position
+                    break
+            
+            if enemy_target_pos:
+                # Parse move actions and find closest to enemy target
+                best_move = None
+                best_distance = float('inf')
+                
+                import re
+                for move_action in move_actions:
+                    match = re.match(r'MOVE\s*\[(-?\d+),\s*(-?\d+)\]', move_action)
+                    if match:
+                        x, y = int(match.group(1)), int(match.group(2))
+                        pos = [x, y]
+                        dist = distance(pos, enemy_target_pos)
+                        
+                        if dist < best_distance:
+                            best_distance = dist
+                            best_move = move_action
+                
+                if best_move:
+                    thoughts = f"Moving towards enemy target at {enemy_target_pos}"
+                    self.is_thinking = False
+                    return thoughts, best_move
+            
+            # Fallback: random move
+            action = random.choice(move_actions)
+            thoughts = "Exploring the battlefield"
+            self.is_thinking = False
+            return thoughts, action
+        
+        # Priority 3: Communicate with teammates
+        if speak_actions:
+            action = f"{speak_actions[0]} Need backup!"
+            thoughts = "Coordinating with team"
+            self.is_thinking = False
+            return thoughts, action
+        
+        # Fallback: wait
+        self.is_thinking = False
+        return "Waiting for opportunities", "WAIT"
     
-    if move_priorities:
-        move_priorities.sort(key=lambda x: x[1], reverse=True)
-        return move_priorities[0][0]
-    
-    return None
+    def check_api_connection(self):
+        """Mock API is always 'connected'."""
+        return True
+
+
+# Example usage
+if __name__ == "__main__":
+    # Test mock interface
+    print("Testing mock interface...")
+    mock_ai = MockAIInterface()
+    print(f"✓ Mock AI created (always returns valid decisions)")
