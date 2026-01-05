@@ -8,7 +8,11 @@ from utils import format_agent_state, get_possible_moves, distance, has_line_of_
 import requests
 import json
 import random
+import os
+from dotenv import load_dotenv
 
+# Load environment variables
+load_dotenv()
 
 class AIInterface:
     """
@@ -16,18 +20,32 @@ class AIInterface:
     Sends game state and receives agent decisions (thoughts + actions).
     """
     
-    def __init__(self, api_url=API_URL, timeout=API_TIMEOUT):
+    def __init__(self, api_url="https://unpalpablely-vibronic-leonore.ngrok-free.dev/api/v1", timeout=API_TIMEOUT):
         """
         Initialize the AI interface.
         
         Args:
-            api_url (str): URL of the AI API endpoint
-            timeout (float): Request timeout in seconds
+            api_url (str): URL of the AI API endpoint.
+            timeout (float): Request timeout in seconds.
         """
-        self.api_url = api_url
+        # Ensure the URL points to the chat completions endpoint if it's an OpenAI-compatible API
+        if not api_url.endswith("/chat/completions"):
+             self.api_url = api_url.rstrip("/") + "/chat/completions"
+        else:
+             self.api_url = api_url
+
         self.timeout = timeout
+        self.api_key = os.getenv("API_KEY")
         self.last_response = None
         self.is_thinking = False
+        
+        # Load system message
+        try:
+            with open('system_message.txt', 'r') as f:
+                self.system_message = f.read()
+        except FileNotFoundError:
+            print("Error: system_message.txt not found.")
+            self.system_message = "You are an AI agent playing a game."
     
     def get_agent_decision(self, agent, turn, game_state):
         """
@@ -56,9 +74,19 @@ class AIInterface:
                 game_state.obstacles
             )
             
-            # Prepare the request payload
+            # Prepare the request payload for OpenAI-compatible API
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self.api_key}"
+            }
+            
             payload = {
-                'state': state
+                "model": "qwen/qwen3-30b-a3b-2507", 
+                "messages": [
+                    {"role": "system", "content": self.system_message},
+                    {"role": "user", "content": json.dumps(state)}
+                ],
+                "temperature": 0.7
             }
             
             # Send POST request to the AI API
@@ -66,24 +94,29 @@ class AIInterface:
                 self.api_url,
                 json=payload,
                 timeout=self.timeout,
-                headers={'Content-Type': 'application/json'}
+                headers=headers
             )
             
             # Check if request was successful
             if response.status_code != 200:
-                print(f"AI API Error: Status code {response.status_code}")
+                print(f"AI API Error: Status code {response.status_code} - {response.text}")
                 self.is_thinking = False
                 return None, None
             
             # Parse the response
             data = response.json()
-            thoughts = data.get('thoughts', '')
-            action = data.get('action', '')
             
-            self.last_response = data
-            self.is_thinking = False
-            
-            return thoughts, action
+            if 'choices' in data and len(data['choices']) > 0:
+                content = data['choices'][0]['message']['content']
+                thoughts, action = self._parse_response(content)
+                
+                self.last_response = data
+                self.is_thinking = False
+                return thoughts, action
+            else:
+                print("AI API Error: Unexpected response format")
+                self.is_thinking = False
+                return None, None
         
         except requests.exceptions.Timeout:
             print("AI API Error: Request timed out")
@@ -110,6 +143,29 @@ class AIInterface:
             print(f"AI API Error: Unexpected error - {e}")
             self.is_thinking = False
             return None, None
+
+    def _parse_response(self, content):
+        """
+        Parse the content string to extract thoughts and action.
+        """
+        thoughts = ""
+        action = ""
+        try:
+            lines = content.split('\n')
+            # Extract thoughts
+            t_lines = [l for l in lines if l.startswith('THOUGHTS: ')]
+            if t_lines:
+                thoughts = t_lines[0][10:].strip()
+            
+            # Extract action
+            a_lines = [l for l in lines if l.startswith('ACTION: ')]
+            if a_lines:
+                action = a_lines[0][8:].strip()
+            
+            return thoughts, action
+        except Exception as e:
+            print(f"Error parsing response: {e}")
+            return "", ""
     
     def check_api_connection(self):
         """
@@ -119,10 +175,14 @@ class AIInterface:
             bool: True if API is accessible, False otherwise
         """
         try:
-            # Try to connect to a hello endpoint or just check the base URL
-            test_url = self.api_url.replace('/play_one_turn', '/hello')
+            # Try to connect to a models endpoint or similar to check availability
+            # Since we don't know if /models is available on the private API, 
+            # we'll assume it's up if we can reach the base URL or just skip this check strictly.
+            # But for good measure let's try a simple GET to the base URL
+            test_url = self.api_url.replace('/chat/completions', '')
             response = requests.get(test_url, timeout=5)
-            return response.status_code == 200
+            # Accept any response that indicates the server is there (even 404/401 is better than connection error)
+            return True
         except:
             return False
 
@@ -135,8 +195,13 @@ class MockAIInterface(AIInterface):
     
     def __init__(self):
         """Initialize the mock AI interface."""
-        super().__init__()
+        # Initialize parent but don't fail if files missing
         self.api_url = "MOCK"
+        self.timeout = 0
+        self.api_key = "MOCK"
+        self.system_message = ""
+        self.last_response = None
+        self.is_thinking = False
     
     def get_agent_decision(self, agent, turn, game_state):
         """
