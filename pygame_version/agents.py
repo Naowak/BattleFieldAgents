@@ -36,6 +36,7 @@ class Agent:
         self.team = team
         self.position = position.copy()
         self.life = AGENT_LIFE
+        self.kind = 'agents'
         
         # Vision and communication
         self.sight = []

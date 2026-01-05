@@ -208,134 +208,140 @@ def get_possible_moves(agent, agents, targets, obstacles, max_distance=AGENT_MOV
     return possible_moves
 
 
+def _is_in_box(position, box_position, box_range=0.5):
+    """Check if a 2D point is inside a square box."""
+    return (box_position[0] - box_range <= position[0] <= box_position[0] + box_range and
+            box_position[1] - box_range <= position[1] <= box_position[1] + box_range)
+
+def _intersection(start, end, hidder_position):
+    """
+    Check if a ray from start to end is blocked by a hidder.
+    The ray is blocked if it passes through the hidder's 1x1 cell box.
+    """
+    STEP_SIZE = 0.1
+    direction = [end[0] - start[0], end[1] - start[1]]
+    
+    length_sq = direction[0]**2 + direction[1]**2
+    if length_sq == 0:
+        return False
+    length = math.sqrt(length_sq)
+        
+    unit_direction = [direction[0] / length, direction[1] / length]
+    step_direction = [unit_direction[0] * STEP_SIZE, unit_direction[1] * STEP_SIZE]
+
+    pos = list(start)
+    
+    # Step along the ray from start, checking for intersection.
+    while not _is_in_box(pos, hidder_position) and not _is_in_box(pos, end):
+        pos[0] += step_direction[0]
+        pos[1] += step_direction[1]
+        
+        # Safety break to avoid infinite loops
+        if (pos[0] - start[0])**2 + (pos[1] - start[1])**2 > length_sq:
+            return False
+
+    return _is_in_box(pos, hidder_position)
+
 def compute_sight(agent, agents, targets, obstacles):
     """
-    Compute what entities an agent can see based on SIGHT_RANGE and line of sight.
-    Returns list of visible entities with their properties.
-    
-    Args:
-        agent (Agent): The agent whose sight to compute
-        agents (list): List of all agents
-        targets (list): List of targets
-        obstacles (list): List of obstacles
-    
-    Returns:
-        list: List of visible entities with properties
+    Compute what entities an agent can see using ray-casting.
+    An object is visible if the ray to it is not blocked by any other object.
     """
-    visible = []
-    
-    # Check other agents
-    for other_agent in agents:
-        if other_agent.id != agent.id and other_agent.is_alive():
-            dist = distance(agent.position, other_agent.position)
-            if dist <= SIGHT_RANGE:
-                if has_line_of_sight(agent.position, other_agent.position, agents, targets, obstacles):
-                    visible.append({
-                        'kind': 'agents',
-                        'id': other_agent.id,
-                        'team': other_agent.team,
-                        'position': other_agent.position.copy(),
-                        'life': other_agent.life
-                    })
-    
-    # Check targets
-    for target in targets:
-        if target.is_alive():
-            dist = distance(agent.position, target.position)
-            if dist <= SIGHT_RANGE:
-                if has_line_of_sight(agent.position, target.position, agents, targets, obstacles):
-                    visible.append({
-                        'kind': 'targets',
-                        'team': target.team,
-                        'position': target.position.copy(),
-                        'life': target.life
-                    })
-    
-    # Check obstacles
-    for obstacle in obstacles:
-        dist = distance(agent.position, obstacle.position)
-        if dist <= SIGHT_RANGE:
-            if has_line_of_sight(agent.position, obstacle.position, agents, targets, obstacles):
-                visible.append({
-                    'kind': 'obstacles',
-                    'position': obstacle.position.copy()
-                })
-    
-    return visible
+    all_entities = [a for a in agents if a.id != agent.id and a.is_alive()] + \
+                   [t for t in targets if t.is_alive()] + \
+                   obstacles
+                   
+    sight = []
+    sight_range_sq = SIGHT_RANGE**2
 
+    # 1. Filter objects in SIGHT_RANGE (using squared Euclidean distance)
+    visible_objects = [
+        o for o in all_entities 
+        if (agent.position[0] - o.position[0])**2 + (agent.position[1] - o.position[1])**2 < sight_range_sq
+    ]
+
+    # 2. For each object, check for obstructions
+    for obj in visible_objects:
+        hidders = [h for h in visible_objects if h is not obj]
+        is_hidden = any(_intersection(agent.position, obj.position, h.position) for h in hidders)
+        
+        if not is_hidden:
+            entry = {'kind': getattr(obj, 'kind', 'unknown'), 'position': obj.position.copy()}
+            if hasattr(obj, 'id'):
+                entry['id'] = obj.id
+            if hasattr(obj, 'team'):
+                entry['team'] = obj.team
+            if hasattr(obj, 'life'):
+                entry['life'] = obj.life
+            sight.append(entry)
+            
+    return sight
 
 def get_visible_cells(agent, agents, targets, obstacles):
     """
-    Get all visible cells for an agent within SIGHT_RANGE.
-    For debugging purposes.
-    
-    Args:
-        agent (Agent): The agent
-        agents (list): List of all agents
-        targets (list): List of targets
-        obstacles (list): List of obstacles
-        
-    Returns:
-        list: List of visible cell positions [[x, y], ...]
+    Get all visible cells for an agent within SIGHT_RANGE for debugging.
+    Uses ray-casting. This is computationally expensive.
     """
+    hidders = [a for a in agents if a.id != agent.id and a.is_alive()] + \
+              [t for t in targets if t.is_alive()] + \
+              obstacles
+              
     visible_cells = []
-    start_pos = agent.position
+    sight_range_sq = SIGHT_RANGE**2
     
-    # Explore all positions within Manhattan distance of SIGHT_RANGE
-    for dx in range(-SIGHT_RANGE, SIGHT_RANGE + 1):
-        for dy in range(-SIGHT_RANGE, SIGHT_RANGE + 1):
-            if abs(dx) + abs(dy) > SIGHT_RANGE:
-                continue
+    min_x = max(-BOARD_SIZE, agent.position[0] - SIGHT_RANGE)
+    max_x = min(BOARD_SIZE, agent.position[0] + SIGHT_RANGE)
+    min_y = max(-BOARD_SIZE, agent.position[1] - SIGHT_RANGE)
+    max_y = min(BOARD_SIZE, agent.position[1] + SIGHT_RANGE)
+
+    for i in range(int(min_x), int(max_x) + 1):
+        for j in range(int(min_y), int(max_y) + 1):
+            cell_pos = [i, j]
             
-            end_pos = [start_pos[0] + dx, start_pos[1] + dy]
-            
-            if not is_position_valid(end_pos):
+            if (agent.position[0] - i)**2 + (agent.position[1] - j)**2 > sight_range_sq:
                 continue
 
-            if has_line_of_sight(start_pos, end_pos, agents, targets, obstacles):
-                visible_cells.append(end_pos)
-    
+            is_hidden = any(_intersection(agent.position, cell_pos, h.position) for h in hidders)
+            
+            if not is_hidden:
+                visible_cells.append(cell_pos)
+                
     return visible_cells
 
+
+def has_line_of_sight(start_pos, end_pos, agents, targets, obstacles):
+    """
+    Check for a clear line of sight between two points using ray-casting.
+    This is a wrapper around the new intersection logic for compatibility.
+    """
+    all_entities = agents + targets + obstacles
+        
+    hidders = [
+        h for h in all_entities 
+        if h.position != start_pos and h.position != end_pos
+    ]
+    
+    is_hidden = any(_intersection(start_pos, end_pos, h.position) for h in hidders)
+    return not is_hidden
 
 def compute_last_positions_seen(agent, turn):
     """
     Compute the last known positions of enemies from sight history.
-    
-    Args:
-        agent (Agent): The agent
-        turn (int): Current turn number
-    
-    Returns:
-        dict: Dictionary of {entity_id: {'position': [x, y], 'turn': turn}}
     """
-    last_seen = {}
-    
-    # This would require maintaining a history of sights
-    # For now, we'll return the current sight as last seen
+    last_seen = agent.last_pos_seen.copy()
     for entity in agent.sight:
-        if entity['kind'] == 'agents' and entity['team'] != agent.team:
-            last_seen[entity['id']] = {
+        if entity['kind'] in ['agents', 'targets'] and entity.get('team') != agent.team:
+            # Use id if it exists (agents), otherwise use team (targets)
+            entity_id = entity.get('id', f"target_{entity['team']}")
+            last_seen[entity_id] = {
                 'position': entity['position'],
                 'turn': turn
             }
-    
     return last_seen
-
 
 def format_agent_state(agent, turn, agents, targets, obstacles):
     """
     Format the agent's state for sending to the AI API.
-    
-    Args:
-        agent (Agent): The agent
-        turn (dict): Current turn information
-        agents (list): List of all agents
-        targets (list): List of targets
-        obstacles (list): List of obstacles
-    
-    Returns:
-        dict: Formatted state dictionary
     """
     # Get possible moves
     possible_moves = get_possible_moves(agent, agents, targets, obstacles)
@@ -344,20 +350,20 @@ def format_agent_state(agent, turn, agents, targets, obstacles):
     # Get possible attacks (enemies in sight)
     attack_actions = []
     for entity in agent.sight:
-        if entity['kind'] in ['agents', 'targets'] and entity['team'] != agent.team:
+        if entity['kind'] in ['agents', 'targets'] and entity.get('team') != agent.team:
             attack_actions.append(f"ATTACK [{entity['position'][0]}, {entity['position'][1]}]")
     
     # Get possible speaks (teammates in sight)
     speak_actions = []
     for entity in agent.sight:
-        if entity['kind'] == 'agents' and entity['team'] == agent.team:
+        if entity['kind'] == 'agents' and entity.get('team') == agent.team:
             speak_actions.append(f"SPEAK [{entity['position'][0]}, {entity['position'][1]}]")
     
     # Separate sight into categories
-    friends = [e for e in agent.sight if e['kind'] == 'agents' and e['team'] == agent.team]
-    enemies = [e for e in agent.sight if e['kind'] == 'agents' and e['team'] != agent.team]
-    friendly_target = [e for e in agent.sight if e['kind'] == 'targets' and e['team'] == agent.team]
-    enemy_target = [e for e in agent.sight if e['kind'] == 'targets' and e['team'] != agent.team]
+    friends = [e for e in agent.sight if e['kind'] == 'agents' and e.get('team') == agent.team]
+    enemies = [e for e in agent.sight if e['kind'] == 'agents' and e.get('team') != agent.team]
+    friendly_target = [e for e in agent.sight if e['kind'] == 'targets' and e.get('team') == agent.team]
+    enemy_target = [e for e in agent.sight if e['kind'] == 'targets' and e.get('team') != agent.team]
     visible_obstacles = [e for e in agent.sight if e['kind'] == 'obstacles']
     
     state = {
@@ -376,73 +382,3 @@ def format_agent_state(agent, turn, agents, targets, obstacles):
     }
     
     return state
-
-
-def get_line_cells(start, end):
-    """
-    Get all cells on a line from start to end using Bresenham's algorithm.
-    
-    Args:
-        start (list): Start position [x, y]
-        end (list): End position [x, y]
-        
-    Returns:
-        list: List of cells [[x, y], ...] on the line
-    """
-    x1, y1 = start
-    x2, y2 = end
-    points = []
-    
-    dx = abs(x2 - x1)
-    dy = abs(y2 - y1)
-    x, y = x1, y1
-    
-    sx = -1 if x1 > x2 else 1
-    sy = -1 if y1 > y2 else 1
-    
-    if dx > dy:
-        err = dx / 2.0
-        while x != x2:
-            points.append([x, y])
-            err -= dy
-            if err < 0:
-                y += sy
-                err += dx
-            x += sx
-    else:
-        err = dy / 2.0
-        while y != y2:
-            points.append([x, y])
-            err -= dx
-            if err < 0:
-                x += sx
-                err += dy
-            y += sy
-            
-    points.append([x, y])
-    return points
-
-
-def has_line_of_sight(start_pos, end_pos, agents, targets, obstacles):
-    """
-    Check for a clear line of sight between two points.
-    
-    Args:
-        start_pos (list): Start position [x, y]
-        end_pos (list): End position [x, y]
-        agents (list): List of all agents
-        targets (list): List of targets
-        obstacles (list): List of obstacles
-        
-    Returns:
-        bool: True if line of sight is clear, False otherwise
-    """
-    line = get_line_cells(start_pos, end_pos)
-    
-    # Check all cells on the line, excluding the start and end points
-    for i in range(1, len(line) - 1):
-        pos = line[i]
-        if is_position_occupied(pos, agents, targets, obstacles):
-            return False # Obstruction found
-            
-    return True
