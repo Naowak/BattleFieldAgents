@@ -8,7 +8,7 @@ import math
 from constants import *
 from agents import Agent, Target, Obstacle
 from actions import MoveAction, AttackAction, SpeakAction
-from utils import get_possible_moves
+from utils import get_possible_moves, get_visible_cells
 
 
 class GameRenderer:
@@ -30,7 +30,10 @@ class GameRenderer:
         self.show_possible_moves = False
         self.show_agent_position = False
         self.show_agent_vision = False
-        self.visible_cells_to_highlight = []
+        
+        # Cached debug info
+        self.cached_visible_cells = []
+        self.cached_possible_moves = []
         
         # Calculate grid dimensions and position
         self.grid_width = (2 * BOARD_SIZE + 1) * CELL_SIZE
@@ -45,6 +48,26 @@ class GameRenderer:
         
         # Fonts
         self.font_small = pygame.font.Font(None, FONT_SIZE_SMALL)
+
+    def update_debug_cache(self):
+        """Update the cached debug information (vision and moves)."""
+        current_agent = self.game_state.get_current_agent()
+        if current_agent:
+            self.cached_visible_cells = get_visible_cells(
+                current_agent,
+                self.game_state.agents,
+                self.game_state.targets,
+                self.game_state.obstacles
+            )
+            self.cached_possible_moves = get_possible_moves(
+                current_agent,
+                self.game_state.agents,
+                self.game_state.targets,
+                self.game_state.obstacles
+            )
+        else:
+            self.cached_visible_cells = []
+            self.cached_possible_moves = []
     
     def world_to_screen(self, world_pos):
         """
@@ -124,13 +147,12 @@ class GameRenderer:
         if current_agent:
             # Agent Vision (drawn first)
             if self.show_agent_vision:
-                for cell_pos in self.visible_cells_to_highlight:
+                for cell_pos in self.cached_visible_cells:
                     self._draw_debug_rect(overlay_surface, cell_pos, COLOR_DEBUG_AGENT_VISION)
             
             # Possible Moves
             if self.show_possible_moves:
-                moves = get_possible_moves(current_agent, self.game_state.agents, self.game_state.targets, self.game_state.obstacles)
-                for move in moves:
+                for move in self.cached_possible_moves:
                     self._draw_debug_rect(overlay_surface, move, COLOR_DEBUG_POSSIBLE_MOVES)
             
             # Current Agent Position (drawn last to be on top of other overlays)

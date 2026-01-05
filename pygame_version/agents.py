@@ -159,7 +159,7 @@ class Target:
         """
         self.team = team
         self.position = position.copy()
-        self.life = AGENT_LIFE  # Targets have same HP as agents
+        self.life = TARGET_LIFE  # Targets have same HP as agents
         self.kind = 'targets'
     
     def is_alive(self):
@@ -174,7 +174,21 @@ class Target:
             damage (int): Amount of damage to take
         """
         self.life = max(0, self.life - damage)
+
+    def get_hp_percentage(self):
+        """Get health as a percentage."""
+        return (self.life / TARGET_LIFE) * 100
     
+    def get_hp_bar_color(self):
+        """Get color for HP bar based on current health."""
+        hp_percent = self.get_hp_percentage()
+        if hp_percent > 60:
+            return COLOR_HP_BAR_GREEN
+        elif hp_percent > 30:
+            return COLOR_HP_BAR_YELLOW
+        else:
+            return COLOR_HP_BAR_RED
+
     def get_color(self):
         """Get the color based on team."""
         if self.team == 'red':

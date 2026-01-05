@@ -180,6 +180,69 @@ class AgentCard:
             y_offset += 15
 
 
+class TargetCard:
+    """
+    UI card displaying target information in the left panel.
+    """
+    
+    def __init__(self, target, x, y, width, height):
+        """
+        Initialize a target card.
+        
+        Args:
+            target (Target): The target to display
+            x (int): X position
+            y (int): Y position
+            width (int): Card width
+            height (int): Card height
+        """
+        self.target = target
+        self.rect = pygame.Rect(x, y, width, height)
+    
+    def draw(self, surface, font_normal, font_small):
+        """
+        Draw the target card.
+        """
+        # Background color based on team and alive status
+        if not self.target.is_alive():
+            bg_color = (40, 40, 40)
+        else:
+            bg_color = self.target.get_color()
+        
+        # Draw card background
+        pygame.draw.rect(surface, bg_color, self.rect)
+        pygame.draw.rect(surface, COLOR_TEXT, self.rect, 2)
+        
+        # Draw target info
+        y_offset = self.rect.y + 10
+        
+        # Target ID/Name
+        team_name = self.target.team.upper()
+        id_text = font_normal.render(f"{team_name} TARGET", True, COLOR_TEXT)
+        surface.blit(id_text, (self.rect.x + 10, y_offset))
+        y_offset += 25
+        
+        # HP Bar
+        hp_bar_width = self.rect.width - 20
+        hp_bar_height = 15
+        hp_percentage = self.target.get_hp_percentage()
+        
+        # HP bar background
+        hp_bar_rect = pygame.Rect(self.rect.x + 10, y_offset, hp_bar_width, hp_bar_height)
+        pygame.draw.rect(surface, COLOR_HP_BAR_BG, hp_bar_rect)
+        
+        # HP bar fill
+        if hp_percentage > 0:
+            hp_fill_width = int(hp_bar_width * (hp_percentage / 100))
+            hp_fill_rect = pygame.Rect(self.rect.x + 10, y_offset, hp_fill_width, hp_bar_height)
+            pygame.draw.rect(surface, self.target.get_hp_bar_color(), hp_fill_rect)
+        
+        # HP text
+        hp_text = font_small.render(f"{self.target.life} / {TARGET_LIFE}", True, COLOR_TEXT)
+        text_x = self.rect.x + 10 + (hp_bar_width - hp_text.get_width()) // 2
+        surface.blit(hp_text, (text_x, y_offset))
+
+
 class ThoughtBubble:
     """
     Displays agent thoughts and actions in the right panel.
@@ -327,7 +390,7 @@ class ThoughtBubble:
 class LeftPanel(Panel):
     """
     Left panel showing all agents and their status.
-    Displays agent cards for both teams.
+    Displays agent cards and target cards for both teams.
     """
     
     def __init__(self, game_state):
@@ -340,17 +403,30 @@ class LeftPanel(Panel):
         super().__init__(0, 0, LEFT_PANEL_WIDTH, WINDOW_HEIGHT)
         self.game_state = game_state
         self.agent_cards = []
+        self.target_cards = []
         self.scroll_offset = 0
         self.font_title = pygame.font.Font(None, FONT_SIZE_TITLE)
         self.font_normal = pygame.font.Font(None, FONT_SIZE_NORMAL)
         self.font_small = pygame.font.Font(None, FONT_SIZE_SMALL)
     
     def update_cards(self):
-        """Update agent cards based on current game state."""
+        """Update agent and target cards based on current game state."""
         self.agent_cards = []
+        self.target_cards = []
         y_offset = PANEL_PADDING + 40  # Space for title
         
         # Red team
+        red_target = next((t for t in self.game_state.targets if t.team == 'red'), None)
+        if red_target:
+            self.target_cards.append(TargetCard(
+                red_target,
+                PANEL_PADDING,
+                y_offset,
+                LEFT_PANEL_WIDTH - 2 * PANEL_PADDING,
+                60 # Slightly smaller than agent card
+            ))
+            y_offset += 60 + AGENT_CARD_MARGIN
+
         red_agents = [a for a in self.game_state.agents if a.team == 'red']
         for agent in red_agents:
             card = AgentCard(
@@ -366,6 +442,17 @@ class LeftPanel(Panel):
         y_offset += 20  # Space between teams
         
         # Blue team
+        blue_target = next((t for t in self.game_state.targets if t.team == 'blue'), None)
+        if blue_target:
+            self.target_cards.append(TargetCard(
+                blue_target,
+                PANEL_PADDING,
+                y_offset,
+                LEFT_PANEL_WIDTH - 2 * PANEL_PADDING,
+                60
+            ))
+            y_offset += 60 + AGENT_CARD_MARGIN
+
         blue_agents = [a for a in self.game_state.agents if a.team == 'blue']
         for agent in blue_agents:
             card = AgentCard(
@@ -399,9 +486,13 @@ class LeftPanel(Panel):
         super().draw(surface)
         
         # Draw title
-        title_text = self.font_title.render("AGENTS", True, COLOR_TEXT)
+        title_text = self.font_title.render("STATUS", True, COLOR_TEXT)
         surface.blit(title_text, (PANEL_PADDING, PANEL_PADDING))
         
+        # Draw target cards
+        for card in self.target_cards:
+            card.draw(surface, self.font_normal, self.font_small)
+
         # Draw agent cards
         for card in self.agent_cards:
             card.draw(surface, self.font_normal, self.font_small)

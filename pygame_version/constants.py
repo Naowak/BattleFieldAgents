@@ -67,6 +67,7 @@ NB_ACTIONS_PER_TURN = 3
 AGENT_MOVE_RANGE = 3
 
 # Combat
+TARGET_LIFE = 150
 AGENT_LIFE = 100
 ATTACK_DAMAGE = 25
 SIGHT_RANGE = 99  # Vision range (currently unlimited)
