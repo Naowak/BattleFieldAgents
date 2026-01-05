@@ -41,7 +41,7 @@ class AIInterface:
         
         # Load system message
         try:
-            with open('system_message.txt', 'r') as f:
+            with open('system_message2.txt', 'r') as f:
                 self.system_message = f.read()
         except FileNotFoundError:
             print("Error: system_message.txt not found.")
@@ -88,6 +88,8 @@ class AIInterface:
                 ],
                 "temperature": 0.7
             }
+
+            print(payload)
             
             # Send POST request to the AI API
             response = requests.post(

@@ -76,7 +76,7 @@ SIGHT_RANGE = 99  # Vision range (currently unlimited)
 SPAWN_RANGE = 3  # Range around target where agents spawn
 
 # Obstacles
-NB_OBSTACLES = 35
+NB_OBSTACLES = 25
 OBSTACLE_SIZE = 1  # Size in cells
 
 # ============================================================================

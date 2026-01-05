@@ -352,12 +352,14 @@ def format_agent_state(agent, turn, agents, targets, obstacles):
     for entity in agent.sight:
         if entity['kind'] in ['agents', 'targets'] and entity.get('team') != agent.team:
             attack_actions.append(f"ATTACK [{entity['position'][0]}, {entity['position'][1]}]")
+    print("Attack Actions:", attack_actions)
     
     # Get possible speaks (teammates in sight)
     speak_actions = []
     for entity in agent.sight:
         if entity['kind'] == 'agents' and entity.get('team') == agent.team:
             speak_actions.append(f"SPEAK [{entity['position'][0]}, {entity['position'][1]}]")
+    print("Speak Actions:", speak_actions)
     
     # Separate sight into categories
     friends = [e for e in agent.sight if e['kind'] == 'agents' and e.get('team') == agent.team]

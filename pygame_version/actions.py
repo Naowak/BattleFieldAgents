@@ -330,7 +330,7 @@ def parse_action_string(action_string, agent_id, game_state):
     action_string = action_string.strip()
     
     # Parse MOVE action: "MOVE [x, y]"
-    move_match = re.match(r'MOVE\s*\[(-?\d+),\s*(-?\d+)\]', action_string)
+    move_match = re.match(r'\"?MOVE\s*\[(-?\d+),\s*(-?\d+)\]\"?', action_string)
     if move_match:
         x, y = int(move_match.group(1)), int(move_match.group(2))
         target_position = [x, y]

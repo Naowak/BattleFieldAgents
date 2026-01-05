@@ -118,8 +118,8 @@ class GameState:
                 attempts += 1
                 
                 # Random position
-                x = random.randint(-BOARD_SIZE + 2, BOARD_SIZE - 2)
-                y = random.randint(-BOARD_SIZE + 2, BOARD_SIZE - 2)
+                x = random.randint(-BOARD_SIZE + 1, BOARD_SIZE - 1)
+                y = random.randint(-BOARD_SIZE + 1, BOARD_SIZE - 1)
                 pos = [x, y]
                 
                 # Check if position is free
