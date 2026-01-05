@@ -210,7 +210,7 @@ def get_possible_moves(agent, agents, targets, obstacles, max_distance=AGENT_MOV
 
 def compute_sight(agent, agents, targets, obstacles):
     """
-    Compute what entities an agent can see based on SIGHT_RANGE.
+    Compute what entities an agent can see based on SIGHT_RANGE and line of sight.
     Returns list of visible entities with their properties.
     
     Args:
@@ -229,36 +229,73 @@ def compute_sight(agent, agents, targets, obstacles):
         if other_agent.id != agent.id and other_agent.is_alive():
             dist = distance(agent.position, other_agent.position)
             if dist <= SIGHT_RANGE:
-                visible.append({
-                    'kind': 'agents',
-                    'id': other_agent.id,
-                    'team': other_agent.team,
-                    'position': other_agent.position.copy(),
-                    'life': other_agent.life
-                })
+                if has_line_of_sight(agent.position, other_agent.position, agents, targets, obstacles):
+                    visible.append({
+                        'kind': 'agents',
+                        'id': other_agent.id,
+                        'team': other_agent.team,
+                        'position': other_agent.position.copy(),
+                        'life': other_agent.life
+                    })
     
     # Check targets
     for target in targets:
         if target.is_alive():
             dist = distance(agent.position, target.position)
             if dist <= SIGHT_RANGE:
-                visible.append({
-                    'kind': 'targets',
-                    'team': target.team,
-                    'position': target.position.copy(),
-                    'life': target.life
-                })
+                if has_line_of_sight(agent.position, target.position, agents, targets, obstacles):
+                    visible.append({
+                        'kind': 'targets',
+                        'team': target.team,
+                        'position': target.position.copy(),
+                        'life': target.life
+                    })
     
     # Check obstacles
     for obstacle in obstacles:
         dist = distance(agent.position, obstacle.position)
         if dist <= SIGHT_RANGE:
-            visible.append({
-                'kind': 'obstacles',
-                'position': obstacle.position.copy()
-            })
+            if has_line_of_sight(agent.position, obstacle.position, agents, targets, obstacles):
+                visible.append({
+                    'kind': 'obstacles',
+                    'position': obstacle.position.copy()
+                })
     
     return visible
+
+
+def get_visible_cells(agent, agents, targets, obstacles):
+    """
+    Get all visible cells for an agent within SIGHT_RANGE.
+    For debugging purposes.
+    
+    Args:
+        agent (Agent): The agent
+        agents (list): List of all agents
+        targets (list): List of targets
+        obstacles (list): List of obstacles
+        
+    Returns:
+        list: List of visible cell positions [[x, y], ...]
+    """
+    visible_cells = []
+    start_pos = agent.position
+    
+    # Explore all positions within Manhattan distance of SIGHT_RANGE
+    for dx in range(-SIGHT_RANGE, SIGHT_RANGE + 1):
+        for dy in range(-SIGHT_RANGE, SIGHT_RANGE + 1):
+            if abs(dx) + abs(dy) > SIGHT_RANGE:
+                continue
+            
+            end_pos = [start_pos[0] + dx, start_pos[1] + dy]
+            
+            if not is_position_valid(end_pos):
+                continue
+
+            if has_line_of_sight(start_pos, end_pos, agents, targets, obstacles):
+                visible_cells.append(end_pos)
+    
+    return visible_cells
 
 
 def compute_last_positions_seen(agent, turn):

@@ -56,7 +56,7 @@ COLOR_BUBBLE_BORDER = (187, 187, 187)
 # GAME BOARD
 # ============================================================================
 BOARD_SIZE = 7  # Grid is (2*BOARD_SIZE + 1) x (2*BOARD_SIZE + 1)
-CELL_SIZE = 40   # Size of each cell in pixels
+CELL_SIZE = 37   # Size of each cell in pixels
 GRID_PADDING = 0  # Padding around the grid
 
 # ============================================================================

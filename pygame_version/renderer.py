@@ -30,6 +30,7 @@ class GameRenderer:
         self.show_possible_moves = False
         self.show_agent_position = False
         self.show_agent_vision = False
+        self.visible_cells_to_highlight = []
         
         # Calculate grid dimensions and position
         self.grid_width = (2 * BOARD_SIZE + 1) * CELL_SIZE
@@ -123,8 +124,8 @@ class GameRenderer:
         if current_agent:
             # Agent Vision (drawn first)
             if self.show_agent_vision:
-                for entity in current_agent.sight:
-                    self._draw_debug_rect(overlay_surface, entity['position'], COLOR_DEBUG_AGENT_VISION)
+                for cell_pos in self.visible_cells_to_highlight:
+                    self._draw_debug_rect(overlay_surface, cell_pos, COLOR_DEBUG_AGENT_VISION)
             
             # Possible Moves
             if self.show_possible_moves:
