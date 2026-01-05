@@ -403,13 +403,16 @@ class ActionQueue:
         Args:
             dt (float): Delta time in seconds
             game_state: The game state object
+            
+        Returns:
+            bool: True if an action was completed and executed, False otherwise
         """
         # Start next action if no current action
         if self.current_action is None:
             if self.queue:
                 self.current_action = self.queue.pop(0)
                 self.current_action.start()
-            return
+            return False
         
         # Update current action
         self.current_action.update(dt)
@@ -427,6 +430,9 @@ class ActionQueue:
                 acting_agent.last_pos_seen = compute_last_positions_seen(acting_agent, game_state.turn['current'])
 
             self.current_action = None
+            return True
+            
+        return False
     
     def is_busy(self):
         """

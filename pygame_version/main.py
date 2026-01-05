@@ -172,14 +172,6 @@ class Game:
                     # Add to action queue
                     self.game_state.action_queue.add_action(action_obj)
                     
-                    # Move to next action
-                    self.game_state.next_action()
-                    
-                    # Update UI
-                    self.left_panel.update_cards()
-                    
-                    # Check win condition
-                    self.game_state.check_win_condition()
                 else:
                     print(f"Invalid action: {action}")
                     self.game_state.next_action()  # Skip invalid action
@@ -203,7 +195,18 @@ class Game:
             return
         
         # Update action queue (animations)
-        self.game_state.action_queue.update(dt, self.game_state)
+        action_completed = self.game_state.action_queue.update(dt, self.game_state)
+        
+        if action_completed:
+            # Check win condition after action execution (damage applied)
+            self.game_state.check_win_condition()
+            
+            if not self.game_state.game_over:
+                # Move to next action/turn
+                self.game_state.next_action()
+                
+                # Update UI
+                self.left_panel.update_cards()
         
         # If no action is animating and not waiting for AI, request next action
         if not self.is_manual_mode and not self.game_state.action_queue.is_busy() and not self.waiting_for_ai:
