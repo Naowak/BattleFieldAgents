@@ -299,16 +299,21 @@ class ThoughtBubble:
         # Draw agent ID header
         header_text = font_normal.render(self.agent_id, True, COLOR_TEXT)
         
+        # Prepare text with prefixes
+        thoughts_text = self.thoughts if self.thoughts.startswith("THOUGHTS:") else f"THOUGHTS: {self.thoughts}"
+        action_text = self.action if self.action.startswith("ACTION:") else f"ACTION: {self.action}"
+        
         # Wrap thoughts text
-        thoughts_lines = self._wrap_text(self.thoughts, font_small, self.width - 2 * padding)
-        action_lines = self._wrap_text(f"ACTION: {self.action}", font_small, self.width - 2 * padding)
+        thoughts_lines = self._wrap_text(thoughts_text, font_small, self.width - 2 * padding)
+        action_lines = self._wrap_text(action_text, font_small, self.width - 2 * padding)
         
         # Calculate total height
         total_height = padding * 2 + 25  # Header
         total_height += len(thoughts_lines) * line_height + 5  # Thoughts
         total_height += len(action_lines) * line_height  # Action
         
-        self.height = min(total_height, BUBBLE_MAX_HEIGHT)
+        # We don't limit height anymore since we have scrolling
+        self.height = total_height
         
         # Draw bubble background
         bubble_rect = pygame.Rect(self.x, self.y, self.width, self.height)
@@ -334,7 +339,7 @@ class ThoughtBubble:
         # Draw thoughts
         for line in thoughts_lines:
             if y_offset + line_height > self.y + self.height - padding:
-                break  # Don't overflow
+                break  # Don't overflow (though with unbounded height this shouldn't happen)
             text_surface = font_small.render(line, True, COLOR_TEXT)
             surface.blit(text_surface, (self.x + padding, y_offset))
             y_offset += line_height
@@ -343,8 +348,8 @@ class ThoughtBubble:
         
         # Draw action
         for line in action_lines:
-            if y_offset + line_height > self.y + self.height - padding:
-                break
+            # if y_offset + line_height > self.y + self.height - padding:
+            #     break
             text_surface = font_small.render(line, True, COLOR_TEXT)
             surface.blit(text_surface, (self.x + padding, y_offset))
             y_offset += line_height
@@ -500,7 +505,7 @@ class LeftPanel(Panel):
 
 class RightPanel(Panel):
     """
-    Right panel showing thought bubbles (agent decisions).
+    RightPanel showing thought bubbles (agent decisions).
     Displays reasoning and actions from AI agents.
     """
     
@@ -517,6 +522,7 @@ class RightPanel(Panel):
         self.font_title = pygame.font.Font(None, FONT_SIZE_TITLE)
         self.font_normal = pygame.font.Font(None, FONT_SIZE_NORMAL)
         self.font_small = pygame.font.Font(None, FONT_SIZE_SMALL)
+        self.max_scroll = 0
     
     def add_thought_bubble(self, agent_id, team, thoughts, action):
         """
@@ -539,13 +545,43 @@ class RightPanel(Panel):
         )
         self.thought_bubbles.append(bubble)
         
-        # Keep only last 20 bubbles
-        if len(self.thought_bubbles) > 20:
-            self.thought_bubbles.pop(0)
+        # Auto-scroll to bottom when new bubble is added
+        self._update_max_scroll()
+        self.scroll_offset = self.max_scroll
+
+    def _update_max_scroll(self):
+        """Calculate the maximum scroll offset based on total content height."""
+        total_height = 0
+        for bubble in self.thought_bubbles:
+            # We need to estimate height or use stored height. 
+            # For accurate scrolling, we might need to pre-calculate height.
+            # Here we'll rely on the fact that draw calculates height, 
+            # but for new bubbles we might need a rough estimate or force a layout update.
+            # A simple approximation or cumulative height from last draw could work.
+            total_height += bubble.height + BUBBLE_MARGIN if bubble.height > 0 else 150 # Estimate if 0
+            
+        visible_height = self.rect.height - (PANEL_PADDING + 40) # Subtract header
+        self.max_scroll = max(0, total_height - visible_height)
+
+    def handle_scroll(self, dy):
+        """
+        Handle scroll events.
+        
+        Args:
+            dy (int): Scroll amount (positive for up, negative for down)
+        """
+        scroll_speed = 30
+        self.scroll_offset -= dy * scroll_speed
+        
+        # Clamp scroll offset
+        self._update_max_scroll()
+        self.scroll_offset = max(0, min(self.scroll_offset, self.max_scroll))
     
     def clear_bubbles(self):
         """Clear all thought bubbles."""
         self.thought_bubbles = []
+        self.scroll_offset = 0
+        self.max_scroll = 0
     
     def draw(self, surface):
         """
@@ -561,17 +597,61 @@ class RightPanel(Panel):
         title_text = self.font_title.render("THOUGHTS", True, COLOR_TEXT)
         surface.blit(title_text, (self.rect.x + PANEL_PADDING, PANEL_PADDING))
         
-        # Draw thought bubbles from bottom to top (newest at bottom)
-        y_offset = self.rect.bottom - PANEL_PADDING
+        # Clip area for bubbles to avoid drawing over title or outside panel
+        clip_rect = pygame.Rect(
+            self.rect.x, 
+            self.rect.y + PANEL_PADDING + 40, 
+            self.rect.width, 
+            self.rect.height - (PANEL_PADDING + 40)
+        )
+        old_clip = surface.get_clip()
+        surface.set_clip(clip_rect)
         
-        for bubble in reversed(self.thought_bubbles):
-            bubble.y = y_offset - bubble.height if bubble.height > 0 else y_offset - 100
-            height = bubble.draw(surface, self.font_normal, self.font_small)
-            y_offset -= height + BUBBLE_MARGIN
+        # Draw thought bubbles
+        # We draw them starting from the top + title offset, shifted by scroll_offset
+        start_y = self.rect.y + PANEL_PADDING + 40 - self.scroll_offset
+        current_y = start_y
+        
+        for bubble in self.thought_bubbles:
+            # Only draw if visible
+            # We need to calculate height first, which is done in draw()
+            # So we might draw off-screen bubbles just to get their height for next frame's scrolling 
+            # or use the height from previous frame.
             
-            # Stop if we've reached the top
-            if y_offset < PANEL_PADDING + 40:
-                break
+            # Update bubble position
+            bubble.y = current_y
+            
+            # Optimization: check if loosely in view before drawing text which is expensive
+            if current_y + BUBBLE_MAX_HEIGHT > 0 and current_y < WINDOW_HEIGHT:
+                height = bubble.draw(surface, self.font_normal, self.font_small)
+            else:
+                # Calculate height without drawing to screen if totally off-screen
+                # For now, just draw it to get the height, or use a dummy surface?
+                # Simpler to just let it calculate height. 
+                # To avoid text rendering cost, we could separate layout from drawing.
+                # But for < 100 bubbles it should be fine.
+                height = bubble.draw(surface, self.font_normal, self.font_small)
+                
+            current_y += height + BUBBLE_MARGIN
+            
+        surface.set_clip(old_clip)
+        
+        # Draw scrollbar if needed
+        if self.max_scroll > 0:
+            scrollbar_width = 6
+            visible_ratio = clip_rect.height / (self.max_scroll + clip_rect.height)
+            scrollbar_height = max(30, int(clip_rect.height * visible_ratio))
+            
+            scroll_pos_ratio = self.scroll_offset / self.max_scroll
+            scrollbar_y = clip_rect.y + int((clip_rect.height - scrollbar_height) * scroll_pos_ratio)
+            
+            scrollbar_rect = pygame.Rect(
+                self.rect.right - scrollbar_width - 2,
+                scrollbar_y,
+                scrollbar_width,
+                scrollbar_height
+            )
+            pygame.draw.rect(surface, COLOR_CELL_BORDER, scrollbar_rect, border_radius=3)
 
 
 class BottomPanel(Panel):

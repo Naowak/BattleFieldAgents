@@ -113,6 +113,11 @@ class Game:
             elif event.type == pygame.MOUSEMOTION:
                 # Handle mouse hover for agent cards
                 self.left_panel.handle_mouse_motion(event.pos)
+            
+            elif event.type == pygame.MOUSEWHEEL:
+                mouse_pos = pygame.mouse.get_pos()
+                if self.right_panel.rect.collidepoint(mouse_pos):
+                    self.right_panel.handle_scroll(event.y)
     
     def restart_game(self):
         """Restart the game with a new initial state."""
