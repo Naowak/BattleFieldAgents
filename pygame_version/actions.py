@@ -418,6 +418,14 @@ class ActionQueue:
         if self.current_action.is_complete:
             # Execute the action's effect on the game state
             self.current_action.execute(game_state)
+            
+            # Update sight for the agent that just acted
+            from utils import compute_sight, compute_last_positions_seen
+            acting_agent = game_state.get_agent_by_id(self.current_action.agent_id)
+            if acting_agent and acting_agent.is_alive():
+                acting_agent.sight = compute_sight(acting_agent, game_state.agents, game_state.targets, game_state.obstacles)
+                acting_agent.last_pos_seen = compute_last_positions_seen(acting_agent, game_state.turn['current'])
+
             self.current_action = None
     
     def is_busy(self):

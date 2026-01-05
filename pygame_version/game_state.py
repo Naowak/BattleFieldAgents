@@ -225,12 +225,6 @@ class GameState:
         
         if self.turn['action_count'] >= NB_ACTIONS_PER_TURN:
             self.next_turn()
-        else:
-            # Update current agent's sight
-            current_agent = self.get_current_agent()
-            if current_agent:
-                current_agent.sight = compute_sight(current_agent, self.agents, self.targets, self.obstacles)
-                current_agent.last_pos_seen = compute_last_positions_seen(current_agent, self.turn['current'])
     
     def next_turn(self):
         """Move to the next agent's turn."""

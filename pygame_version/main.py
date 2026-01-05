@@ -182,6 +182,7 @@ class Game:
                     self.game_state.check_win_condition()
                 else:
                     print(f"Invalid action: {action}")
+                    self.game_state.next_action()  # Skip invalid action
             else:
                 print("AI returned no action")
         
