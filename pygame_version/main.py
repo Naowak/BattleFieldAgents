@@ -231,18 +231,8 @@ class Game:
         # Clear screen
         self.screen.fill(COLOR_BG)
 
-        # Update debug vision data
-        if self.renderer.show_agent_vision:
-            current_agent = self.game_state.get_current_agent()
-            if current_agent:
-                self.renderer.visible_cells_to_highlight = get_visible_cells(
-                    current_agent,
-                    self.game_state.agents,
-                    self.game_state.targets,
-                    self.game_state.obstacles
-                )
-        else:
-            self.renderer.visible_cells_to_highlight = []
+        # Update debug cache (vision and possible moves)
+        self.renderer.update_debug_cache()
         
         # Render game grid and entities
         self.renderer.render(self.screen)

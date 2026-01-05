@@ -355,7 +355,7 @@ class GameRenderer:
             color = COLOR_TEAM_BLUE
         
         text_surface = font_large.render(winner_text, True, color)
-        text_x = (WINDOW_WIDTH - text_surface.get_width()) // 2
+        text_x = LEFT_PANEL_WIDTH + (WINDOW_WIDTH - LEFT_PANEL_WIDTH - RIGHT_PANEL_WIDTH - text_surface.get_width()) // 2
         text_y = WINDOW_HEIGHT // 2 - 50
         surface.blit(text_surface, (text_x, text_y))
         
@@ -363,7 +363,7 @@ class GameRenderer:
         font_small = pygame.font.Font(None, 36)
         instruction_text = "Press R to restart"
         text_surface = font_small.render(instruction_text, True, COLOR_TEXT)
-        text_x = (WINDOW_WIDTH - text_surface.get_width()) // 2
+        text_x = LEFT_PANEL_WIDTH + (WINDOW_WIDTH - LEFT_PANEL_WIDTH - RIGHT_PANEL_WIDTH - text_surface.get_width()) // 2
         text_y = WINDOW_HEIGHT // 2 + 50
         surface.blit(text_surface, (text_x, text_y))
     
