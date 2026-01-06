@@ -8,6 +8,7 @@ import math
 from constants import *
 from agents import Agent, Target, Obstacle
 from actions import MoveAction, AttackAction, SpeakAction
+from utils import get_possible_moves, get_visible_cells
 
 
 class GameRenderer:
@@ -25,6 +26,15 @@ class GameRenderer:
         """
         self.game_state = game_state
         
+        # Debug display flags
+        self.show_possible_moves = False
+        self.show_agent_position = False
+        self.show_agent_vision = False
+        
+        # Cached debug info
+        self.cached_visible_cells = []
+        self.cached_possible_moves = []
+        
         # Calculate grid dimensions and position
         self.grid_width = (2 * BOARD_SIZE + 1) * CELL_SIZE
         self.grid_height = (2 * BOARD_SIZE + 1) * CELL_SIZE
@@ -38,6 +48,26 @@ class GameRenderer:
         
         # Fonts
         self.font_small = pygame.font.Font(None, FONT_SIZE_SMALL)
+
+    def update_debug_cache(self):
+        """Update the cached debug information (vision and moves)."""
+        current_agent = self.game_state.get_current_agent()
+        if current_agent:
+            self.cached_visible_cells = get_visible_cells(
+                current_agent,
+                self.game_state.agents,
+                self.game_state.targets,
+                self.game_state.obstacles
+            )
+            self.cached_possible_moves = get_possible_moves(
+                current_agent,
+                self.game_state.agents,
+                self.game_state.targets,
+                self.game_state.obstacles
+            )
+        else:
+            self.cached_visible_cells = []
+            self.cached_possible_moves = []
     
     def world_to_screen(self, world_pos):
         """
@@ -93,6 +123,69 @@ class GameRenderer:
                     text_y = screen_y + 2
                     surface.blit(coord_text, (text_x, text_y))
     
+    def _draw_debug_rect(self, surface, world_pos, color):
+        """Helper to draw a debug rectangle on the overlay surface."""
+        grid_x = world_pos[0] + BOARD_SIZE
+        grid_y = world_pos[1] + BOARD_SIZE
+        
+        rect = pygame.Rect(
+            grid_x * CELL_SIZE,
+            grid_y * CELL_SIZE,
+            CELL_SIZE,
+            CELL_SIZE
+        )
+        pygame.draw.rect(surface, color, rect)
+
+    def draw_debug_overlays(self, surface):
+        """Draw semi-transparent overlays for debugging."""
+        if not (self.show_possible_moves or self.show_agent_position or self.show_agent_vision):
+            return
+
+        overlay_surface = pygame.Surface((self.grid_width, self.grid_height), pygame.SRCALPHA)
+        current_agent = self.game_state.get_current_agent()
+
+        if current_agent:
+            # Agent Vision (drawn first)
+            if self.show_agent_vision:
+                for cell_pos in self.cached_visible_cells:
+                    self._draw_debug_rect(overlay_surface, cell_pos, COLOR_DEBUG_AGENT_VISION)
+            
+            # Possible Moves
+            if self.show_possible_moves:
+                for move in self.cached_possible_moves:
+                    self._draw_debug_rect(overlay_surface, move, COLOR_DEBUG_POSSIBLE_MOVES)
+            
+            # Current Agent Position (drawn last to be on top of other overlays)
+            if self.show_agent_position:
+                self._draw_debug_rect(overlay_surface, current_agent.position, COLOR_DEBUG_AGENT_POSITION)
+
+        surface.blit(overlay_surface, (self.grid_x, self.grid_y))
+
+    def draw_bonuses(self, surface):
+        """
+        Draw bonus/malus items.
+        
+        Args:
+            surface (pygame.Surface): Surface to draw on
+        """
+        for bonus in self.game_state.bonus_malus:
+            screen_pos = self.world_to_screen(bonus.position)
+            
+            # Draw bonus cell background
+            bonus_rect = pygame.Rect(
+                screen_pos[0] - CELL_SIZE // 2 + 5,
+                screen_pos[1] - CELL_SIZE // 2 + 5,
+                CELL_SIZE - 10,
+                CELL_SIZE - 10
+            )
+            pygame.draw.rect(surface, COLOR_BONUS, bonus_rect, border_radius=5)
+            pygame.draw.rect(surface, COLOR_TEXT, bonus_rect, 1, border_radius=5)
+            
+            # Draw "?" text
+            text_surf = self.font_small.render("?", True, COLOR_TEXT)
+            text_rect = text_surf.get_rect(center=screen_pos)
+            surface.blit(text_surf, text_rect)
+
     def draw_obstacles(self, surface):
         """
         Draw obstacles with hatched pattern.
@@ -141,22 +234,31 @@ class GameRenderer:
         Args:
             surface (pygame.Surface): Surface to draw on
         """
+        current_action = self.game_state.action_queue.get_current_action()
+
         for target in self.game_state.targets:
             if not target.is_alive():
                 continue
             
-            screen_pos = self.world_to_screen(target.position)
+            # Check if target should blink (being attacked)
+            should_render = True
+            if current_action and isinstance(current_action, AttackAction):
+                if target.position == current_action.params['target_position']:
+                    should_render = current_action.should_render_target()
             
-            # Draw diamond shape (4 points)
-            points = [
-                (screen_pos[0], screen_pos[1] - TARGET_SIZE),  # Top
-                (screen_pos[0] + TARGET_SIZE, screen_pos[1]),  # Right
-                (screen_pos[0], screen_pos[1] + TARGET_SIZE),  # Bottom
-                (screen_pos[0] - TARGET_SIZE, screen_pos[1])   # Left
-            ]
-            
-            pygame.draw.polygon(surface, target.get_color(), points)
-            pygame.draw.polygon(surface, COLOR_TEXT, points, 2)
+            if should_render:
+                screen_pos = self.world_to_screen(target.position)
+                
+                # Draw diamond shape (4 points)
+                points = [
+                    (screen_pos[0], screen_pos[1] - TARGET_SIZE),  # Top
+                    (screen_pos[0] + TARGET_SIZE, screen_pos[1]),  # Right
+                    (screen_pos[0], screen_pos[1] + TARGET_SIZE),  # Bottom
+                    (screen_pos[0] - TARGET_SIZE, screen_pos[1])   # Left
+                ]
+                
+                pygame.draw.polygon(surface, target.get_color(), points)
+                pygame.draw.polygon(surface, COLOR_TEXT, points, 2)
     
     def draw_agents(self, surface):
         """
@@ -287,7 +389,7 @@ class GameRenderer:
             color = COLOR_TEAM_BLUE
         
         text_surface = font_large.render(winner_text, True, color)
-        text_x = (WINDOW_WIDTH - text_surface.get_width()) // 2
+        text_x = LEFT_PANEL_WIDTH + (WINDOW_WIDTH - LEFT_PANEL_WIDTH - RIGHT_PANEL_WIDTH - text_surface.get_width()) // 2
         text_y = WINDOW_HEIGHT // 2 - 50
         surface.blit(text_surface, (text_x, text_y))
         
@@ -295,7 +397,7 @@ class GameRenderer:
         font_small = pygame.font.Font(None, 36)
         instruction_text = "Press R to restart"
         text_surface = font_small.render(instruction_text, True, COLOR_TEXT)
-        text_x = (WINDOW_WIDTH - text_surface.get_width()) // 2
+        text_x = LEFT_PANEL_WIDTH + (WINDOW_WIDTH - LEFT_PANEL_WIDTH - RIGHT_PANEL_WIDTH - text_surface.get_width()) // 2
         text_y = WINDOW_HEIGHT // 2 + 50
         surface.blit(text_surface, (text_x, text_y))
     
@@ -309,8 +411,14 @@ class GameRenderer:
         # Draw grid
         self.draw_grid(surface)
         
+        # Draw debug overlays on top of the grid
+        self.draw_debug_overlays(surface)
+
         # Draw obstacles
         self.draw_obstacles(surface)
+
+        # Draw bonuses
+        self.draw_bonuses(surface)
         
         # Draw targets
         self.draw_targets(surface)

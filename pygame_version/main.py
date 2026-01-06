@@ -12,9 +12,10 @@ import time
 from constants import *
 from game_state import GameState
 from renderer import GameRenderer
-from ui_components import LeftPanel, RightPanel
+from ui_components import LeftPanel, RightPanel, BottomPanel
 from actions import parse_action_string
-from ai_interface import AIInterface, MockAIInterface
+import ai_interface  # Import module to access classes dynamically
+from utils import get_visible_cells
 
 
 class Game:
@@ -23,12 +24,15 @@ class Game:
     Handles game loop, input, and coordination between components.
     """
     
-    def __init__(self, use_mock_ai=False):
+    def __init__(self, red_ai_class="MockAIInterface", blue_ai_class="MockAIInterface", use_manual_mode=False, nb_bonuses=NB_BONUS):
         """
         Initialize the game.
         
         Args:
-            use_mock_ai (bool): Use mock AI instead of real API
+            red_ai_class (str): Name of the AI class for Red team
+            blue_ai_class (str): Name of the AI class for Blue team
+            use_manual_mode (bool): Start in manual mode
+            nb_bonuses (int): Number of bonuses to generate
         """
         # Initialize Pygame
         pygame.init()
@@ -41,9 +45,11 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = True
         self.paused = False
+        self.is_manual_mode = use_manual_mode
+        self.nb_bonuses = nb_bonuses
         
         # Game state
-        self.game_state = GameState()
+        self.game_state = GameState(nb_bonuses=self.nb_bonuses)
         
         # Renderer
         self.renderer = GameRenderer(self.game_state)
@@ -51,14 +57,30 @@ class Game:
         # UI Panels
         self.left_panel = LeftPanel(self.game_state)
         self.right_panel = RightPanel()
+        self.bottom_panel = BottomPanel(
+            LEFT_PANEL_WIDTH,
+            WINDOW_HEIGHT - 120,
+            GRID_AREA_WIDTH,
+            120,
+            self.renderer
+        )
         
-        # AI Interface
-        if use_mock_ai:
-            self.ai_interface = MockAIInterface()
-            print("Using Mock AI (no API required)")
-        else:
-            self.ai_interface = AIInterface()
-            print(f"Using AI API at {self.ai_interface.api_url}")
+        # Initialize AI interfaces for each team
+        try:
+            RedAIClass = getattr(ai_interface, red_ai_class)
+            self.red_ai = RedAIClass()
+            print(f"Red Team AI: {red_ai_class}")
+        except AttributeError:
+            print(f"Error: AI class '{red_ai_class}' not found in ai_interface.py. Defaulting to MockAIInterface.")
+            self.red_ai = ai_interface.MockAIInterface()
+
+        try:
+            BlueAIClass = getattr(ai_interface, blue_ai_class)
+            self.blue_ai = BlueAIClass()
+            print(f"Blue Team AI: {blue_ai_class}")
+        except AttributeError:
+            print(f"Error: AI class '{blue_ai_class}' not found in ai_interface.py. Defaulting to MockAIInterface.")
+            self.blue_ai = ai_interface.MockAIInterface()
         
         # Game state flags
         self.waiting_for_ai = False
@@ -82,23 +104,39 @@ class Game:
                 elif event.key == pygame.K_SPACE:
                     self.paused = not self.paused
                 
+                # M - Toggle manual/auto mode
+                elif event.key == pygame.K_m:
+                    self.is_manual_mode = not self.is_manual_mode
+                    print(f"Game mode set to {'MANUAL' if self.is_manual_mode else 'AUTOMATIC'}")
+
                 # ESC - Quit
                 elif event.key == pygame.K_ESCAPE:
                     self.running = False
                 
                 # N - Next action (manual step)
                 elif event.key == pygame.K_n and not self.game_state.game_over:
-                    if not self.game_state.action_queue.is_busy():
+                    if self.is_manual_mode and not self.game_state.action_queue.is_busy():
                         self.request_next_action()
             
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1: # Left click
+                    self.bottom_panel.handle_mouse_click(event.pos)
+
             elif event.type == pygame.MOUSEMOTION:
                 # Handle mouse hover for agent cards
                 self.left_panel.handle_mouse_motion(event.pos)
+            
+            elif event.type == pygame.MOUSEWHEEL:
+                mouse_pos = pygame.mouse.get_pos()
+                if self.right_panel.rect.collidepoint(mouse_pos):
+                    self.right_panel.handle_scroll(event.y)
     
     def restart_game(self):
         """Restart the game with a new initial state."""
         print("\n=== RESTARTING GAME ===\n")
-        self.game_state.reset_game()
+        # Re-initialize game state with original params
+        self.game_state.__init__(nb_bonuses=self.nb_bonuses)
+        
         self.left_panel.update_cards()
         self.right_panel.clear_bubbles()
         self.waiting_for_ai = False
@@ -118,9 +156,12 @@ class Game:
         self.waiting_for_ai = True
         self.ai_request_time = time.time()
         
+        # Select AI based on team
+        ai_interface_instance = self.red_ai if current_agent.team == 'red' else self.blue_ai
+        
         # Request decision from AI
         try:
-            thoughts, action = self.ai_interface.get_agent_decision(
+            thoughts, action = ai_interface_instance.get_agent_decision(
                 current_agent,
                 self.game_state.turn,
                 self.game_state
@@ -153,19 +194,9 @@ class Game:
                     # Add to action queue
                     self.game_state.action_queue.add_action(action_obj)
                     
-                    # Execute action effects immediately (damage, messages, etc.)
-                    action_obj.execute(self.game_state)
-                    
-                    # Move to next action
-                    self.game_state.next_action()
-                    
-                    # Update UI
-                    self.left_panel.update_cards()
-                    
-                    # Check win condition
-                    self.game_state.check_win_condition()
                 else:
                     print(f"Invalid action: {action}")
+                    self.game_state.next_action()  # Skip invalid action
             else:
                 print("AI returned no action")
         
@@ -186,10 +217,26 @@ class Game:
             return
         
         # Update action queue (animations)
-        self.game_state.action_queue.update(dt)
+        action_completed = self.game_state.action_queue.update(dt, self.game_state)
+        
+        # Check for system notifications from game state
+        while self.game_state.notifications:
+            msg = self.game_state.notifications.pop(0)
+            self.right_panel.add_system_message(msg)
+        
+        if action_completed:
+            # Check win condition after action execution (damage applied)
+            self.game_state.check_win_condition()
+            
+            if not self.game_state.game_over:
+                # Move to next action/turn
+                self.game_state.next_action()
+                
+                # Update UI
+                self.left_panel.update_cards()
         
         # If no action is animating and not waiting for AI, request next action
-        if not self.game_state.action_queue.is_busy() and not self.waiting_for_ai:
+        if not self.is_manual_mode and not self.game_state.action_queue.is_busy() and not self.waiting_for_ai:
             if not self.game_state.action_queue.has_pending_actions():
                 # Small delay before next action to allow player to see the board
                 if not hasattr(self, 'action_delay_timer'):
@@ -205,6 +252,9 @@ class Game:
         """Render the game."""
         # Clear screen
         self.screen.fill(COLOR_BG)
+
+        # Update debug cache (vision and possible moves)
+        self.renderer.update_debug_cache()
         
         # Render game grid and entities
         self.renderer.render(self.screen)
@@ -212,19 +262,23 @@ class Game:
         # Render UI panels
         self.left_panel.draw(self.screen)
         self.right_panel.draw(self.screen)
+        self.bottom_panel.draw(self.screen)
         
-        # Draw pause indicator
-        if self.paused:
+        # Draw pause/manual indicators
+        if self.paused or self.is_manual_mode:
             font = pygame.font.Font(None, 48)
-            pause_text = font.render("PAUSED", True, COLOR_TEXT)
-            text_rect = pause_text.get_rect(center=(WINDOW_WIDTH // 2, 50))
+            mode_text = "PAUSED" if self.paused else "MANUAL MODE"
             
+            text_surf = font.render(mode_text, True, COLOR_TEXT)
+            center = LEFT_PANEL_WIDTH + (WINDOW_WIDTH - (LEFT_PANEL_WIDTH + RIGHT_PANEL_WIDTH)) // 2
+            text_rect = text_surf.get_rect(center=(center, 50))
+
             # Background
             bg_rect = text_rect.inflate(20, 10)
             pygame.draw.rect(self.screen, COLOR_PANEL_BG, bg_rect)
             pygame.draw.rect(self.screen, COLOR_TEXT, bg_rect, 2)
             
-            self.screen.blit(pause_text, text_rect)
+            self.screen.blit(text_surf, text_rect)
         
         # Update display
         pygame.display.flip()
@@ -236,8 +290,9 @@ class Game:
         print("=" * 60)
         print("\nControls:")
         print("  SPACE  - Pause/Unpause")
+        print("  M      - Toggle Manual/Auto mode")
+        print("  N      - Next action (in Manual mode)")
         print("  R      - Restart game")
-        print("  N      - Next action (manual)")
         print("  ESC    - Quit")
         print("\nStarting game...\n")
         
@@ -271,13 +326,24 @@ def main():
     import argparse
     
     parser = argparse.ArgumentParser(description="BattleField Agents - 2D Pygame Version")
-    parser.add_argument('--mock-ai', action='store_true', 
-                       help='Use mock AI instead of real API')
+    parser.add_argument('--red-ai', type=str, default="MockAIInterface",
+                       help='AI class name for Red team (default: MockAIInterface)')
+    parser.add_argument('--blue-ai', type=str, default="MockAIInterface",
+                       help='AI class name for Blue team (default: MockAIInterface)')
+    parser.add_argument('--manual', action='store_true',
+                       help='Start in manual mode (press N for next action)')
+    parser.add_argument('--bonuses', type=int, default=NB_BONUS,
+                       help='Number of bonus/malus items to generate (default: %(default)s)')
     
     args = parser.parse_args()
     
     try:
-        game = Game(use_mock_ai=args.mock_ai)
+        game = Game(
+            red_ai_class=args.red_ai,
+            blue_ai_class=args.blue_ai,
+            use_manual_mode=args.manual,
+            nb_bonuses=args.bonuses
+        )
         game.run()
     except KeyboardInterrupt:
         print("\n\nGame interrupted by user")

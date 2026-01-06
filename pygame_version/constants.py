@@ -55,8 +55,8 @@ COLOR_BUBBLE_BORDER = (187, 187, 187)
 # ============================================================================
 # GAME BOARD
 # ============================================================================
-BOARD_SIZE = 7  # Grid is (2*BOARD_SIZE + 1) x (2*BOARD_SIZE + 1)
-CELL_SIZE = 40   # Size of each cell in pixels
+BOARD_SIZE = 6  # Grid is (2*BOARD_SIZE + 1) x (2*BOARD_SIZE + 1)
+CELL_SIZE = 43   # Size of each cell in pixels
 GRID_PADDING = 0  # Padding around the grid
 
 # ============================================================================
@@ -64,19 +64,32 @@ GRID_PADDING = 0  # Padding around the grid
 # ============================================================================
 NB_AGENTS_PER_TEAM = 3
 NB_ACTIONS_PER_TURN = 3
-NB_CELLS_MAX_PER_MOVE = 3
+AGENT_MOVE_RANGE = 3
 
 # Combat
+TARGET_LIFE = 150
 AGENT_LIFE = 100
 ATTACK_DAMAGE = 25
 SIGHT_RANGE = 99  # Vision range (currently unlimited)
 
 # Spawning
-SPAWN_RANGE = 3  # Range around target where agents spawn
+SPAWN_RANGE = 2  # Range around target where agents spawn
 
 # Obstacles
-NB_OBSTACLES = 10
+NB_OBSTACLES = 41
 OBSTACLE_SIZE = 1  # Size in cells
+
+# Bonus/Malus
+NB_BONUS = 10  # Total bonuses (symmetric pairs)
+COLOR_BONUS = (150, 200, 150)
+BONUS_TYPES = ["HEAL", "TRAP", "VAMPIRE", "GRENADE", "SABOTAGE"]
+BONUS_HEAL_AMOUNT = 50
+BONUS_TRAP_DAMAGE = 25
+BONUS_VAMPIRE_RANGE = 3
+BONUS_VAMPIRE_DAMAGE = 15
+BONUS_GRENADE_RANGE = 3
+BONUS_GRENADE_DAMAGE = 20
+BONUS_SABOTAGE_DAMAGE = 25
 
 # ============================================================================
 # ANIMATIONS
@@ -90,8 +103,8 @@ ANIMATION_SPEAK_DURATION = 2.0  # seconds
 # RENDERING
 # ============================================================================
 # Agent rendering
-AGENT_RADIUS = 16  # pixels
-TARGET_SIZE = 16   # pixels (diamond shape)
+AGENT_RADIUS = 18  # pixels
+TARGET_SIZE = 18   # pixels (diamond shape)
 
 # UI Elements
 PANEL_PADDING = 15
@@ -120,3 +133,8 @@ API_TIMEOUT = 15.0  # seconds
 DEBUG_MODE = False
 SHOW_COORDINATES = True
 SHOW_STATS = True
+
+# Debug colors for grid overlays
+COLOR_DEBUG_POSSIBLE_MOVES = (100, 150, 255, 150)  # Light blue, semi-transparent
+COLOR_DEBUG_AGENT_POSITION = (255, 220, 100, 150) # Yellow, semi-transparent
+COLOR_DEBUG_AGENT_VISION = (200, 100, 200, 100)  # Purple, semi-transparent
