@@ -173,10 +173,10 @@ class GameRenderer:
             
             # Draw bonus cell background
             bonus_rect = pygame.Rect(
-                screen_pos[0] - CELL_SIZE // 2 + 2,
-                screen_pos[1] - CELL_SIZE // 2 + 2,
-                CELL_SIZE - 4,
-                CELL_SIZE - 4
+                screen_pos[0] - CELL_SIZE // 2 + 5,
+                screen_pos[1] - CELL_SIZE // 2 + 5,
+                CELL_SIZE - 10,
+                CELL_SIZE - 10
             )
             pygame.draw.rect(surface, COLOR_BONUS, bonus_rect, border_radius=5)
             pygame.draw.rect(surface, COLOR_TEXT, bonus_rect, 1, border_radius=5)

@@ -81,7 +81,7 @@ OBSTACLE_SIZE = 1  # Size in cells
 
 # Bonus/Malus
 NB_BONUS = 10  # Total bonuses (symmetric pairs)
-COLOR_BONUS = (50, 200, 50)
+COLOR_BONUS = (150, 200, 150)
 BONUS_TYPES = ["HEAL", "TRAP", "VAMPIRE", "GRENADE", "SABOTAGE"]
 BONUS_HEAL_AMOUNT = 50
 BONUS_TRAP_DAMAGE = 25
@@ -103,8 +103,8 @@ ANIMATION_SPEAK_DURATION = 2.0  # seconds
 # RENDERING
 # ============================================================================
 # Agent rendering
-AGENT_RADIUS = 16  # pixels
-TARGET_SIZE = 16   # pixels (diamond shape)
+AGENT_RADIUS = 18  # pixels
+TARGET_SIZE = 18   # pixels (diamond shape)
 
 # UI Elements
 PANEL_PADDING = 15
