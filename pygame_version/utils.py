@@ -6,6 +6,7 @@ Includes pathfinding (A*), vision calculation, and helper functions.
 from constants import *
 import math
 from heapq import heappush, heappop
+from agents import Obstacle
 
 
 def distance(pos1, pos2):
@@ -88,7 +89,7 @@ def get_neighbors(position):
         position (list): Current position [x, y]
     
     Returns:
-        list: List of neighbor positions [[x, y], ...]
+        list: List of neighbor positions [[x, y], ...] 
     """
     x, y = position
     neighbors = [
@@ -185,7 +186,7 @@ def get_possible_moves(agent, agents, targets, obstacles, max_distance=AGENT_MOV
         max_distance (int): Maximum movement distance
     
     Returns:
-        list: List of possible positions [[x, y], ...]
+        list: List of possible positions [[x, y], ...] 
     """
     possible_moves = []
     start_pos = agent.position
@@ -242,14 +243,29 @@ def _intersection(start, end, hidder_position):
 
     return _is_in_box(pos, hidder_position)
 
-def compute_sight(agent, agents, targets, obstacles):
+def compute_sight(agent, agents, targets, obstacles, bonuses=None):
     """
     Compute what entities an agent can see using ray-casting.
     An object is visible if the ray to it is not blocked by any other object.
     """
+    if bonuses is None:
+        bonuses = []
+        
+    # Bonuses are visible but don't usually block vision (unless we want them to?).
+    # Assuming bonuses are flat on the ground and don't block vision.
+    # But they are "entities" we want to see.
+    # To check visibility TO a bonus, we check if obstacles block it.
+    
     all_entities = [a for a in agents if a.id != agent.id and a.is_alive()] + \
                    [t for t in targets if t.is_alive()] + \
-                   obstacles
+                   obstacles + \
+                   bonuses
+                   
+    # Hidders are objects that block vision. Assuming bonuses DON'T block vision.
+    hidders = [a for a in agents if a.id != agent.id and a.is_alive()] + \
+              [t for t in targets if t.is_alive()] + \
+              obstacles
+              # Bonuses excluded from hidders
                    
     sight = []
     sight_range_sq = SIGHT_RANGE**2
@@ -262,8 +278,10 @@ def compute_sight(agent, agents, targets, obstacles):
 
     # 2. For each object, check for obstructions
     for obj in visible_objects:
-        hidders = [h for h in visible_objects if h is not obj]
-        is_hidden = any(_intersection(agent.position, obj.position, h.position) for h in hidders)
+        # Check against hidders (excluding self if self is a hidder)
+        blockers = [h for h in hidders if h is not obj]
+        
+        is_hidden = any(_intersection(agent.position, obj.position, h.position) for h in blockers)
         
         if not is_hidden:
             entry = {'kind': getattr(obj, 'kind', 'unknown'), 'position': obj.position.copy()}
@@ -273,6 +291,8 @@ def compute_sight(agent, agents, targets, obstacles):
                 entry['team'] = obj.team
             if hasattr(obj, 'life'):
                 entry['life'] = obj.life
+            if hasattr(obj, 'type'): # For bonuses
+                entry['type'] = obj.type
             sight.append(entry)
             
     return sight
@@ -301,7 +321,18 @@ def get_visible_cells(agent, agents, targets, obstacles):
             if (agent.position[0] - i)**2 + (agent.position[1] - j)**2 > sight_range_sq:
                 continue
 
-            is_hidden = any(_intersection(agent.position, cell_pos, h.position) for h in hidders)
+            # Check if line of sight is blocked
+            is_hidden = False
+            for h in hidders:
+                # If the object is at the target cell position, and it's NOT an obstacle,
+                # it shouldn't block visibility of its own cell.
+                # We want to see the cell under agents/targets.
+                if h.position == cell_pos and getattr(h, 'kind', '') != 'obstacles' and not isinstance(h, Obstacle):
+                    continue
+                
+                if _intersection(agent.position, cell_pos, h.position):
+                    is_hidden = True
+                    break
             
             if not is_hidden:
                 visible_cells.append(cell_pos)
@@ -352,14 +383,12 @@ def format_agent_state(agent, turn, agents, targets, obstacles):
     for entity in agent.sight:
         if entity['kind'] in ['agents', 'targets'] and entity.get('team') != agent.team:
             attack_actions.append(f"ATTACK [{entity['position'][0]}, {entity['position'][1]}]")
-    print("Attack Actions:", attack_actions)
     
     # Get possible speaks (teammates in sight)
     speak_actions = []
     for entity in agent.sight:
         if entity['kind'] == 'agents' and entity.get('team') == agent.team:
             speak_actions.append(f"SPEAK [{entity['position'][0]}, {entity['position'][1]}]")
-    print("Speak Actions:", speak_actions)
     
     # Separate sight into categories
     friends = [e for e in agent.sight if e['kind'] == 'agents' and e.get('team') == agent.team]
@@ -367,6 +396,7 @@ def format_agent_state(agent, turn, agents, targets, obstacles):
     friendly_target = [e for e in agent.sight if e['kind'] == 'targets' and e.get('team') == agent.team]
     enemy_target = [e for e in agent.sight if e['kind'] == 'targets' and e.get('team') != agent.team]
     visible_obstacles = [e for e in agent.sight if e['kind'] == 'obstacles']
+    visible_bonuses = [e for e in agent.sight if e['kind'] == 'bonus']
     
     state = {
         'messages': agent.messages,
@@ -379,6 +409,7 @@ def format_agent_state(agent, turn, agents, targets, obstacles):
         'friendlyTarget': friendly_target,
         'enemyTarget': enemy_target,
         'obstacles': visible_obstacles,
+        'bonuses': visible_bonuses,
         'actionsLeft': NB_ACTIONS_PER_TURN - turn['action_count'],
         'possibleActions': move_actions + attack_actions + speak_actions
     }

@@ -38,12 +38,13 @@ class Action:
         self.is_complete = False
         self.animation_progress = 0.0
     
-    def update(self, dt):
+    def update(self, dt, game_state=None):
         """
         Update action progress.
         
         Args:
             dt (float): Delta time in seconds
+            game_state (GameState): Current game state (optional)
         """
         pass
     
@@ -87,12 +88,13 @@ class MoveAction(Action):
         self.current_cell_index = 0
         self.cell_progress = 0.0
     
-    def update(self, dt):
+    def update(self, dt, game_state=None):
         """
         Update movement animation.
         
         Args:
             dt (float): Delta time in seconds
+            game_state (GameState): Current game state
         """
         if self.is_complete:
             return
@@ -104,6 +106,15 @@ class MoveAction(Action):
         
         # Move to next cell if current cell is complete
         if self.cell_progress >= 1.0:
+            # We reached the cell at current_cell_index
+            # Check for bonus/malus activation on the cell just entered
+            if game_state and self.current_cell_index < len(path):
+                pos = path[self.current_cell_index]
+                agent = game_state.get_agent_by_id(self.agent_id)
+                if agent:
+                    # Trigger bonus if present at this position
+                    game_state.trigger_bonus_at_position(pos, agent)
+
             self.cell_progress = 0.0
             self.current_cell_index += 1
             
@@ -191,12 +202,13 @@ class AttackAction(Action):
         self.blink_count = 0
         self.last_blink_time = 0
     
-    def update(self, dt):
+    def update(self, dt, game_state=None):
         """
         Update attack animation (blinking).
         
         Args:
             dt (float): Delta time in seconds
+            game_state (GameState): Current game state
         """
         if self.is_complete:
             return
@@ -275,12 +287,13 @@ class SpeakAction(Action):
         """Start the speak action."""
         super().start()
     
-    def update(self, dt):
+    def update(self, dt, game_state=None):
         """
         Update speak animation.
         
         Args:
             dt (float): Delta time in seconds
+            game_state (GameState): Current game state
         """
         if self.is_complete:
             return
@@ -330,13 +343,14 @@ def parse_action_string(action_string, agent_id, game_state):
     action_string = action_string.strip()
     
     # Parse MOVE action: "MOVE [x, y]"
-    move_match = re.match(r'\"?MOVE\s*\[(-?\d+),\s*(-?\d+)\]\"?', action_string)
+    move_match = re.match(r'"?MOVE\s*\[(-?\d+),\s*(-?\d+)\]"?', action_string)
     if move_match:
         x, y = int(move_match.group(1)), int(move_match.group(2))
         target_position = [x, y]
         
-        # Check if target position is occupied
-        if game_state.get_entity_at_position(target_position):
+        # Check if target position is occupied (but ignore bonuses)
+        entity = game_state.get_entity_at_position(target_position)
+        if entity and getattr(entity, 'kind', '') != 'bonus':
             return None
         
         agent = game_state.get_agent_by_id(agent_id)
@@ -415,18 +429,24 @@ class ActionQueue:
             return False
         
         # Update current action
-        self.current_action.update(dt)
+        self.current_action.update(dt, game_state)
         
         # Check if current action is complete
         if self.current_action.is_complete:
             # Execute the action's effect on the game state
             self.current_action.execute(game_state)
             
+            # Identify the agent
+            acting_agent = game_state.get_agent_by_id(self.current_action.agent_id)
+            
+            # Final check for bonus activation (in case it wasn't triggered during update, e.g. start/end same?)
+            if self.current_action.action_type == 'MOVE' and acting_agent and acting_agent.is_alive():
+                game_state.check_bonus_activation(acting_agent)
+            
             # Update sight for the agent that just acted
             from utils import compute_sight, compute_last_positions_seen
-            acting_agent = game_state.get_agent_by_id(self.current_action.agent_id)
             if acting_agent and acting_agent.is_alive():
-                acting_agent.sight = compute_sight(acting_agent, game_state.agents, game_state.targets, game_state.obstacles)
+                acting_agent.sight = compute_sight(acting_agent, game_state.agents, game_state.targets, game_state.obstacles, game_state.bonus_malus)
                 acting_agent.last_pos_seen = compute_last_positions_seen(acting_agent, game_state.turn['current'])
 
             self.current_action = None

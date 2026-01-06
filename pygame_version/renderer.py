@@ -161,6 +161,31 @@ class GameRenderer:
 
         surface.blit(overlay_surface, (self.grid_x, self.grid_y))
 
+    def draw_bonuses(self, surface):
+        """
+        Draw bonus/malus items.
+        
+        Args:
+            surface (pygame.Surface): Surface to draw on
+        """
+        for bonus in self.game_state.bonus_malus:
+            screen_pos = self.world_to_screen(bonus.position)
+            
+            # Draw bonus cell background
+            bonus_rect = pygame.Rect(
+                screen_pos[0] - CELL_SIZE // 2 + 2,
+                screen_pos[1] - CELL_SIZE // 2 + 2,
+                CELL_SIZE - 4,
+                CELL_SIZE - 4
+            )
+            pygame.draw.rect(surface, COLOR_BONUS, bonus_rect, border_radius=5)
+            pygame.draw.rect(surface, COLOR_TEXT, bonus_rect, 1, border_radius=5)
+            
+            # Draw "?" text
+            text_surf = self.font_small.render("?", True, COLOR_TEXT)
+            text_rect = text_surf.get_rect(center=screen_pos)
+            surface.blit(text_surf, text_rect)
+
     def draw_obstacles(self, surface):
         """
         Draw obstacles with hatched pattern.
@@ -391,6 +416,9 @@ class GameRenderer:
 
         # Draw obstacles
         self.draw_obstacles(surface)
+
+        # Draw bonuses
+        self.draw_bonuses(surface)
         
         # Draw targets
         self.draw_targets(surface)

@@ -41,7 +41,7 @@ class AIInterface:
         
         # Load system message
         try:
-            with open('system_message2.txt', 'r') as f:
+            with open('system_message.txt', 'r') as f:
                 self.system_message = f.read()
         except FileNotFoundError:
             print("Error: system_message.txt not found.")
@@ -86,7 +86,7 @@ class AIInterface:
                     {"role": "system", "content": self.system_message},
                     {"role": "user", "content": json.dumps(state)}
                 ],
-                "temperature": 0.7
+                "temperature": 0.2
             }
 
             print(payload)

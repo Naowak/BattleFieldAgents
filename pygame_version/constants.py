@@ -76,8 +76,20 @@ SIGHT_RANGE = 99  # Vision range (currently unlimited)
 SPAWN_RANGE = 3  # Range around target where agents spawn
 
 # Obstacles
-NB_OBSTACLES = 25
+NB_OBSTACLES = 41
 OBSTACLE_SIZE = 1  # Size in cells
+
+# Bonus/Malus
+NB_BONUS = 80  # Total bonuses (symmetric pairs)
+COLOR_BONUS = (50, 200, 50)
+BONUS_TYPES = ["HEAL", "TRAP", "VAMPIRE", "GRENADE", "SABOTAGE"]
+BONUS_HEAL_AMOUNT = 50
+BONUS_TRAP_DAMAGE = 25
+BONUS_VAMPIRE_RANGE = 3
+BONUS_VAMPIRE_DAMAGE = 15
+BONUS_GRENADE_RANGE = 3
+BONUS_GRENADE_DAMAGE = 20
+BONUS_SABOTAGE_DAMAGE = 25
 
 # ============================================================================
 # ANIMATIONS

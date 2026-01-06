@@ -86,6 +86,15 @@ class Agent:
         self.life = max(0, self.life - damage)
         self.stats['damage_taken'] += damage
     
+    def heal(self, amount):
+        """
+        Heal the agent.
+        
+        Args:
+            amount (int): Amount of health to restore
+        """
+        self.life = min(AGENT_LIFE, self.life + amount)
+
     def add_message(self, turn, sender_id, sender_pos, message):
         """
         Add a message received from a teammate.
@@ -222,3 +231,26 @@ class Obstacle:
     def __repr__(self):
         """String representation of the obstacle."""
         return f"Obstacle(pos={self.position})"
+
+
+class BonusMalus:
+    """
+    Represents a bonus or malus item on the battlefield.
+    Represented by a '?' until triggered.
+    """
+    
+    def __init__(self, position, bonus_type):
+        """
+        Initialize a bonus/malus.
+        
+        Args:
+            position (list): [x, y] position
+            bonus_type (str): Type of bonus (HEAL, TRAP, etc.)
+        """
+        self.position = position.copy()
+        self.type = bonus_type
+        self.kind = 'bonus'
+        self.triggered = False
+    
+    def __repr__(self):
+        return f"Bonus({self.type}, pos={self.position})"

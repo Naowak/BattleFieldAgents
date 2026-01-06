@@ -5,9 +5,9 @@ Handles game initialization, updates, and win condition checking.
 """
 
 from constants import *
-from agents import Agent, Target, Obstacle
+from agents import Agent, Target, Obstacle, BonusMalus
 from actions import ActionQueue
-from utils import compute_sight, compute_last_positions_seen
+from utils import compute_sight, compute_last_positions_seen, distance
 import random
 
 
@@ -22,6 +22,7 @@ class GameState:
         self.agents = []
         self.targets = []
         self.obstacles = []
+        self.bonus_malus = []
         
         self.turn = {
             'current': 1,
@@ -45,6 +46,7 @@ class GameState:
         self.agents = []
         self.targets = []
         self.obstacles = []
+        self.bonus_malus = []
         self.winner = None
         self.game_over = False
         
@@ -57,6 +59,9 @@ class GameState:
         
         # Create obstacles first (so agents avoid them)
         self._generate_obstacles()
+        
+        # Generate bonus/malus
+        self._generate_bonus_malus()
 
         # Generate symmetric spawn positions for agents
         red_spawn_positions, blue_spawn_positions = self._generate_symmetric_spawn_positions(
@@ -178,15 +183,9 @@ class GameState:
             x = random.randint(-BOARD_SIZE, BOARD_SIZE)
             y = random.randint(-BOARD_SIZE, BOARD_SIZE)
             
-            # Enforce being on one side of diagonal (y < -x)
-            # If on diagonal or other side, flip or skip. 
-            # To maximize coverage, if y >= -x, we can just take (-x, -y) which is <= x
-            # But let's just retry if on diagonal, and ensure strict inequality.
-            
             if y == -x:
-                continue # On diagonal, skip to avoid self-symmetry issues (except 0,0 which is handled)
+                continue 
             
-            # If on the "wrong" side, flip it to the "right" side
             if y > -x:
                 x, y = -x, -y
             
@@ -198,7 +197,135 @@ class GameState:
                 self.obstacles.append(Obstacle(pos1))
                 self.obstacles.append(Obstacle(pos2))
                 added_pairs += 1
-    
+
+    def _generate_bonus_malus(self):
+        """
+        Generate random bonus/malus items on the battlefield with central symmetry.
+        """
+        self.bonus_malus = []
+        
+        pairs_count = NB_BONUS // 2
+        
+        # Helper to check if a position is occupied
+        def is_occupied(pos):
+            for agent in self.agents:
+                if agent.position == pos:
+                    return True
+            for target in self.targets:
+                if target.position == pos:
+                    return True
+            for obstacle in self.obstacles:
+                if obstacle.position == pos:
+                    return True
+            for bonus in self.bonus_malus:
+                if bonus.position == pos:
+                    return True
+            return False
+
+        added_pairs = 0
+        attempts = 0
+        max_attempts = 1000
+        
+        while added_pairs < pairs_count and attempts < max_attempts:
+            attempts += 1
+            
+            # Generate random position
+            x = random.randint(-BOARD_SIZE, BOARD_SIZE)
+            y = random.randint(-BOARD_SIZE, BOARD_SIZE)
+            
+            if y == -x:
+                continue 
+            
+            if y > -x:
+                x, y = -x, -y
+            
+            pos1 = [x, y]
+            pos2 = [-x, -y]
+            
+            # Check if both positions are free
+            if not is_occupied(pos1) and not is_occupied(pos2):
+                bonus_type = random.choice(BONUS_TYPES)
+                # Create symmetric bonuses (same type)
+                self.bonus_malus.append(BonusMalus(pos1, bonus_type))
+                self.bonus_malus.append(BonusMalus(pos2, bonus_type))
+                added_pairs += 1
+
+    def check_bonus_activation(self, agent):
+        """
+        Check if an agent triggered a bonus/malus.
+        
+        Args:
+            agent (Agent): The agent that moved
+        """
+        self.trigger_bonus_at_position(agent.position, agent)
+
+    def trigger_bonus_at_position(self, position, agent):
+        """
+        Check for and trigger a bonus at a specific position.
+        
+        Args:
+            position (list): Position to check [x, y]
+            agent (Agent): The agent triggering the bonus
+        """
+        for bonus in self.bonus_malus:
+            if not bonus.triggered and bonus.position == position:
+                self._apply_bonus_effect(agent, bonus)
+                bonus.triggered = True
+                self.bonus_malus.remove(bonus)
+                return
+
+    def _apply_bonus_effect(self, agent, bonus):
+        """
+        Apply the effect of a bonus/malus to the agent.
+        
+        Args:
+            agent (Agent): The triggering agent
+            bonus (BonusMalus): The bonus triggered
+        """
+        message_text = f"Turn {self.turn['current']}: {agent.id} triggered {bonus.type}"
+        print(message_text)
+        
+        # Broadcast message to all agents
+        for a in self.agents:
+            if a.is_alive():
+                a.add_message(self.turn['current'], "SYSTEM", bonus.position, message_text)
+        
+        if bonus.type == "HEAL":
+            agent.heal(BONUS_HEAL_AMOUNT)
+            
+        elif bonus.type == "TRAP":
+            agent.take_damage(BONUS_TRAP_DAMAGE)
+            # Should trigger blink animation ideally, handled by renderer if damage taken?
+            
+        elif bonus.type == "VAMPIRE":
+            # Life steal in range 3
+            targets_hit = 0
+            for enemy in self.agents:
+                if enemy.team != agent.team and enemy.is_alive() and distance(agent.position, enemy.position) <= BONUS_VAMPIRE_RANGE:
+                    enemy.take_damage(BONUS_VAMPIRE_DAMAGE)
+                    targets_hit += 1
+            
+            for target in self.targets:
+                if target.team != agent.team and target.is_alive() and distance(agent.position, target.position) <= BONUS_VAMPIRE_RANGE:
+                    target.take_damage(BONUS_VAMPIRE_DAMAGE)
+                    targets_hit += 1
+            
+            if targets_hit > 0:
+                agent.heal(BONUS_VAMPIRE_DAMAGE * targets_hit)
+                
+        elif bonus.type == "GRENADE":
+            # Damage all entities in range 3
+            all_entities = self.agents + self.targets
+            for entity in all_entities:
+                if entity.is_alive() and distance(agent.position, entity.position) <= BONUS_GRENADE_RANGE:
+                    entity.take_damage(BONUS_GRENADE_DAMAGE)
+                    
+        elif bonus.type == "SABOTAGE":
+            # Damage enemy target
+            for target in self.targets:
+                if target.team != agent.team:
+                    target.take_damage(BONUS_SABOTAGE_DAMAGE)
+
     def _setup_turn_order(self):
         """Set up the turn order, alternating between teams."""
         red_agents = [a.id for a in self.agents if a.team == 'red']
@@ -220,7 +347,7 @@ class GameState:
         """Update sight information for all agents."""
         for agent in self.agents:
             if agent.is_alive():
-                agent.sight = compute_sight(agent, self.agents, self.targets, self.obstacles)
+                agent.sight = compute_sight(agent, self.agents, self.targets, self.obstacles, self.bonus_malus)
                 agent.last_pos_seen = compute_last_positions_seen(agent, self.turn['current'])
     
     def get_agent_by_id(self, agent_id):
@@ -249,7 +376,7 @@ class GameState:
     
     def get_entity_at_position(self, position):
         """
-        Get any entity (agent, target, obstacle) at a position.
+        Get any entity (agent, target, obstacle, bonus) at a position.
         
         Args:
             position (list): Position [x, y]
@@ -268,6 +395,10 @@ class GameState:
         for obstacle in self.obstacles:
             if obstacle.position == position:
                 return obstacle
+        
+        for bonus in self.bonus_malus:
+            if bonus.position == position:
+                return bonus
         
         return None
     
@@ -302,7 +433,7 @@ class GameState:
                     self.turn['current'] += 1
                 
                 # Update sight for new current agent
-                next_agent.sight = compute_sight(next_agent, self.agents, self.targets, self.obstacles)
+                next_agent.sight = compute_sight(next_agent, self.agents, self.targets, self.obstacles, self.bonus_malus)
                 next_agent.last_pos_seen = compute_last_positions_seen(next_agent, self.turn['current'])
                 
                 return
