@@ -1,129 +1,99 @@
-# BattleFieldAgents - Pygame 2D Version 🎮
+# ⚔️ Manuel Technique : BattleFieldAgents (BFA)
 
-A 2D visualization of the BattleFieldAgents game using Pygame. Watch AI agents battle on a grid-based battlefield with smooth animations and a polished UI.
-
-## Features ✨
-
-- **2D Grid Visualization**: Clean, grid-based battlefield with agents, targets, and obstacles
-- **Smooth Animations**: 
-  - Movement animations (0.75s per cell)
-  - Attack animations (blinking effect)
-  - Speak animations (yellow highlight)
-- **Interactive UI**:
-  - Left panel: Agent status cards with HP bars and stats
-  - Right panel: AI thought bubbles showing reasoning
-  - Hover tooltips for detailed information
-- **Game Controls**:
-  - Pause/Resume gameplay
-  - Manual step-through for analysis
-  - Restart game anytime
-- **AI Integration**: Connects to OpenAI API or uses mock AI for testing
-
-## Installation 📦
-
-### Prerequisites
-- Python 3.8+
-- pip
-
-### Setup
-
-```bash
-# Navigate to the pygame version directory
-cd pygame_version
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-## Usage 🚀
-
-### Running with Mock AI (No API Required)
-
-Perfect for testing and development:
-
-```bash
-python main.py --mock-ai
-```
-
-The mock AI uses simple rule-based decisions:
-- Attacks enemies when visible
-- Moves towards enemy targets
-- Communicates with teammates
-
-### Running with OpenAI API
-
-For real AI-controlled agents:
-
-```bash
-# Make sure your API is running (from project root)
-cd api
-python main.py
-
-# In another terminal, run the pygame version
-cd pygame_version
-python main.py
-```
-
-The game will connect to the API at `http://localhost:5000/play_one_turn`.
-
-## Controls 🎮
-
-| Key | Action |
-|-----|--------|
-| **SPACE** | Pause/Resume game |
-| **R** | Restart game |
-| **N** | Next action (manual step) |
-| **ESC** | Quit game |
-| **Mouse Hover** | Show agent stats tooltip |
-
-## Configuration ⚙️
-
-Edit `constants.py` to customize the game:
-
-### Game Settings
-```python
-NB_AGENTS_PER_TEAM = 3      # Number of agents per team
-NB_ACTIONS_PER_TURN = 3     # Actions per agent per turn
-BOARD_SIZE = 10             # Grid size (-10 to +10)
-NB_OBSTACLES = 15           # Number of obstacles
-```
-
-### Visual Settings
-```python
-WINDOW_WIDTH = 1600         # Window width
-WINDOW_HEIGHT = 900         # Window height
-CELL_SIZE = 40              # Size of each grid cell
-FPS = 60                    # Frame rate
-```
-
-## Architecture 🏗️
-
-```
-pygame_version/
-├── main.py              # Game loop and entry point
-├── constants.py         # Configuration and constants
-├── game_state.py        # Game state management
-├── agents.py            # Agent, Target, Obstacle classes
-├── actions.py           # Action system (Move, Attack, Speak)
-├── renderer.py          # Game rendering (grid, entities)
-├── ui_components.py     # UI panels and widgets
-├── utils.py             # Pathfinding and utilities
-├── ai_interface.py      # AI API communication
-├── animations.py        # Animation system (particles, tweens)
-└── requirements.txt     # Python dependencies
-```
-
-## Troubleshooting 🔧
-
-### Game won't start
-- Check that pygame is installed: `pip install pygame`
-- Verify Python version: `python --version` (should be 3.8+)
-
-### API connection errors
-- Ensure the Flask API is running on port 5000
-- Check `constants.py` has correct `API_URL`
-- Try mock AI mode: `python main.py --mock-ai`
+Ce projet est une plateforme de simulation tactique au tour par tour développée en Pygame. Il est conçu pour servir de support à l'apprentissage du développement d'IA, du Prompt Engineering et des systèmes hybrides Code/LLM.
 
 ---
 
-**Enjoy watching AI agents battle!** 🤖⚔️🤖
+## 🎯 Objectifs du Projet
+
+Les étudiants devront relever trois défis progressifs :
+
+1.  **IA Heuristique (Python) :** Implémenter une logique de décision en Python pur dans `ai_interface.py`. L'objectif est de maximiser l'efficacité des agents en utilisant des calculs géométriques et des priorités tactiques.
+2.  **Prompt Engineering (LLM) :** Développer un prompt système permettant à un LLM de piloter un agent. L'accent est mis sur la **communication** : l'agent doit être capable d'envoyer des messages pertinents à ses alliés pour coordonner une stratégie.
+3.  **IA Hybride (Code + LLM) :** Fusionner les deux approches. 
+    *   Pré-calculer des données complexes (chemins, portées, statistiques) pour enrichir le contexte envoyé au LLM.
+    *   Ou demander au LLM de générer un script/tâche spécifique que l'interface exécutera pour affiner la décision finale.
+
+---
+
+## 📸 Interface du Jeu
+
+> [ESPACE POUR LA CAPTURE D'ÉCRAN]
+
+---
+
+## ⚙️ Mécaniques de Jeu
+
+### 1. Le Champ de Bataille
+Le terrain est une grille dont les coordonnées vont de `-7` à `7`. Le centre est en `[0, 0]`.
+- **Symétrie :** Pour garantir l'équité, les obstacles et les positions de départ sont générés avec une **symétrie centrale** par rapport au point `[0, 0]`.
+- **Obstacles :** Cases noires hachurées. Ils bloquent totalement le mouvement et la ligne de vue (LOS).
+
+### 2. Entités et Statistiques
+- **Agents :** 100 HP. Ils peuvent se déplacer, attaquer et parler.
+- **Targets (Bases) :** 150 HP. Elles sont immobiles. Détruire la cible ennemie est l'un des moyens de gagner.
+- **Bonus/Malus (`?`) :** Cellules spéciales dont l'effet est révélé uniquement au déclenchement.
+
+### 3. Système de Tour et Actions
+Chaque agent joue à tour de rôle et dispose de **3 actions par tour**.
+Format de réponse attendu par le moteur pour le parsing :
+- **THOUGHTS:** [Votre raisonnement textuel]
+- **ACTION:** [La commande d'action]
+
+**Commandes valides :**
+- `MOVE [x, y]` : Se déplacer vers une case. Portée maximale : **3 cases** (Manhattan distance).
+- `ATTACK [x, y]` : Inflige **25 dégâts**. Nécessite une ligne de vue (LOS).
+- `SPEAK [x, y] message` : Envoie un message à l'allié situé aux coordonnées indiquées.
+- `WAIT` : Passe l'action en cours.
+
+### 4. Vision (Line of Sight - LOS)
+Un agent voit tout ce qui n'est pas caché derrière un **Obstacle**.
+- Les autres agents et les cibles ne bloquent pas la vue (on voit "à travers" ou "en dessous").
+- La vision est utilisée pour alimenter le dictionnaire `sight` envoyé à l'IA.
+
+### 5. Bonus et Malus (Déclenchement Dynamique)
+Les bonus/malus se déclenchent dès qu'un agent **marche dessus ou traverse la case** durant un mouvement. Le type est tiré aléatoirement au moment de l'activation :
+- **Soin :** Rend **50 HP** à l'agent.
+- **Piège :** Inflige **25 dégâts** à l'agent.
+- **Vampire :** Vole **15 HP** à tous les ennemis (agents et cible) dans un rayon de 3 cases. L'agent gagne 15 HP par cible touchée.
+- **Grenade :** Inflige **20 dégâts** à TOUTES les entités (alliés inclus) dans un rayon de 3 cases.
+- **Sabotage :** Inflige **25 dégâts** directement à la cible (base) ennemie.
+
+---
+
+## 💻 Guide de Développement (`ai_interface.py`)
+
+Les étudiants ne doivent modifier que le fichier `ai_interface.py`. Ils ont accès à l'intégralité du `game_state` pour prendre leurs décisions.
+
+### Données disponibles dans `game_state` :
+- `agents` : Liste des objets agents (id, team, position, life, etc.).
+- `targets` : Liste des bases.
+- `obstacles` : Liste des positions bloquantes.
+- `bonus_malus` : Liste des bonus encore présents sur la carte.
+
+### Fonctions utiles dans `utils.py` :
+- `get_possible_moves(agent, agents, targets, obstacles)` : Calcule les cases accessibles selon la portée et les collisions.
+- `has_line_of_sight(start, end, agents, targets, obstacles)` : Vérifie si un segment est obstrué par un obstacle.
+- `distance(pos1, pos2)` : Retourne la distance de Manhattan.
+
+---
+
+## 🚀 Lancement et Arguments
+
+Le projet se lance via le fichier `main.py`.
+
+### Arguments de ligne de commande :
+- `--red-ai [NOM_CLASSE]` : Définit la classe d'IA pour l'équipe rouge (ex: `MockAIInterface`).
+- `--blue-ai [NOM_CLASSE]` : Définit la classe d'IA pour l'équipe bleue (ex: `AIInterface`).
+- `--bonuses [NOMBRE]` : Définit le nombre de bonus/malus à générer (par défaut 6).
+- `--manual` : Active le mode manuel. Il faut appuyer sur `N` pour déclencher chaque action de l'IA.
+
+### Contrôles en jeu :
+- `ESPACE` : Pause.
+- `M` : Alterner entre mode Automatique et Manuel.
+- `R` : Redémarrer la partie (réinitialise la grille et les positions).
+- `Molette Souris` : Scroller dans le panneau des pensées (droite).
+- `Boutons de Debug` (en bas) : Permettent d'afficher les portées de déplacement et les champs de vision de l'agent courant.
+
+---
+*Note : Pour les appels LLM, assurez-vous que votre fichier `.env` contient une clé valide sous le nom `API_KEY`.*
