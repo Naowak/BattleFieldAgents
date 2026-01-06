@@ -503,6 +503,87 @@ class LeftPanel(Panel):
             card.draw(surface, self.font_normal, self.font_small)
 
 
+class SystemBubble:
+    """
+    Displays a system message (e.g. bonus triggered) in the right panel.
+    """
+    
+    def __init__(self, text, x, y, width):
+        """
+        Initialize a system bubble.
+        
+        Args:
+            text (str): Message text
+            x (int): X position
+            y (int): Y position
+            width (int): Bubble width
+        """
+        self.text = text
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = 0
+        
+        # Colors for system messages (green theme)
+        self.bg_color = (50, 100, 50, 180)
+        self.border_color = (100, 255, 100)
+    
+    def draw(self, surface, font_normal, font_small):
+        """
+        Draw the system bubble.
+        """
+        padding = BUBBLE_PADDING
+        line_height = 18
+        y_offset = self.y + padding
+        
+        # Wrap text
+        lines = self._wrap_text(self.text, font_small, self.width - 2 * padding)
+        
+        # Calculate total height
+        total_height = padding * 2 + len(lines) * line_height
+        self.height = total_height
+        
+        # Draw bubble background
+        bubble_rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        
+        # Create surface with alpha for background
+        bubble_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+        pygame.draw.rect(bubble_surface, self.bg_color, bubble_surface.get_rect(), border_radius=10)
+        surface.blit(bubble_surface, (self.x, self.y))
+        
+        # Draw border
+        pygame.draw.rect(surface, self.border_color, bubble_rect, 2, border_radius=10)
+        
+        # Draw text
+        for line in lines:
+            text_surface = font_small.render(line, True, COLOR_TEXT)
+            surface.blit(text_surface, (self.x + padding, y_offset))
+            y_offset += line_height
+            
+        return self.height
+
+    def _wrap_text(self, text, font, max_width):
+        """Wrap text helper."""
+        words = text.split(' ')
+        lines = []
+        current_line = []
+        
+        for word in words:
+            test_line = ' '.join(current_line + [word])
+            test_surface = font.render(test_line, True, COLOR_TEXT)
+            if test_surface.get_width() <= max_width:
+                current_line.append(word)
+            else:
+                if current_line:
+                    lines.append(' '.join(current_line))
+                    current_line = [word]
+                else:
+                    lines.append(word)
+        if current_line:
+            lines.append(' '.join(current_line))
+        return lines if lines else [text]
+
+
 class RightPanel(Panel):
     """
     RightPanel showing thought bubbles (agent decisions).
@@ -546,6 +627,23 @@ class RightPanel(Panel):
         self.thought_bubbles.append(bubble)
         
         # Auto-scroll to bottom when new bubble is added
+        self._update_max_scroll()
+        self.scroll_offset = self.max_scroll
+
+    def add_system_message(self, message):
+        """
+        Add a system message bubble.
+        
+        Args:
+            message (str): Message text
+        """
+        bubble = SystemBubble(
+            message,
+            self.rect.x + PANEL_PADDING,
+            0,
+            RIGHT_PANEL_WIDTH - 2 * PANEL_PADDING
+        )
+        self.thought_bubbles.append(bubble)
         self._update_max_scroll()
         self.scroll_offset = self.max_scroll
 
@@ -594,7 +692,7 @@ class RightPanel(Panel):
         super().draw(surface)
         
         # Draw title
-        title_text = self.font_title.render("THOUGHTS", True, COLOR_TEXT)
+        title_text = self.font_title.render("HISTORIC", True, COLOR_TEXT)
         surface.blit(title_text, (self.rect.x + PANEL_PADDING, PANEL_PADDING))
         
         # Clip area for bubbles to avoid drawing over title or outside panel

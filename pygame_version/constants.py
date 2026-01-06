@@ -55,8 +55,8 @@ COLOR_BUBBLE_BORDER = (187, 187, 187)
 # ============================================================================
 # GAME BOARD
 # ============================================================================
-BOARD_SIZE = 7  # Grid is (2*BOARD_SIZE + 1) x (2*BOARD_SIZE + 1)
-CELL_SIZE = 37   # Size of each cell in pixels
+BOARD_SIZE = 6  # Grid is (2*BOARD_SIZE + 1) x (2*BOARD_SIZE + 1)
+CELL_SIZE = 43   # Size of each cell in pixels
 GRID_PADDING = 0  # Padding around the grid
 
 # ============================================================================
@@ -73,14 +73,14 @@ ATTACK_DAMAGE = 25
 SIGHT_RANGE = 99  # Vision range (currently unlimited)
 
 # Spawning
-SPAWN_RANGE = 3  # Range around target where agents spawn
+SPAWN_RANGE = 2  # Range around target where agents spawn
 
 # Obstacles
 NB_OBSTACLES = 41
 OBSTACLE_SIZE = 1  # Size in cells
 
 # Bonus/Malus
-NB_BONUS = 80  # Total bonuses (symmetric pairs)
+NB_BONUS = 10  # Total bonuses (symmetric pairs)
 COLOR_BONUS = (50, 200, 50)
 BONUS_TYPES = ["HEAL", "TRAP", "VAMPIRE", "GRENADE", "SABOTAGE"]
 BONUS_HEAL_AMOUNT = 50

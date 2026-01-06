@@ -24,13 +24,14 @@ class Game:
     Handles game loop, input, and coordination between components.
     """
     
-    def __init__(self, use_mock_ai=False, use_manual_mode=False):
+    def __init__(self, use_mock_ai=False, use_manual_mode=False, nb_bonuses=NB_BONUS):
         """
         Initialize the game.
         
         Args:
             use_mock_ai (bool): Use mock AI instead of real API
             use_manual_mode (bool): Start in manual mode
+            nb_bonuses (int): Number of bonuses to generate
         """
         # Initialize Pygame
         pygame.init()
@@ -44,9 +45,10 @@ class Game:
         self.running = True
         self.paused = False
         self.is_manual_mode = use_manual_mode
+        self.nb_bonuses = nb_bonuses
         
         # Game state
-        self.game_state = GameState()
+        self.game_state = GameState(nb_bonuses=self.nb_bonuses)
         
         # Renderer
         self.renderer = GameRenderer(self.game_state)
@@ -122,7 +124,13 @@ class Game:
     def restart_game(self):
         """Restart the game with a new initial state."""
         print("\n=== RESTARTING GAME ===\n")
-        self.game_state.reset_game()
+        # Re-initialize game state with original params
+        self.game_state.__init__(nb_bonuses=self.nb_bonuses)
+        # Note: We need to re-link things if needed, but GameState manages itself.
+        # However, Renderer holds a reference to game_state. If __init__ creates a new object instance (unlikely for __init__),
+        # but here we call __init__ on existing object which resets attributes.
+        # Wait, GameState.__init__ resets everything.
+        
         self.left_panel.update_cards()
         self.right_panel.clear_bubbles()
         self.waiting_for_ai = False
@@ -202,6 +210,11 @@ class Game:
         # Update action queue (animations)
         action_completed = self.game_state.action_queue.update(dt, self.game_state)
         
+        # Check for system notifications from game state
+        while self.game_state.notifications:
+            msg = self.game_state.notifications.pop(0)
+            self.right_panel.add_system_message(msg)
+        
         if action_completed:
             # Check win condition after action execution (damage applied)
             self.game_state.check_win_condition()
@@ -248,8 +261,9 @@ class Game:
             mode_text = "PAUSED" if self.paused else "MANUAL MODE"
             
             text_surf = font.render(mode_text, True, COLOR_TEXT)
-            text_rect = text_surf.get_rect(center=(WINDOW_WIDTH // 2, 50))
-            
+            center = LEFT_PANEL_WIDTH + (WINDOW_WIDTH - (LEFT_PANEL_WIDTH + RIGHT_PANEL_WIDTH)) // 2
+            text_rect = text_surf.get_rect(center=(center, 50))
+
             # Background
             bg_rect = text_rect.inflate(20, 10)
             pygame.draw.rect(self.screen, COLOR_PANEL_BG, bg_rect)
@@ -307,11 +321,17 @@ def main():
                        help='Use mock AI instead of real API')
     parser.add_argument('--manual', action='store_true',
                        help='Start in manual mode (press N for next action)')
+    parser.add_argument('--bonuses', type=int, default=NB_BONUS,
+                       help='Number of bonus/malus items to generate (default: %(default)s)')
     
     args = parser.parse_args()
     
     try:
-        game = Game(use_mock_ai=args.mock_ai, use_manual_mode=args.manual)
+        game = Game(
+            use_mock_ai=args.mock_ai, 
+            use_manual_mode=args.manual,
+            nb_bonuses=args.bonuses
+        )
         game.run()
     except KeyboardInterrupt:
         print("\n\nGame interrupted by user")

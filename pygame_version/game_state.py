@@ -17,12 +17,18 @@ class GameState:
     Maintains all game entities, turn information, and game flow.
     """
     
-    def __init__(self):
-        """Initialize the game state."""
+    def __init__(self, nb_bonuses=NB_BONUS):
+        """
+        Initialize the game state.
+        
+        Args:
+            nb_bonuses (int): Number of bonuses to generate (default from constants)
+        """
         self.agents = []
         self.targets = []
         self.obstacles = []
         self.bonus_malus = []
+        self.nb_bonuses = nb_bonuses
         
         self.turn = {
             'current': 1,
@@ -34,6 +40,7 @@ class GameState:
         self.action_queue = ActionQueue()
         self.winner = None
         self.game_over = False
+        self.notifications = []  # List of system messages to display
         
         # Initialize game
         self.initialize_game()
@@ -49,6 +56,7 @@ class GameState:
         self.bonus_malus = []
         self.winner = None
         self.game_over = False
+        self.notifications = []
         
         # Create targets at opposite sides of the board
         red_target_pos = [-SPAWN_RANGE - 1, -SPAWN_RANGE -  1]
@@ -204,7 +212,7 @@ class GameState:
         """
         self.bonus_malus = []
         
-        pairs_count = NB_BONUS // 2
+        pairs_count = self.nb_bonuses // 2
         
         # Helper to check if a position is occupied
         def is_occupied(pos):
@@ -284,6 +292,7 @@ class GameState:
         """
         message_text = f"Turn {self.turn['current']}: {agent.id} triggered {bonus.type}"
         print(message_text)
+        self.notifications.append(message_text)
         
         # Broadcast message to all agents
         for a in self.agents:
