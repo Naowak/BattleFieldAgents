@@ -81,7 +81,7 @@ class AIInterface:
             }
             
             payload = {
-                "model": "qwen/qwen3-30b-a3b-2507", 
+                "model": "qwen/qwen3-30b-a3b-2507:2", 
                 "messages": [
                     {"role": "system", "content": self.system_message},
                     {"role": "user", "content": json.dumps(state)}

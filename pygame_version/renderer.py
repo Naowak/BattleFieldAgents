@@ -209,22 +209,31 @@ class GameRenderer:
         Args:
             surface (pygame.Surface): Surface to draw on
         """
+        current_action = self.game_state.action_queue.get_current_action()
+
         for target in self.game_state.targets:
             if not target.is_alive():
                 continue
             
-            screen_pos = self.world_to_screen(target.position)
+            # Check if target should blink (being attacked)
+            should_render = True
+            if current_action and isinstance(current_action, AttackAction):
+                if target.position == current_action.params['target_position']:
+                    should_render = current_action.should_render_target()
             
-            # Draw diamond shape (4 points)
-            points = [
-                (screen_pos[0], screen_pos[1] - TARGET_SIZE),  # Top
-                (screen_pos[0] + TARGET_SIZE, screen_pos[1]),  # Right
-                (screen_pos[0], screen_pos[1] + TARGET_SIZE),  # Bottom
-                (screen_pos[0] - TARGET_SIZE, screen_pos[1])   # Left
-            ]
-            
-            pygame.draw.polygon(surface, target.get_color(), points)
-            pygame.draw.polygon(surface, COLOR_TEXT, points, 2)
+            if should_render:
+                screen_pos = self.world_to_screen(target.position)
+                
+                # Draw diamond shape (4 points)
+                points = [
+                    (screen_pos[0], screen_pos[1] - TARGET_SIZE),  # Top
+                    (screen_pos[0] + TARGET_SIZE, screen_pos[1]),  # Right
+                    (screen_pos[0], screen_pos[1] + TARGET_SIZE),  # Bottom
+                    (screen_pos[0] - TARGET_SIZE, screen_pos[1])   # Left
+                ]
+                
+                pygame.draw.polygon(surface, target.get_color(), points)
+                pygame.draw.polygon(surface, COLOR_TEXT, points, 2)
     
     def draw_agents(self, surface):
         """
