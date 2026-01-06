@@ -252,10 +252,9 @@ class GameState:
             
             # Check if both positions are free
             if not is_occupied(pos1) and not is_occupied(pos2):
-                bonus_type = random.choice(BONUS_TYPES)
-                # Create symmetric bonuses (same type)
-                self.bonus_malus.append(BonusMalus(pos1, bonus_type))
-                self.bonus_malus.append(BonusMalus(pos2, bonus_type))
+                # Create symmetric bonuses with UNKNOWN type
+                self.bonus_malus.append(BonusMalus(pos1, "UNKNOWN"))
+                self.bonus_malus.append(BonusMalus(pos2, "UNKNOWN"))
                 added_pairs += 1
 
     def check_bonus_activation(self, agent):
@@ -290,6 +289,9 @@ class GameState:
             agent (Agent): The triggering agent
             bonus (BonusMalus): The bonus triggered
         """
+        # Determine type at trigger time
+        bonus.type = random.choice(BONUS_TYPES)
+        
         message_text = f"Turn {self.turn['current']}: {agent.id} triggered {bonus.type}"
         print(message_text)
         self.notifications.append(message_text)

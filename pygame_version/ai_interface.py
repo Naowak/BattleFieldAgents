@@ -89,8 +89,6 @@ class AIInterface:
                 "temperature": 0.2
             }
 
-            print(payload)
-            
             # Send POST request to the AI API
             response = requests.post(
                 self.api_url,
