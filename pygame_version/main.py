@@ -14,7 +14,7 @@ from game_state import GameState
 from renderer import GameRenderer
 from ui_components import LeftPanel, RightPanel, BottomPanel
 from actions import parse_action_string
-from ai_interface import AIInterface, MockAIInterface
+import ai_interface  # Import module to access classes dynamically
 from utils import get_visible_cells
 
 
@@ -24,12 +24,13 @@ class Game:
     Handles game loop, input, and coordination between components.
     """
     
-    def __init__(self, use_mock_ai=False, use_manual_mode=False, nb_bonuses=NB_BONUS):
+    def __init__(self, red_ai_class="MockAIInterface", blue_ai_class="MockAIInterface", use_manual_mode=False, nb_bonuses=NB_BONUS):
         """
         Initialize the game.
         
         Args:
-            use_mock_ai (bool): Use mock AI instead of real API
+            red_ai_class (str): Name of the AI class for Red team
+            blue_ai_class (str): Name of the AI class for Blue team
             use_manual_mode (bool): Start in manual mode
             nb_bonuses (int): Number of bonuses to generate
         """
@@ -64,13 +65,22 @@ class Game:
             self.renderer
         )
         
-        # AI Interface
-        if use_mock_ai:
-            self.ai_interface = MockAIInterface()
-            print("Using Mock AI (no API required)")
-        else:
-            self.ai_interface = AIInterface()
-            print(f"Using AI API at {self.ai_interface.api_url}")
+        # Initialize AI interfaces for each team
+        try:
+            RedAIClass = getattr(ai_interface, red_ai_class)
+            self.red_ai = RedAIClass()
+            print(f"Red Team AI: {red_ai_class}")
+        except AttributeError:
+            print(f"Error: AI class '{red_ai_class}' not found in ai_interface.py. Defaulting to MockAIInterface.")
+            self.red_ai = ai_interface.MockAIInterface()
+
+        try:
+            BlueAIClass = getattr(ai_interface, blue_ai_class)
+            self.blue_ai = BlueAIClass()
+            print(f"Blue Team AI: {blue_ai_class}")
+        except AttributeError:
+            print(f"Error: AI class '{blue_ai_class}' not found in ai_interface.py. Defaulting to MockAIInterface.")
+            self.blue_ai = ai_interface.MockAIInterface()
         
         # Game state flags
         self.waiting_for_ai = False
@@ -126,10 +136,6 @@ class Game:
         print("\n=== RESTARTING GAME ===\n")
         # Re-initialize game state with original params
         self.game_state.__init__(nb_bonuses=self.nb_bonuses)
-        # Note: We need to re-link things if needed, but GameState manages itself.
-        # However, Renderer holds a reference to game_state. If __init__ creates a new object instance (unlikely for __init__),
-        # but here we call __init__ on existing object which resets attributes.
-        # Wait, GameState.__init__ resets everything.
         
         self.left_panel.update_cards()
         self.right_panel.clear_bubbles()
@@ -150,9 +156,12 @@ class Game:
         self.waiting_for_ai = True
         self.ai_request_time = time.time()
         
+        # Select AI based on team
+        ai_interface_instance = self.red_ai if current_agent.team == 'red' else self.blue_ai
+        
         # Request decision from AI
         try:
-            thoughts, action = self.ai_interface.get_agent_decision(
+            thoughts, action = ai_interface_instance.get_agent_decision(
                 current_agent,
                 self.game_state.turn,
                 self.game_state
@@ -317,8 +326,10 @@ def main():
     import argparse
     
     parser = argparse.ArgumentParser(description="BattleField Agents - 2D Pygame Version")
-    parser.add_argument('--mock-ai', action='store_true', 
-                       help='Use mock AI instead of real API')
+    parser.add_argument('--red-ai', type=str, default="MockAIInterface",
+                       help='AI class name for Red team (default: MockAIInterface)')
+    parser.add_argument('--blue-ai', type=str, default="MockAIInterface",
+                       help='AI class name for Blue team (default: MockAIInterface)')
     parser.add_argument('--manual', action='store_true',
                        help='Start in manual mode (press N for next action)')
     parser.add_argument('--bonuses', type=int, default=NB_BONUS,
@@ -328,7 +339,8 @@ def main():
     
     try:
         game = Game(
-            use_mock_ai=args.mock_ai, 
+            red_ai_class=args.red_ai,
+            blue_ai_class=args.blue_ai,
             use_manual_mode=args.manual,
             nb_bonuses=args.bonuses
         )
