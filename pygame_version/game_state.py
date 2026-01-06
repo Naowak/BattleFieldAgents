@@ -55,9 +55,14 @@ class GameState:
         self.targets.append(Target('red', red_target_pos))
         self.targets.append(Target('blue', blue_target_pos))
         
-        # Create agents around their targets
-        red_spawn_positions = self._generate_spawn_positions(red_target_pos, NB_AGENTS_PER_TEAM)
-        blue_spawn_positions = self._generate_spawn_positions(blue_target_pos, NB_AGENTS_PER_TEAM)
+        # Create obstacles first (so agents avoid them)
+        self._generate_obstacles()
+
+        # Generate symmetric spawn positions for agents
+        red_spawn_positions, blue_spawn_positions = self._generate_symmetric_spawn_positions(
+            red_target_pos, 
+            NB_AGENTS_PER_TEAM
+        )
         
         # Create red team agents
         for i, pos in enumerate(red_spawn_positions):
@@ -69,44 +74,68 @@ class GameState:
             agent = Agent(f'blue_{i+1}', 'blue', pos)
             self.agents.append(agent)
         
-        # Create obstacles
-        self._generate_obstacles()
-        
         # Set up turn order (alternating teams)
         self._setup_turn_order()
         
         # Update initial sight for all agents
         self._update_all_sights()
     
-    def _generate_spawn_positions(self, target_pos, count):
+    def _generate_symmetric_spawn_positions(self, red_target_pos, count):
         """
-        Generate spawn positions around a target.
+        Generate symmetric spawn positions around targets.
         
         Args:
-            target_pos (list): Target position [x, y]
-            count (int): Number of positions to generate
+            red_target_pos (list): Red target position [x, y]
+            count (int): Number of positions to generate per team
         
         Returns:
-            list: List of spawn positions
+            tuple: (red_positions, blue_positions)
         """
-        positions = []
+        red_positions = []
+        blue_positions = []
         attempts = 0
         max_attempts = 100
         
-        while len(positions) < count and attempts < max_attempts:
+        # Helper to check if a position is free (obstacles or targets)
+        # Agents are not created yet so we only check internal collision
+        def is_free(pos, current_positions):
+            # Check occupied by other generated positions
+            if pos in current_positions:
+                return False
+            
+            # Check targets
+            for target in self.targets:
+                if target.position == pos:
+                    return False
+            
+            # Check obstacles
+            for obstacle in self.obstacles:
+                if obstacle.position == pos:
+                    return False
+            
+            return True
+
+        while len(red_positions) < count and attempts < max_attempts:
             attempts += 1
             
-            # Random offset within spawn range
+            # Random offset within spawn range for Red
             dx = random.randint(-SPAWN_RANGE, SPAWN_RANGE)
             dy = random.randint(-SPAWN_RANGE, SPAWN_RANGE)
             
-            pos = [target_pos[0] + dx, target_pos[1] + dy]
+            pos_red = [red_target_pos[0] + dx, red_target_pos[1] + dy]
             
-            # Check if position is valid and not occupied
-            if pos not in positions and pos != target_pos:
-                positions.append(pos)
+            # Calculate symmetric Blue position (central symmetry)
+            pos_blue = [-pos_red[0], -pos_red[1]]
+            
+            # Check validity for both
+            if (is_free(pos_red, red_positions) and 
+                is_free(pos_blue, blue_positions) and 
+                pos_red != pos_blue): # Prevent overlapping
+                
+                red_positions.append(pos_red)
+                blue_positions.append(pos_blue)
         
-        return positions
+        return red_positions, blue_positions
     
     def _generate_obstacles(self):
         """
