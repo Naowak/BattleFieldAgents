@@ -109,40 +109,66 @@ class GameState:
         return positions
     
     def _generate_obstacles(self):
-        """Generate random obstacles on the battlefield."""
-        for _ in range(NB_OBSTACLES):
-            attempts = 0
-            max_attempts = 100
+        """
+        Generate random obstacles on the battlefield with central symmetry.
+        The field is divided by the diagonal y = -x.
+        """
+        self.obstacles = []
+        
+        pairs_count = NB_OBSTACLES // 2
+        has_center = NB_OBSTACLES % 2 == 1
+        
+        # Helper to check if a position is occupied
+        def is_occupied(pos):
+            for agent in self.agents:
+                if agent.position == pos:
+                    return True
+            for target in self.targets:
+                if target.position == pos:
+                    return True
+            for obstacle in self.obstacles:
+                if obstacle.position == pos:
+                    return True
+            return False
+
+        # 1. Place center obstacle if needed
+        if has_center:
+            center = [0, 0]
+            if not is_occupied(center):
+                self.obstacles.append(Obstacle(center))
+        
+        # 2. Generate pairs
+        added_pairs = 0
+        attempts = 0
+        max_attempts = 1000  # Safety break
+        
+        while added_pairs < pairs_count and attempts < max_attempts:
+            attempts += 1
             
-            while attempts < max_attempts:
-                attempts += 1
-                
-                # Random position
-                x = random.randint(-BOARD_SIZE + 1, BOARD_SIZE - 1)
-                y = random.randint(-BOARD_SIZE + 1, BOARD_SIZE - 1)
-                pos = [x, y]
-                
-                # Check if position is free
-                occupied = False
-                
-                for agent in self.agents:
-                    if agent.position == pos:
-                        occupied = True
-                        break
-                
-                for target in self.targets:
-                    if target.position == pos:
-                        occupied = True
-                        break
-                
-                for obstacle in self.obstacles:
-                    if obstacle.position == pos:
-                        occupied = True
-                        break
-                
-                if not occupied:
-                    self.obstacles.append(Obstacle(pos))
-                    break
+            # Generate random position
+            x = random.randint(-BOARD_SIZE, BOARD_SIZE)
+            y = random.randint(-BOARD_SIZE, BOARD_SIZE)
+            
+            # Enforce being on one side of diagonal (y < -x)
+            # If on diagonal or other side, flip or skip. 
+            # To maximize coverage, if y >= -x, we can just take (-x, -y) which is <= x
+            # But let's just retry if on diagonal, and ensure strict inequality.
+            
+            if y == -x:
+                continue # On diagonal, skip to avoid self-symmetry issues (except 0,0 which is handled)
+            
+            # If on the "wrong" side, flip it to the "right" side
+            if y > -x:
+                x, y = -x, -y
+            
+            pos1 = [x, y]
+            pos2 = [-x, -y]
+            
+            # Check if both positions are free
+            if not is_occupied(pos1) and not is_occupied(pos2):
+                self.obstacles.append(Obstacle(pos1))
+                self.obstacles.append(Obstacle(pos2))
+                added_pairs += 1
     
     def _setup_turn_order(self):
         """Set up the turn order, alternating between teams."""
